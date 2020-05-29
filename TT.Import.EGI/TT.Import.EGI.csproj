@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F2789AA9-A43D-4106-ABDA-4D2C27A6402C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TT.Import.EGI</RootNamespace>
+    <AssemblyName>TT.Import.EGI</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\Ic90dev\Plugins\Standard\Misc\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\..\..\Ic90dev\Plugins\Standard\Misc\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="kd.sdk">
+      <HintPath>..\..\..\..\Ic90dev\kd.sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\ArticleAnalysis.cs">
+      <Link>src\Analysis\ArticleAnalysis.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\ArticlesAnalysis.cs">
+      <Link>src\Analysis\ArticlesAnalysis.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\Constraint.cs">
+      <Link>src\Analysis\Constraint.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\SceneAnalysis.cs">
+      <Link>src\Analysis\SceneAnalysis.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\Tolerance.cs">
+      <Link>src\Analysis\Tolerance.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Analysis\WallsAnalysis.cs">
+      <Link>src\Analysis\WallsAnalysis.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Classification\ArrangementClassification.cs">
+      <Link>src\Classification\ArrangementClassification.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Classification\ArticleClassification.cs">
+      <Link>src\Classification\ArticleClassification.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Const\LayerConst.cs">
+      <Link>src\Const\LayerConst.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Const\SubTypeConst.cs">
+      <Link>src\Const\SubTypeConst.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Const\TopicConst.cs">
+      <Link>src\Const\TopicConst.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\InSitu\InSitu.Ini.cs">
+      <Link>src\InSitu\InSitu.Ini.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Maths\Maths.cs">
+      <Link>src\Maths\Maths.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Model\ModelWrapper.cs">
+      <Link>src\Model\ModelWrapper.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Model\TypedArticle.cs">
+      <Link>src\Model\TypedArticle.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Model\TypedArticles.cs">
+      <Link>src\Model\TypedArticles.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Config.cs">
+      <Link>src\Profile\Config.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\CustomXmlSection.cs">
+      <Link>src\Profile\CustomXmlSection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Events.cs">
+      <Link>src\Profile\Events.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Ini.cs">
+      <Link>src\Profile\Ini.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\IProfile.cs">
+      <Link>src\Profile\IProfile.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Profile.cs">
+      <Link>src\Profile\Profile.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Registry.cs">
+      <Link>src\Profile\Registry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\Xml.cs">
+      <Link>src\Profile\Xml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\Profile\XmlHelper.cs">
+      <Link>src\Profile\XmlHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\CatalogHelper.cs">
+      <Link>src\SDK\CatalogHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\CatalogProperties.cs">
+      <Link>src\SDK\CatalogProperties.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\DicoHelper.cs">
+      <Link>src\SDK\DicoHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\FilterBuilder.cs">
+      <Link>src\SDK\FilterBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\PluginHelper.cs">
+      <Link>src\SDK\PluginHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\ScriptHelper.cs">
+      <Link>src\SDK\ScriptHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\SDK\SDKWrapper.cs">
+      <Link>src\SDK\SDKWrapper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\AssemblyHelper.cs">
+      <Link>src\System\AssemblyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\CommandLine.Utility.cs">
+      <Link>src\System\CommandLine.Utility.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\CsvHelper.cs">
+      <Link>src\System\CsvHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\DataHelper.cs">
+      <Link>src\System\DataHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\HSLColor.cs">
+      <Link>src\System\HSLColor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\ImageHelper.cs">
+      <Link>src\System\ImageHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\IniHelper.cs">
+      <Link>src\System\IniHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\IOHelper.cs">
+      <Link>src\System\IOHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\StringHelper.cs">
+      <Link>src\System\StringHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
+      <Link>src\System\StringsHelper.cs</Link>
+    </Compile>
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
