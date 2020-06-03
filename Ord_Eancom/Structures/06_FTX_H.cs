@@ -80,30 +80,54 @@ namespace Eancom
 
             if (MainForm.IsChoiceExportPlan)
             {
+                int index = 1;
+
                 fileType = Convert.ToInt16(OrderEnum.Type.FLOOR_PLAN).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.JPEG).ToString();
-                fileName = OrderTransmission.PlanJPGFileName;
-                fileDescription = OrderTransmission.PlanJPGFileName;
+                
+                string[] allJPGFiles = System.IO.Directory.GetFiles(Order.orderDir, KD.StringTools.Const.Wildcard + OrderTransmission.ExtensionJPG);
+                foreach (string jPGfile in allJPGFiles)
+                {
+                    if (jPGfile.ToUpper().Contains(OrderTransmission.PlanName.ToUpper()))
+                    {
+                        fileName = System.IO.Path.GetFileName(jPGfile);//  OrderTransmission.PlanName + index + OrderTransmission.ExtensionJPG;
+                        fileDescription = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.PlanName + index + OrderTransmission.ExtensionJPG;
 
-                fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
+                        fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
+
+                        index++;
+                    }
+                }
+                
             }
 
             if (MainForm.IsChoiceExportElevation)
             {
+                int index = 1;
+
                 fileType = Convert.ToInt16(OrderEnum.Type.WALL_FRONT_VIEW).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.JPEG).ToString();
-                fileName = OrderTransmission.ElevJPGFileName;
-                fileDescription = OrderTransmission.ElevJPGFileName;
 
-                fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
+                string[] allJPGFiles = System.IO.Directory.GetFiles(Order.orderDir, KD.StringTools.Const.Wildcard + OrderTransmission.ExtensionJPG);
+                foreach (string jPGfile in allJPGFiles)
+                {
+                    if (jPGfile.ToUpper().Contains(OrderTransmission.ElevName.ToUpper()))
+                    {
+                        fileName = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.ElevName + index + OrderTransmission.ExtensionJPG;
+                        fileDescription = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.ElevName + index + OrderTransmission.ExtensionJPG;
+
+                        fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
+                        index++;
+                    }
+                }
             }
 
             if (MainForm.IsChoiceExportOrder)
             {
                 fileType = Convert.ToInt16(OrderEnum.Type.OTHER).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.PDF).ToString();
-                fileName = OrderTransmission.OrderPDFFileName;
-                fileDescription = OrderTransmission.OrderPDFFileName;
+                fileName = OrderTransmission.OrderName + OrderTransmission.ExtensionPDF;
+                fileDescription = OrderTransmission.OrderName + OrderTransmission.ExtensionPDF;
 
                 fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
             }

@@ -53,10 +53,12 @@
             // ChoiceOrder_CHB
             // 
             this.ChoiceOrder_CHB.AutoSize = true;
+            this.ChoiceOrder_CHB.Checked = true;
+            this.ChoiceOrder_CHB.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ChoiceOrder_CHB.Location = new System.Drawing.Point(6, 88);
             this.ChoiceOrder_CHB.Name = "ChoiceOrder_CHB";
             this.ChoiceOrder_CHB.Size = new System.Drawing.Size(79, 17);
-            this.ChoiceOrder_CHB.TabIndex = 0;
+            this.ChoiceOrder_CHB.TabIndex = 5;
             this.ChoiceOrder_CHB.Text = "Commande";
             this.ChoiceOrder_CHB.UseVisualStyleBackColor = true;
             this.ChoiceOrder_CHB.CheckedChanged += new System.EventHandler(this.ChoiceOrder_CHB_CheckedChanged);
@@ -64,11 +66,12 @@
             // ChoiceElevation_CHB
             // 
             this.ChoiceElevation_CHB.AutoSize = true;
-            this.ChoiceElevation_CHB.Enabled = false;
+            this.ChoiceElevation_CHB.Checked = true;
+            this.ChoiceElevation_CHB.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ChoiceElevation_CHB.Location = new System.Drawing.Point(6, 65);
             this.ChoiceElevation_CHB.Name = "ChoiceElevation_CHB";
             this.ChoiceElevation_CHB.Size = new System.Drawing.Size(75, 17);
-            this.ChoiceElevation_CHB.TabIndex = 0;
+            this.ChoiceElevation_CHB.TabIndex = 4;
             this.ChoiceElevation_CHB.Text = "Elévations";
             this.ChoiceElevation_CHB.UseVisualStyleBackColor = true;
             this.ChoiceElevation_CHB.CheckedChanged += new System.EventHandler(this.ChoiceElevation_CHB_CheckedChanged);
@@ -76,10 +79,12 @@
             // ChoicePlan_CHB
             // 
             this.ChoicePlan_CHB.AutoSize = true;
+            this.ChoicePlan_CHB.Checked = true;
+            this.ChoicePlan_CHB.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ChoicePlan_CHB.Location = new System.Drawing.Point(6, 42);
             this.ChoicePlan_CHB.Name = "ChoicePlan_CHB";
             this.ChoicePlan_CHB.Size = new System.Drawing.Size(47, 17);
-            this.ChoicePlan_CHB.TabIndex = 0;
+            this.ChoicePlan_CHB.TabIndex = 3;
             this.ChoicePlan_CHB.Text = "Plan";
             this.ChoicePlan_CHB.UseVisualStyleBackColor = true;
             this.ChoicePlan_CHB.CheckedChanged += new System.EventHandler(this.ChoicePlan_CHB_CheckedChanged);
@@ -91,7 +96,7 @@
             this.ChoiceEGI_CHB.Location = new System.Drawing.Point(6, 19);
             this.ChoiceEGI_CHB.Name = "ChoiceEGI_CHB";
             this.ChoiceEGI_CHB.Size = new System.Drawing.Size(44, 17);
-            this.ChoiceEGI_CHB.TabIndex = 0;
+            this.ChoiceEGI_CHB.TabIndex = 2;
             this.ChoiceEGI_CHB.Text = "EGI";
             this.ChoiceEGI_CHB.UseVisualStyleBackColor = true;
             this.ChoiceEGI_CHB.CheckedChanged += new System.EventHandler(this.ChoiceEGI_CHB_CheckedChanged);
@@ -112,7 +117,7 @@
             this.version_LNK.Location = new System.Drawing.Point(9, 175);
             this.version_LNK.Name = "version_LNK";
             this.version_LNK.Size = new System.Drawing.Size(13, 13);
-            this.version_LNK.TabIndex = 2;
+            this.version_LNK.TabIndex = 6;
             this.version_LNK.TabStop = true;
             this.version_LNK.Text = "?";
             this.version_LNK.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.version_LNK_LinkClicked);

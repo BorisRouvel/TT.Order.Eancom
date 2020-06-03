@@ -77,16 +77,18 @@ namespace Ord_Eancom
     {      
         public const string OrderEDIFileName = "Order.edi";
         public const string OrderEGIFileName = "Order.egi";
-        public const string OrderPDFFileName = "Commande.pdf";
+        public const string OrderName = "Commande";
         public const string OrderZipFileName = "Order.zip";
 
-        public const string PlanJPGFileName = "Plan.jpg";
-        public const string ElevJPGFileName = "Elevation.jpg";
+        public const string PlanName = "Plan";
+        public const string ElevName = "Elevation";
 
         public const string ExtensionEDI = ".edi";
         public const string ExtensionEGI = ".egi";
         public const string ExtensionZIP = ".zip";
-        public const string ExtensionTXT = ".txt";
+        public const string ExtensionTXT = KD.IO.File.Extension.Txt;
+        public const string ExtensionJPG = KD.IO.File.Extension.Jpg;
+        public const string ExtensionPDF = KD.IO.File.Extension.Pdf;
 
         //public const string VersionOrderDataFormat = "EANCOM_ORDER_V2.03"; //i must get the string in IDM
         public const string VersionEdigraph = "EDIGRAPH_V1.50";
@@ -845,13 +847,13 @@ namespace Ord_Eancom
             rFF_H = new Eancom.RFF_H(_orderInformations);
             nAD = new Eancom.NAD(_orderInformations, _fileEDI);
             cTA = new Eancom.CTA(_orderInformations);
-            cOM = new Eancom.COM(_orderInformations);
+            cOM = new Eancom.COM(_orderInformations, _fileEDI);
 
-            lIN_H = new Eancom.LIN_H(Convert.ToString(consecutiveNumbering));
+            lIN_H = new Eancom.LIN_H(Convert.ToString(this.consecutiveNumbering));
             pIA_H = new Eancom.PIA_H(_orderInformationsFromArticles, _fileEDI);
 
-            consecutiveNumbering += 1;
-            lIN_A = new Eancom.LIN_A(_orderInformationsFromArticles, Convert.ToString(consecutiveNumbering), _fileEDI);
+            this.consecutiveNumbering += 1;
+            lIN_A = new Eancom.LIN_A(_orderInformationsFromArticles, Convert.ToString(this.consecutiveNumbering), _fileEDI);
             pIA_A = new Eancom.PIA_A(_orderInformationsFromArticles, _fileEDI);
             iMD = new Eancom.IMD(_orderInformationsFromArticles);
             mEA = new Eancom.MEA();
@@ -1539,8 +1541,7 @@ namespace Ord_Eancom
             KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
             this.SetView(KD.SDK.SceneEnum.ViewMode.TOP);
             this.ZoomAdjusted();           
-            this.ExportTopImageJPG();
-            this.CurrentAppli.Scene.ViewSetMode(currentViewMode);
+            this.ExportTopImageJPG(1);           
             this.SetView(currentViewMode);
         }
         private KD.SDK.SceneEnum.ViewMode GetView()
@@ -1555,9 +1556,13 @@ namespace Ord_Eancom
         {
             return this.CurrentAppli.Scene.ZoomAdjusted();
         }
-        private bool ExportTopImageJPG()
+        private bool ExportTopImageJPG(int count)
         {
-            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, OrderTransmission.PlanJPGFileName), 1200, 1200, "255,255,255", true, 100, 3);
+            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, OrderTransmission.PlanName + "-" + count + OrderTransmission.ExtensionJPG), 1200, 1200, "255,255,255", true, 100, 3);
+        }
+        private bool ExportElevImageJPG(int count)
+        {
+            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, OrderTransmission.ElevName + "-" + count + OrderTransmission.ExtensionJPG), 1200, 1200, "255,255,255", true, 100, 3);
         }
 
         private bool IsPosedOn(Article article)
@@ -1590,12 +1595,12 @@ namespace Ord_Eancom
             if (article.Topic == 0)
             {
                 string type = this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
-
-                if (type == "5" && article.Layer == 5) //Plinth
+                
+                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //Plinth
                 {
                     return 2;
                 }
-                else if (type == "0" && article.Layer == 2) //Worktop
+                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //Worktop
                 {
                     return 1;
                 }
@@ -1633,8 +1638,31 @@ namespace Ord_Eancom
             return null;
         }
 
+        // Elevation
+        public void BuildElevation()
+        {
+            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
+
+            Articles articles = this.CurrentAppli.GetArticleList(FilterArticle.FilterToGetWallByValid());
+            Walls walls = new Walls(articles);
+           
+            foreach (Wall wall in walls)
+            {
+                Articles articlesAgainst = wall.AgainstMeASC;
+
+                if (articlesAgainst != null && articlesAgainst.Count > 0)
+                {
+                    wall.IsActive = true;
+                    this.SetView(KD.SDK.SceneEnum.ViewMode.VECTELEVATION);
+                    this.ZoomAdjusted();                    
+                    this.ExportElevImageJPG(walls.IndexOf(wall) + 1);                   
+                }
+             
+            }
+            this.SetView(currentViewMode);
+        }
+
         // Commande (PDF)
-       
         public void BuildOrder()
         {
             int supplierRank = this.CurrentAppli.GetSupplierRankFromIdent(this._orderInformations.GetSupplierName());
@@ -1671,7 +1699,7 @@ namespace Ord_Eancom
         {
             if (File.Exists(supplierFilePath))
             {
-                File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderPDFFileName), true);
+                File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);
             }
         }
 
@@ -1683,34 +1711,45 @@ namespace Ord_Eancom
             {
                 using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
-                    if (File.Exists(Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName)))
-                    {
-                        readmeEntry = archive.CreateEntryFromFile(Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName), OrderTransmission.OrderEDIFileName);
-                    }
+                    string EDIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName);
+                    this.EntryZipAndDeleteFile(readmeEntry, archive, EDIFile, OrderTransmission.OrderEDIFileName);                   
 
                     if (MainForm.IsChoiceExportEGI)
                     {
-                        if (File.Exists(Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName)))
+                        string EGIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName);
+                        this.EntryZipAndDeleteFile(readmeEntry, archive, EGIFile, OrderTransmission.OrderEGIFileName);
+                    }
+                    if (MainForm.IsChoiceExportPlan)
+                    {
+                        for (int i = 1; i < 99; i++)
                         {
-                            readmeEntry = archive.CreateEntryFromFile(Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName), OrderTransmission.OrderEGIFileName);
+                            string JPGplanFile = Path.Combine(Order.orderDir, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
+                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGplanFile, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
                         }
                     }
-                    if (MainForm.IsChoiceExportPlan || MainForm.IsChoiceExportElevation)
+                    if (MainForm.IsChoiceExportElevation)
                     {
-                        if (File.Exists(Path.Combine(Order.orderDir, OrderTransmission.PlanJPGFileName)))
+                        for (int i = 1; i < 99; i++)
                         {
-                            readmeEntry = archive.CreateEntryFromFile(Path.Combine(Order.orderDir, OrderTransmission.PlanJPGFileName), OrderTransmission.PlanJPGFileName);
+                            string JPGelevFile = Path.Combine(Order.orderDir, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
+                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGelevFile, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
                         }
                     }
                     if (MainForm.IsChoiceExportOrder)
                     {
-                        if (File.Exists(Path.Combine(Order.orderDir, OrderTransmission.OrderPDFFileName)))
-                        {
-                            readmeEntry = archive.CreateEntryFromFile(Path.Combine(Order.orderDir, OrderTransmission.OrderPDFFileName), OrderTransmission.OrderPDFFileName);
-                        }
+                        string OrderFile = Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
+                        this.EntryZipAndDeleteFile(readmeEntry, archive, OrderFile, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
                     }
                 }
             }            
+        }
+        private void EntryZipAndDeleteFile(ZipArchiveEntry readmeEntry, ZipArchive archive, string file, string entryFile)
+        {           
+            if (File.Exists(file))
+            {
+                readmeEntry = archive.CreateEntryFromFile(file, entryFile);
+                File.Delete(file);
+            }
         }
     }
 

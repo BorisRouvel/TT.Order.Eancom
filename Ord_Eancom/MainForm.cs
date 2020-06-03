@@ -12,7 +12,7 @@ namespace Ord_Eancom
 {
     public partial class MainForm : Form
     {
-        private static bool _isChoiceExportEGI;
+        private static bool _isChoiceExportEGI ;
         public static bool IsChoiceExportEGI
         {
             get
@@ -77,6 +77,11 @@ namespace Ord_Eancom
         public MainForm()
         {
             InitializeComponent();
+
+            _isChoiceExportEGI = this.ChoiceEGI_CHB.Checked;
+            _isChoiceExportPlan = this.ChoicePlan_CHB.Checked;
+            _isChoiceExportElevation = this.ChoiceElevation_CHB.Checked;
+            _isChoiceExportOrder = this.ChoiceOrder_CHB.Checked;
         }
 
         private void Ok_BTN_Click(object sender, EventArgs e)

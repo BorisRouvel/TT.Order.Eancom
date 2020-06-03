@@ -13,6 +13,7 @@ using Eancom;
 
 namespace Ord_Eancom
 {
+    
     public class Order : KD.Plugin.PluginBase
     {
         OrderInformations orderInformations = null;
@@ -24,6 +25,11 @@ namespace Ord_Eancom
         public static KD.Plugin.Word.Plugin _pluginWord = null;
         public static string orderDir = String.Empty;
         public static string orderFile = String.Empty;
+
+        public Order()
+        {
+           
+        }
 
         /// <summary>
         /// The "GenerateOrder" function belonging to the "Order" class is the entry point of the supplier orders management module.
@@ -41,28 +47,11 @@ namespace Ord_Eancom
             this.mainForm = new MainForm();
             this.Main(callParamsBlock);
 
-            MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return true;
-        }
-        public bool ProcessOrder(int callParamsBlock)
-        {
-            this.DelOrderFile(orderFile);
+            MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);           
 
             return true;
-        }
+        }     
 
-        //private void PDF(int callParamsBlock)
-        //{
-        //    orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-        //    int supplierRank = this.CurrentAppli.GetSupplierRankFromIdent(this.orderInformations.GetSupplierName());
-
-        //    if (supplierRank != KD.Const.UnknownId)
-        //    {
-        //        string pdfFlagState = this.CurrentAppli.SupplierGetInfo(supplierRank, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-
-        //        bool bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, KD.StringTools.Const.One, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-        //    }
-        //}
 
         private void Main(int callParamsBlock)
         {
@@ -71,18 +60,14 @@ namespace Ord_Eancom
             OrderWrite.segmentNumberBetweenUNHandUNT = 0;
             RFF_A.refPosList.Clear();
 
-            orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+            Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
 
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
             Articles articles = SupplierArticleValidInScene(orderInformations);
             orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
             fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
-
             orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
-
-            orderWrite.BuildEDI(articles);
-            orderWrite.EDIOrderFile();
 
             if (MainForm.IsChoiceExportEGI)
             {
@@ -95,26 +80,20 @@ namespace Ord_Eancom
             }
             if (MainForm.IsChoiceExportElevation)
             {
-                //orderWrite.;
+                orderWrite.BuildElevation();
             }
             if (MainForm.IsChoiceExportOrder)
             {
                 orderWrite.BuildOrder();
             }
 
+            orderWrite.BuildEDI(articles);
+            orderWrite.EDIOrderFile();
+
             orderWrite.ZIPOrderFile();
+           
         }
-        private void DelOrderFile(string file)
-        {
-            if (!String.IsNullOrEmpty(file))
-            {
-                file += OrderTransmission.ExtensionTXT;
-                if (File.Exists(Path.Combine(Order.orderDir, file)))
-                {
-                    File.Delete(Path.Combine(Order.orderDir, file));
-                }
-            }
-        }
+      
         private Articles SupplierArticleValidInScene(OrderInformations orderInformations)
         {
             Articles articles = new Articles();

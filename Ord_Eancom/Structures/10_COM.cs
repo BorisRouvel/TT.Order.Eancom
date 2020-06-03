@@ -6,6 +6,7 @@ namespace Eancom
     public class COM
     {
         OrderInformations _orderInformations = null;
+        FileEDI _fileEDI = null;
 
         public class C076
         {
@@ -51,9 +52,10 @@ namespace Eancom
             }
         }
 
-        public COM(OrderInformations orderInformations)
+        public COM(OrderInformations orderInformations, FileEDI fileEDI)
         {
-            _orderInformations = orderInformations;           
+            _orderInformations = orderInformations;
+            _fileEDI = fileEDI;
         }
 
         public string Add_Supplier_TE()
@@ -82,7 +84,7 @@ namespace Eancom
         }
         public string Add_Supplier_EM()
         {
-            string e3148 = _orderInformations.GetSupplierEmail();
+            string e3148 = _fileEDI.Email(); // _orderInformations.GetSupplierEmail(); Change 03/06/2020 cause supplier email want to send the order and here its only for informations
             C076 c076 = new C076(e3148, Eancom.COM.C076.E3155_EM);
 
             if (!String.IsNullOrEmpty(e3148))

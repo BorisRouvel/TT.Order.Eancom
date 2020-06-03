@@ -54,6 +54,7 @@ namespace Eancom
 
     public class FileEDI
     {
+        #region /!\ Constantes
         private const string IniOrderFileName = "orders.ini";
         private const string EANCOMPAIRINGTABLES = "EANCOM_PAIRINGTABLES";
 
@@ -70,11 +71,13 @@ namespace Eancom
         private const string ordersKey = "ORDERS";
         private const string ordrspKey = "ORDRSP";
         private const string ostrptKey = "OSTRPT";
+        private const string emailKey = "EMAIL";
 
         public const char separatorArticleField = KD.CharTools.Const.Pipe;
 
         private const string numberSection = "Number";
         private const string nextKey = "Next";
+        #endregion
 
         private AppliComponent _currentAppli;
         public AppliComponent CurrentAppli
@@ -83,7 +86,7 @@ namespace Eancom
             {
                 return _currentAppli;
             }
-            set
+            private set
             {
                 _currentAppli = value;
 
@@ -115,7 +118,7 @@ namespace Eancom
             this._currentAppli = appli;
             this._supplierName = supplierName;
             this._orderInformationsFromArticles = orderInformationsFromArticles;
-            appairingCatalogFileName = this._orderInformationsFromArticles.GetPairingCatalogFileName(this.CsvFileName());
+            this.appairingCatalogFileName = this._orderInformationsFromArticles.GetPairingCatalogFileName(this.CsvFileName());
             rowList.Clear();
 
             try
@@ -139,7 +142,7 @@ namespace Eancom
 
         public string GetNextOrdersNumberHex()
         {
-            string nextOrderNumber = ordersIniFile.ReadValue(numberSection, nextKey);
+            string nextOrderNumber = ordersIniFile.ReadValue(FileEDI.numberSection, FileEDI.nextKey);
             int.TryParse(nextOrderNumber, out int value);
             string valueHex = value.ToString("X");
             string valueHexa = String.Empty;
@@ -152,7 +155,7 @@ namespace Eancom
 
         public string CsvFileName()
         {
-            return (SupplierName + KD.StringTools.Const.Underscore + EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
+            return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
         }
         public string GetCsvValue(string value, int position)
         {            
@@ -177,15 +180,15 @@ namespace Eancom
 
         public string IniFileName()
         {
-            return (SupplierName + KD.StringTools.Const.Underscore + EANCOMPAIRINGTABLES + ".ini"); // KD.IO.File.Extension.Ini);
+            return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + ".ini"); // KD.IO.File.Extension.Ini);
         }        
         public string ManufacturerID()
         {
-            return this.GetCsvValue(manufacturerIDKey, 1);          
+            return this.GetCsvValue(FileEDI.manufacturerIDKey, 1);          
         }
         public string ManufacturerGLN()
         {
-            return this.GetCsvValue(manufacturerGLNKey, 1);
+            return this.GetCsvValue(FileEDI.manufacturerGLNKey, 1);
         }
         public bool HasManufacturerGLNCode(string code)
         {
@@ -197,11 +200,11 @@ namespace Eancom
         }
         public string RetailerNumber()
         {
-            return this.GetCsvValue(retailerCustomerNumberKey, 1);
+            return this.GetCsvValue(FileEDI.retailerCustomerNumberKey, 1);
         }
         public string SerieNo()
         {
-            return this.GetCsvValue(serieNoKey, 1);
+            return this.GetCsvValue(FileEDI.serieNoKey, 1);
         }
         public string CatalogID()
         {
@@ -227,6 +230,10 @@ namespace Eancom
         public string Ostrpt()
         {
             return this.GetCsvValue(FileEDI.ostrptKey, 1);
+        }
+        public string Email()
+        {
+            return this.GetCsvValue(FileEDI.emailKey, 1);
         }
         public string FinishTypeVariant(string finishTypeKey)
         {
