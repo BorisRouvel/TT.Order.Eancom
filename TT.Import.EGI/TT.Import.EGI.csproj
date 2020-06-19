@@ -197,8 +197,13 @@
     <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
       <Link>src\System\StringsHelper.cs</Link>
     </Compile>
+    <Compile Include="Segment\ArticleSegment.cs" />
+    <Compile Include="FileEGI.cs" />
+    <Compile Include="ManageCatalog.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Segment\Segments.cs" />
+    <Compile Include="Segment\WallSegment.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
