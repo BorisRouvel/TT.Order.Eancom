@@ -1,10 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TT.Import.EGI
 {
@@ -38,12 +34,14 @@ namespace TT.Import.EGI
 
         public bool Open()
         {
-            System.Windows.Forms.OpenFileDialog openFile = new OpenFileDialog();
+            OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = FileEGI.FilterEGIFile;
             openFile.InitialDirectory = orderDir;
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {
+                Cursor.Current = Cursors.WaitCursor;
+
                 orderEGIFileName = Path.GetFileName(openFile.FileName);
                 return true;
             }
@@ -54,7 +52,8 @@ namespace TT.Import.EGI
         {
             if (Open())
             {
-                return new KD.Config.IniFile(Path.Combine(orderDir, orderEGIFileName));       
+                KD.Config.IniFile iniFile = new KD.Config.IniFile(Path.Combine(orderDir, orderEGIFileName));
+                return iniFile;
             }
             return null;
         }

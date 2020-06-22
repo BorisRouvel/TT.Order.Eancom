@@ -202,6 +202,7 @@
     <Compile Include="ManageCatalog.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Segment\GlobalSegment.cs" />
     <Compile Include="Segment\Segments.cs" />
     <Compile Include="Segment\WallSegment.cs" />
   </ItemGroup>
