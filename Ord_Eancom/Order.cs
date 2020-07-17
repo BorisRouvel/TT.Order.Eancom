@@ -1,12 +1,14 @@
 ﻿using System.Windows.Forms;
-using System.IO;
+using System.Collections.Generic;
 using System;
+using System.IO;
 
 // ---------------------------------------
 // for KD self registration via RegAsm
 using System.Runtime.InteropServices;
 // ---------------------------------------
 using KD.Model;
+using KD.Analysis;
 
 using Eancom;
 
@@ -26,6 +28,10 @@ namespace Ord_Eancom
         public static string orderDir = String.Empty;
         public static string orderFile = String.Empty;
 
+        private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
+
+        private string referenceNoValid = String.Empty;
+
         public Order()
         {
            
@@ -41,19 +47,64 @@ namespace Ord_Eancom
         /// <returns></returns>
         public bool GenerateOrder(int callParamsBlock)
         {
-            _pluginWord = new KD.Plugin.Word.Plugin();
-            _pluginWord.InitializeAll(callParamsBlock);
+            orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+            Articles articles = SupplierArticleValidInScene();
 
-            this.mainForm = new MainForm();
-            this.Main(callParamsBlock);
+            if (this.IsGenerateOrders(articles))
+            {
+                _pluginWord = new KD.Plugin.Word.Plugin();
+                _pluginWord.InitializeAll(callParamsBlock);               
 
-            MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);           
+                this.mainForm = new MainForm();
+                this.Main(callParamsBlock, articles);
 
+                MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
+            }
+            return false;
+        }
+
+        private Articles SupplierArticleValidInScene()//OrderInformations orderInformations
+        {
+            Articles articles = new Articles();
+
+            string supplierId = orderInformations.GetSupplierName();
+            string IDs = String.Empty;
+
+            int objSupplierNb = this.GetObjectNbFromHeading();
+            if (objSupplierNb > 0)
+            {
+                for (int rank = 0; rank < objSupplierNb; rank++)
+                {
+                    int objId = this.CurrentAppli.Scene.SupplierGetObjectId(supplierId, (int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false, rank);
+                    IDs += objId + KD.StringTools.Const.Comma;
+                }
+
+                Articles supplierArticles = new Articles(CurrentAppli, IDs);
+
+                foreach (Article article in supplierArticles)
+                {
+                    if (article.IsValid && article.Type != 17)
+                    {
+                        articles.Add(article);
+                    }
+                }
+            }
+            return articles;
+        }
+        private bool IsGenerateOrders(Articles articles)
+        {
+            referenceNoValid = String.Empty;
+            if (articles == null | articles.Count <= 0 | !this.IsSceneComplete(articles))
+            {
+                MessageBox.Show("L'article '" + referenceNoValid + "' de la commande n'est pas valide." + Environment.NewLine + "La commande est annulée.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+           
             return true;
-        }     
+        }
 
-
-        private void Main(int callParamsBlock)
+        private void Main(int callParamsBlock, Articles articles)
         {
             this.mainForm.ShowDialog();
 
@@ -62,8 +113,9 @@ namespace Ord_Eancom
 
             Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
 
-            orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-            Articles articles = SupplierArticleValidInScene(orderInformations);
+            //orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+           // Articles articles = SupplierArticleValidInScene();//orderInformations
+           
             orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
             fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
@@ -91,38 +143,54 @@ namespace Ord_Eancom
             orderWrite.EDIOrderFile();
 
             orderWrite.ZIPOrderFile();
-           
         }
       
-        private Articles SupplierArticleValidInScene(OrderInformations orderInformations)
+        private int GetObjectNbFromHeading()
         {
-            Articles articles = new Articles();
-            //OrderInformations orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-            string supplierId = orderInformations.GetSupplierName();
-            string IDs = String.Empty;
+            return this.CurrentAppli.Scene.HeadingGetObjectsNb((int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false);
+        }
+     
 
-            int objSupplierNb = this.CurrentAppli.Scene.HeadingGetObjectsNb((int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false);
-            if (objSupplierNb > 0)
+        private bool IsSceneComplete(Articles articles)
+        {
+            List<string> catalogsList = this.CatalogsByManufacturerValidList();
+
+            foreach(Article article in articles)
             {
-                for (int rank = 0; rank < objSupplierNb; rank++)
+                string catalogFileName = article.CatalogFileName.ToUpper();
+                if (!catalogsList.Contains(catalogFileName))
                 {
-                    int objId = this.CurrentAppli.Scene.SupplierGetObjectId(supplierId, (int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false, rank);
-                    IDs += objId + KD.StringTools.Const.Comma;
+                    referenceNoValid = article.Ref;
+                    return false;
                 }
-
-                Articles supplierArticles = new Articles(CurrentAppli, IDs);
-
-                foreach (Article article in supplierArticles)
-                {
-                    if (article.IsValid)
-                    {
-                        articles.Add(article);
-                    }
-                }
-            }
-            return articles;
+            }            
+            return true;
         }
 
+        private IEnumerable<string> CatalogsBaseList()
+        {
+            return Directory.EnumerateFiles(this.CurrentAppli.CatalogDir, KD.StringTools.Const.Wildcard + KD.IO.File.Extension.Cat);
+        }
+        private string GetCatalogCustomInfo(string catalog, string info)
+        {
+            return this.CurrentAppli.CatalogGetCustomInfo(catalog, info);
+        }
+        private List<string> CatalogsByManufacturerValidList()
+        {
+            List<string> list = new List<string>();
+            list.Clear();
+
+            foreach (string catalogPath in this.CatalogsBaseList())
+            {
+                string manufacturerCat = this.GetCatalogCustomInfo(catalogPath, ManufacturerCustomFromCatalog);
+
+                if (!String.IsNullOrEmpty(manufacturerCat) && !manufacturerCat.Equals("0"))
+                {
+                    list.Add(Path.GetFileNameWithoutExtension(catalogPath.ToUpper()));
+                }
+            }
+            return list;
+        }
     }
 
 }

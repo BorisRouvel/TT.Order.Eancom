@@ -8,7 +8,12 @@ using KD.SDKComponent;
 using Ord_Eancom;
 
 namespace Eancom
-{
+{    
+    public class Constants
+    {
+        public const string Version = "EANCOM_ORDER_V2.03";
+    }
+
     public class Separator
     {
         public static readonly string NewLine = Environment.NewLine;

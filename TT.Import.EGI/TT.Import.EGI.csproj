@@ -86,9 +86,6 @@
     <Compile Include="..\..\Plugins.Core\src\Analysis\WallsAnalysis.cs">
       <Link>src\Analysis\WallsAnalysis.cs</Link>
     </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Classification\ArrangementClassification.cs">
-      <Link>src\Classification\ArrangementClassification.cs</Link>
-    </Compile>
     <Compile Include="..\..\Plugins.Core\src\Classification\ArticleClassification.cs">
       <Link>src\Classification\ArticleClassification.cs</Link>
     </Compile>
@@ -196,6 +193,10 @@
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
       <Link>src\System\StringsHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SortedArticle.cs">
+      <Link>src\Model\SortedArticle.cs</Link>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Segment\ArticleSegment.cs" />
     <Compile Include="FileEGI.cs" />

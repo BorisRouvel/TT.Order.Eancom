@@ -11,7 +11,7 @@ using KD.Analysis;
 using KD.Model;
 
 using KD.Plugin.Word;
-
+using KD.SortedArticle;
 using Eancom;
 
 
@@ -46,7 +46,7 @@ namespace Ord_Eancom
     }
 
     public class OrderConstants
-    {
+    {        
         public const string Insitu = "INSITU";
         public const string HandleName = "_HDL";
 
@@ -1644,22 +1644,25 @@ namespace Ord_Eancom
             KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
 
             Articles articles = this.CurrentAppli.GetArticleList(FilterArticle.FilterToGetWallByValid());
-            Walls walls = new Walls(articles);
-           
-            foreach (Wall wall in walls)
+            if (articles != null && articles.Count > 0)
             {
-                Articles articlesAgainst = wall.AgainstMeASC;
+                Walls walls = new Walls(articles);
 
-                if (articlesAgainst != null && articlesAgainst.Count > 0)
+                foreach (Wall wall in walls)
                 {
-                    wall.IsActive = true;
-                    this.SetView(KD.SDK.SceneEnum.ViewMode.VECTELEVATION);
-                    this.ZoomAdjusted();                    
-                    this.ExportElevImageJPG(walls.IndexOf(wall) + 1);                   
+                    Articles articlesAgainst = wall.AgainstMeASC;
+
+                    if (articlesAgainst != null && articlesAgainst.Count > 0)
+                    {
+                        wall.IsActive = true;
+                        this.SetView(KD.SDK.SceneEnum.ViewMode.VECTELEVATION);
+                        this.ZoomAdjusted();
+                        this.ExportElevImageJPG(walls.IndexOf(wall) + 1);
+                    }
+
                 }
-             
+                this.SetView(currentViewMode);
             }
-            this.SetView(currentViewMode);
         }
 
         // Commande (PDF)
@@ -1690,7 +1693,7 @@ namespace Ord_Eancom
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Afin de générer le fichier de 'Commande.pdf'" + Environment.NewLine +
+                System.Windows.Forms.MessageBox.Show("Afin de générer le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + Environment.NewLine +
                     "Veuillez sélectionner 'Fichier PDF joint' dans votre fournisseurs", "Information");
             }
             //bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, pdfFlagState, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
@@ -1700,6 +1703,11 @@ namespace Ord_Eancom
             if (File.Exists(supplierFilePath))
             {
                 File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + 
+                    " n'a pas pu être généré.", "Information");
             }
         }
 

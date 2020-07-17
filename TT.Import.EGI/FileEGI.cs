@@ -20,7 +20,7 @@ namespace TT.Import.EGI
         }
 
         private const string Dir = "orders";
-        private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
+        //private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
         private const string FilterEGIFile = "Fichiers egi (*.egi)|*.egi";
         
         public static string orderDir = String.Empty;
