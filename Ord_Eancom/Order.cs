@@ -37,34 +37,92 @@ namespace Ord_Eancom
            
         }
 
+
+        public bool ProcessOrder(int callParamsBlock)
+        {
+            _pluginWord = new KD.Plugin.Word.Plugin();
+          
+            string generateOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.GenerateOrder);
+
+            if (!String.IsNullOrEmpty(generateOrder))
+            {
+                bool.TryParse(generateOrder, out bool isGenerateOrder);
+
+                if (isGenerateOrder)
+                {
+                    orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+                    Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+
+                    MainForm.EmailTo = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey);
+                    MainForm.EmailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey);
+
+                    string recipientAdress = MainForm.EmailTo; // "commande-EDI@discac.fr, commandes@discac.fr, ETL@discac.fr";
+
+                    if (!String.IsNullOrEmpty(recipientAdress))
+                    {
+                        this.SendMail(recipientAdress);                        
+                    }                    
+                }               
+            }
+            return true;
+        }
+
+        private void SendMail(string recipientAdress)
+        {
+            string ccAdress = MainForm.EmailCc;
+            string customerNumber = orderInformations.GetRetailerGLN();
+            string commissiontNumber = orderInformations.GetCommissionNumber();
+            string softWareVersion = orderInformations.GetNameAndVersionSoftware();
+            string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);
+
+            DialogResult dialogResult = MessageBox.Show("Voulez-vous envoyer la commande ?", "InSitu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (dialogResult == DialogResult.Yes)
+            {
+                bool bSend = this.CurrentAppli.EmailSend(String.Empty, //Contact name if exist
+                                                        recipientAdress,
+                                                        ccAdress, //cc
+                                                        OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
+                                                        String.Empty, //Body message
+                                                        attachedFilesPathsList, //AttachedFilesPathsList
+                                                        String.Empty, //AttachedFilesNamesList
+                                                        true); // show dialog
+            }
+        }
+
+
+
+
         /// <summary>
         /// The "GenerateOrder" function belonging to the "Order" class is the entry point of the supplier orders management module.
         /// If the DLL is selected in the "Computer file" option box corresponding to a supplier in the "Suppliers" dialog box,
         /// the following "GenerateOrder" function is called when the user generates an order for that supplier running 
         /// the "File | Orders to suppliers | Generate".
         /// </summary>
-        /// <param name="iCallParamsBlock"></param>
+        /// <param name="callParamsBlock"></param>
         /// <returns></returns>
         public bool GenerateOrder(int callParamsBlock)
         {
+            _pluginWord = new KD.Plugin.Word.Plugin();
+            _pluginWord.InitializeAll(callParamsBlock);
+
+            Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
             Articles articles = SupplierArticleValidInScene();
 
             if (this.IsGenerateOrders(articles))
             {
-                _pluginWord = new KD.Plugin.Word.Plugin();
-                _pluginWord.InitializeAll(callParamsBlock);               
-
                 this.mainForm = new MainForm();
                 this.Main(callParamsBlock, articles);
 
-                MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);                          
+                Cursor.Current = Cursors.Arrow;
                 return true;
-            }
+            }            
             return false;
         }
 
-        private Articles SupplierArticleValidInScene()//OrderInformations orderInformations
+        private Articles SupplierArticleValidInScene()
         {
             Articles articles = new Articles();
 
@@ -98,9 +156,10 @@ namespace Ord_Eancom
             if (articles == null | articles.Count <= 0 | !this.IsSceneComplete(articles))
             {
                 MessageBox.Show("L'article '" + referenceNoValid + "' de la commande n'est pas valide." + Environment.NewLine + "La commande est annulée.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);                
                 return false;
             }
-           
+            _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.TrueLowerCase, OrderKey.GenerateOrder);
             return true;
         }
 
@@ -109,12 +168,7 @@ namespace Ord_Eancom
             this.mainForm.ShowDialog();
 
             OrderWrite.segmentNumberBetweenUNHandUNT = 0;
-            RFF_A.refPosList.Clear();
-
-            Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
-
-            //orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-           // Articles articles = SupplierArticleValidInScene();//orderInformations
+            RFF_A.refPosList.Clear();                   
            
             orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
@@ -134,13 +188,17 @@ namespace Ord_Eancom
             {
                 orderWrite.BuildElevation();
             }
+            if (MainForm.IsChoiceExportPerspective)
+            {
+                orderWrite.BuildPerspective();
+            }
             if (MainForm.IsChoiceExportOrder)
             {
                 orderWrite.BuildOrder();
             }
 
             orderWrite.BuildEDI(articles);
-            orderWrite.EDIOrderFile();
+            orderWrite.EDIOrderFileStream();
 
             orderWrite.ZIPOrderFile();
         }

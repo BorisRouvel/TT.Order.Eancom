@@ -70,9 +70,9 @@ namespace Eancom
             {                 
             }
 
-            public string Add()
+            public string Add(OrderInformations orderInformationsFromArticles)
             {
-                return this.E7140 + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + E3055;
+                return orderInformationsFromArticles.ReleaseChar(this.E7140) + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + E3055;
             }
 
         }
@@ -85,8 +85,8 @@ namespace Eancom
         }
 
         private string BuildLine()
-        {
-            return StructureEDI.PIA_H + Separator.DataGroup + E4347 + Separator.DataGroup + c212.Add() + Separator.EndLine;
+        {             
+            return StructureEDI.PIA_H + Separator.DataGroup + E4347 + Separator.DataGroup + c212.Add(_orderInformationsFromArticles) + Separator.EndLine; 
         }
 
         public string Add_ManufacturerID()
@@ -149,8 +149,7 @@ namespace Eancom
                         break;
                     }
                 }
-            }            
-
+            }                     
             return dataLine;
         }
         public string Add_FinishCodeAndName()

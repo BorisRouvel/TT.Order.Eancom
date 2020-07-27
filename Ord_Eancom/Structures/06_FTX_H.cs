@@ -122,6 +122,27 @@ namespace Eancom
                 }
             }
 
+            if (MainForm.IsChoiceExportPerspective)
+            {
+                int index = 1;
+
+                fileType = Convert.ToInt16(OrderEnum.Type.PERSPECTIVE).ToString();
+                fileFormat = Convert.ToInt16(OrderEnum.Format.JPEG).ToString();
+
+                string[] allJPGFiles = System.IO.Directory.GetFiles(Order.orderDir, KD.StringTools.Const.Wildcard + OrderTransmission.ExtensionJPG);
+                foreach (string jPGfile in allJPGFiles)
+                {
+                    if (jPGfile.ToUpper().Contains(OrderTransmission.PerspectiveName.ToUpper()))
+                    {
+                        fileName = System.IO.Path.GetFileName(jPGfile);
+                        fileDescription = System.IO.Path.GetFileName(jPGfile);
+
+                        fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
+                        index++;
+                    }
+                }
+            }
+
             if (MainForm.IsChoiceExportOrder)
             {
                 fileType = Convert.ToInt16(OrderEnum.Type.OTHER).ToString();

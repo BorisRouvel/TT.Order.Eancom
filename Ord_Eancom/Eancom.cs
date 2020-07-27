@@ -82,6 +82,9 @@ namespace Eancom
 
         private const string numberSection = "Number";
         private const string nextKey = "Next";
+        public const string ediSection = "EDI";
+        public const string emailToKey = "EmailTo";
+        public const string emailCcKey = "EmailCc";
         #endregion
 
         private AppliComponent _currentAppli;
@@ -111,12 +114,12 @@ namespace Eancom
             }
         }
 
-        OrderInformations _orderInformationsFromArticles = null;
+        private readonly OrderInformations _orderInformationsFromArticles = null;
         public string appairingCatalogFileName = String.Empty;
 
-        KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, IniOrderFileName));
-        KD.CsvHelper.CsvFileReader csvFileReader = null;
-        KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
+        public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, IniOrderFileName));
+        private KD.CsvHelper.CsvFileReader csvFileReader = null;
+        private KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
 
         public FileEDI(AppliComponent appli, string supplierName, OrderInformations orderInformationsFromArticles)
         {

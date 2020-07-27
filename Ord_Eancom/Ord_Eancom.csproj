@@ -185,10 +185,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Eancom.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="Form\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Order.cs" />
@@ -223,7 +223,7 @@
     <Compile Include="Structures\03_UNH.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="Form\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

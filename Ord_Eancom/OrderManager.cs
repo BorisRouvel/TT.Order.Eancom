@@ -45,6 +45,19 @@ namespace Ord_Eancom
         }
     }
 
+    public class OrderKey
+    {
+        public const string ChoiceRetaillerDelivery = "IsChoiceRetaillerDelivery";
+        public const string ChoiceCustomerDelivery = "IsChoiceCustomerDelivery";
+        public const string InformationInstallation = "InformationInstallation";
+        public const string ChoiceExportEGI = "IsChoiceExportEGI";
+        public const string ChoiceExportPlan = "IsChoiceExportPlan";
+        public const string ChoiceExportElevation = "IsChoiceExportElevation";
+        public const string ChoiceExportPerspective = "IsChoiceExportPerspective";
+        public const string ChoiceExportOrder = "IsChoiceExportOrder";
+        public const string GenerateOrder = "IsGenerateOrder";
+    }
+
     public class OrderConstants
     {        
         public const string Insitu = "INSITU";
@@ -82,6 +95,7 @@ namespace Ord_Eancom
 
         public const string PlanName = "Plan";
         public const string ElevName = "Elevation";
+        public const string PerspectiveName = "Perspective";
 
         public const string ExtensionEDI = ".edi";
         public const string ExtensionEGI = ".egi";
@@ -92,7 +106,9 @@ namespace Ord_Eancom
 
         //public const string VersionOrderDataFormat = "EANCOM_ORDER_V2.03"; //i must get the string in IDM
         public const string VersionEdigraph = "EDIGRAPH_V1.50";
-        
+        public const string HeaderSubject = "EDI-ORDER";
+
+
     }
 
     public class OrderInformations
@@ -125,7 +141,7 @@ namespace Ord_Eancom
             }
         }
 
-        private Articles _articles;
+        private readonly Articles _articles;
         public Articles Articles
         {
             get
@@ -134,7 +150,7 @@ namespace Ord_Eancom
             }
         }
 
-        private Article _article;
+        private readonly Article _article;
         public Article Article
         {
             get
@@ -146,8 +162,8 @@ namespace Ord_Eancom
         private SceneAnalysis sceneAnalysis = null;
 
         public static string deliveryDate = String.Empty;
-        public static string installationDate = String.Empty;
-        private CultureInfo provider = CultureInfo.InvariantCulture;
+        public static string installationDate = String.Empty;        
+        private readonly CultureInfo provider = CultureInfo.InvariantCulture;
 
         private string supplierID = String.Empty;
         
@@ -505,10 +521,7 @@ namespace Ord_Eancom
         }        
         public string GetCatalogModelCodeAndName()
         {
-            string[] generikFinishTypes;
-            string[] generikFinishes;           
-
-            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out generikFinishTypes, out generikFinishes);
+            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
             if (IsGenerik)
             {
                 int.TryParse(generikFinishTypes[0], out int generikFinishType);
@@ -520,11 +533,9 @@ namespace Ord_Eancom
         public List<string> GetGenericCatalogFinishCodeAndName()
         {            
             List<string> finishesList = new List<string>();
-            string[] generikFinishTypes;
-            string[] generikFinishes;
             sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
 
-            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out generikFinishTypes, out generikFinishes);
+            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < generikFinishTypes.Length; fin++) 
@@ -542,11 +553,9 @@ namespace Ord_Eancom
         public List<string> GetCatalogFinishCodeAndName()//Article article)
         {
             List<string> finishesList = new List<string>();
-            string[] finishTypes;
-            string[] finishes;
             sceneAnalysis = new SceneAnalysis(this.Article);
-            
-            bool IsGenerik = sceneAnalysis.GetFinishes(out finishTypes, out finishes);
+
+            bool IsGenerik = sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
@@ -564,11 +573,9 @@ namespace Ord_Eancom
         public List<string> GetFinishCodeAndName()//Article article)
         {
             List<string> finishesList = new List<string>();
-            string[] finishTypes;
-            string[] finishes;
             sceneAnalysis = new SceneAnalysis(this.Article);
 
-            bool IsGenerik = sceneAnalysis.GetFinishes(out finishTypes, out finishes);
+            bool IsGenerik = sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
@@ -734,7 +741,7 @@ namespace Ord_Eancom
 
     public class OrderWrite
     {
-        Encoding uniEncoding = Encoding.UTF8;
+        Encoding utf8Encoding = Encoding.UTF8;
         static List<string> structureLineEDIList = new List<string>();
         static List<string> structureLineEGIList = new List<string>();
         readonly OrderInformations _orderInformations = null;
@@ -779,10 +786,10 @@ namespace Ord_Eancom
         double sceneDimZ = 0.0;
         double angleScene = 0.0;
 
-        private string x = String.Empty;
-        private string y = String.Empty;
-        private string z = String.Empty;
-        private string ab = String.Empty;       
+        private readonly string x = String.Empty;
+        private readonly string y = String.Empty;
+        private readonly string z = String.Empty;
+        private readonly string ab = String.Empty;       
         
         private double x1 = 0.0;
         private double y1 = 0.0;
@@ -833,8 +840,8 @@ namespace Ord_Eancom
             version = OrderTransmission.VersionEdigraph.Split(KD.CharTools.Const.Underscore)[1];
         }
 
-        //   EDI      
-        private void InitializeEancomStructure()//OrderInformations orderInformations)
+        #region //EDI      
+        private void InitializeEancomStructure()
         {
             this.ClearStructureEDIList();
 
@@ -875,8 +882,8 @@ namespace Ord_Eancom
         private void SetLineEDIList(string text)
         {
             if (!String.IsNullOrEmpty(text))
-            {
-                structureLineEDIList.Add(text);
+            {                
+                structureLineEDIList.Add(text); //OrderWrite.segmentNumberBetweenUNHandUNT + " // " + 
             }
         }
         private void SetLineEDIList(List<string> list)
@@ -889,9 +896,29 @@ namespace Ord_Eancom
                 }
             }
         }
+        private void SetLine_NAD_Delivery()
+        {
+            if (MainForm.IsChoiceRetaillerDelivery)
+            {
+                if (!nAD.IsBYequalDDP())
+                {
+                    SetLineEDIList(nAD.Add_Delivery_DP(1));
+                }
+            }
+            else if (MainForm.IsChoiceCustomerDelivery)
+            {
+                SetLineEDIList(nAD.Add_CustomerDelivery_DP());
+            }
+        }
         private void WriteLineInFileEDI(FileStream fs, string text)
         {
-            fs.Write(uniEncoding.GetBytes(text), 0, uniEncoding.GetByteCount(text));
+            // Convert the string into a byte array.
+            byte[] unicodeBytes = utf8Encoding.GetBytes(text);
+
+            // Perform the conversion from one encoding to the other.
+            byte[] uft8Bytes = Encoding.Convert(utf8Encoding, utf8Encoding, unicodeBytes);
+
+            fs.Write(uft8Bytes, 0, utf8Encoding.GetByteCount(text));
         }
 
         public void BuildEDI(Articles articles)
@@ -902,7 +929,7 @@ namespace Ord_Eancom
            this.EndEDI(); //here set segement number between UNH and UNT include
         }
 
-        public void HeaderEDI()
+        private void HeaderEDI()
         {
             SetLineEDIList(uNA.Add());
 
@@ -927,8 +954,8 @@ namespace Ord_Eancom
             SetLineEDIList(cOM.Add_Supplier_TE());
             SetLineEDIList(cOM.Add_Supplier_FX());
             SetLineEDIList(cOM.Add_Supplier_EM());
-
-            SetLineEDIList(nAD.Add_BY());
+            
+            SetLineEDIList(nAD.Add_BY(1));
 
             SetLineEDIList(cTA.Add_Seller_OC());
 
@@ -936,10 +963,9 @@ namespace Ord_Eancom
             SetLineEDIList(cOM.Add_Retailer_FX());
             SetLineEDIList(cOM.Add_Retailer_EM());
 
-            SetLineEDIList(nAD.Add_Delivery_DP());
-            SetLineEDIList(nAD.Add_CustomerDelivery_DP());
+            this.SetLine_NAD_Delivery();
         }
-        public void HeaderData()
+        private void HeaderData()
         {
             SetLineEDIList(lIN_H.Add());
 
@@ -950,7 +976,7 @@ namespace Ord_Eancom
             SetLineEDIList(pIA_H.Add_FinishCodeAndName());
             SetLineEDIList(pIA_H.Add_PlinthHeight());
         }
-        public void LineData(Articles articles)
+        private void LineData(Articles articles)
         {
             foreach (Article article in articles)
             {
@@ -1025,14 +1051,14 @@ namespace Ord_Eancom
                 }
             }
         }
-        public void EndEDI()
+        private void EndEDI()
         {
             SetLineEDIList(uNS.Add());
             SetLineEDIList(uNT.Add());
             SetLineEDIList(uNZ.Add());
         }
 
-        public void EDIOrderFile()
+        public void EDIOrderFileStream()
         {
             using (FileStream fs = new FileStream(Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName), FileMode.Create))
             {
@@ -1047,8 +1073,256 @@ namespace Ord_Eancom
                 fs.Dispose();
             }
         }
+       
+        #endregion
 
-        // EGI
+        #region //Plan for EDI
+        public void BuildPlan()
+        {
+            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
+            this.SetView(KD.SDK.SceneEnum.ViewMode.TOP);
+            this.ZoomAdjusted();           
+            this.ExportImageJPG(1, OrderTransmission.PlanName);           
+            this.SetView(currentViewMode);
+        }
+        private KD.SDK.SceneEnum.ViewMode GetView()
+        {
+            return this.CurrentAppli.Scene.ViewGetMode();
+        }
+        private bool SetView(KD.SDK.SceneEnum.ViewMode viewMode)
+        {
+            return this.CurrentAppli.Scene.ViewSetMode(viewMode);
+        }
+        private bool ZoomAdjusted()
+        {
+            return this.CurrentAppli.Scene.ZoomAdjusted();
+        }
+        private bool ExportImageJPG(int count, string exportName)
+        {
+            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, exportName + "-" + count + OrderTransmission.ExtensionJPG), 1200, 1200, "255,255,255", true, 100, 3);
+        }
+        private bool IsPosedOn(Article article)
+        {
+            if (article.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.ON_OR_UNDER) == "0")
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool IsPosedUnder(Article article)
+        {
+            if (article.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.ON_OR_UNDER) == "1")
+            {
+                return true;
+            }
+            return false;
+        }
+        private double GetRealPositionZByPosedOnOrUnder(Article article)
+        {
+            double positionZ = article.PositionZ;
+            if (this.IsPosedUnder(article))
+            {
+                positionZ = article.PositionZ - article.DimensionZ;
+            }
+            return positionZ;
+        }
+        private int GetArticlePolyType(Article article)
+        {
+            if (article.Topic == 0)
+            {
+                string type = this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+                
+                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //Plinth
+                {
+                    return 2;
+                }
+                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //Worktop
+                {
+                    return 1;
+                }
+            }
+
+            return KD.Const.UnknownId;
+        }
+        private int GetArticlePolyCounter(Article article)
+        {
+            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
+            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
+            if (shapeList.Length > 0)
+            {
+                return shapeList.Length;
+            }
+            return 0;
+        }
+        private string[] GetArticlePolyPoint(Article article, int polyType)
+        {
+            if (polyType == 1)
+            {
+                Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+                foreach (Article child in childs)
+                {
+                    article = child;
+                }
+
+            }
+            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
+            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
+            if (shapeList.Length > 0)
+            {
+                return shapeList;
+            }
+            return null;
+        }
+        #endregion
+
+        #region //Elevation for EDI
+        public void BuildElevation()
+        {
+            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
+
+            Articles articles = this.CurrentAppli.GetArticleList(FilterArticle.FilterToGetWallByValid());
+            if (articles != null && articles.Count > 0)
+            {
+                Walls walls = new Walls(articles);
+
+                foreach (Wall wall in walls)
+                {
+                    Articles articlesAgainst = wall.AgainstMeASC;
+
+                    if (articlesAgainst != null && articlesAgainst.Count > 0)
+                    {
+                        wall.IsActive = true;
+                        this.SetView(KD.SDK.SceneEnum.ViewMode.VECTELEVATION);
+                        this.ZoomAdjusted();
+                        this.ExportImageJPG(walls.IndexOf(wall) + 1, OrderTransmission.ElevName);
+                    }
+
+                }
+                this.SetView(currentViewMode);
+            }
+        }
+        #endregion
+
+        #region //Perspective for EDI
+        public void BuildPerspective()
+        {
+            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
+           
+            this.SetView(KD.SDK.SceneEnum.ViewMode.OGLREAL);
+            this.ZoomAdjusted();
+            this.ExportImageJPG(1, OrderTransmission.PerspectiveName);                  
+            this.SetView(currentViewMode);           
+        }
+        #endregion
+
+        #region //Commande (PDF) for EDI
+        public void BuildOrder()
+        {
+            int supplierRank = this.CurrentAppli.GetSupplierRankFromIdent(this._orderInformations.GetSupplierName());
+
+            if (supplierRank != KD.Const.UnknownId)
+            {
+                this.ManagePdfFile(supplierRank);
+            }
+        }
+        private string GetSupplierFilePath()
+        {
+            string supplierId = Order._pluginWord.DocEngine.SupplierId();
+            string sceneDocDir = Order._pluginWord.DocEngine.SceneDocDir;
+            return Path.Combine(sceneDocDir, KD.Plugin.Word.Config.Const.SupplierOrderDirName, supplierId + KD.IO.File.Extension.Pdf);
+        }
+        private void ManagePdfFile(int supplierRank)
+        {
+            string pdfFlagState = this.CurrentAppli.SupplierGetInfo(supplierRank, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
+
+            if (pdfFlagState == KD.StringTools.Const.One)
+            {
+                //    bool bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, KD.StringTools.Const.One, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
+                string supplierFilePath = this.GetSupplierFilePath();
+                this.CopySupplierFile(supplierFilePath);
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Afin de générer le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + Environment.NewLine +
+                    "Veuillez sélectionner 'Fichier PDF joint' dans votre fournisseurs", "Information");
+            }
+            //bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, pdfFlagState, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
+        }
+        private void CopySupplierFile(string supplierFilePath)
+        {
+            if (File.Exists(supplierFilePath))
+            {
+                File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + 
+                    " n'a pas pu être généré.", "Information");
+            }
+        }
+        #endregion
+
+        #region //ZIP for EDI
+        public void ZIPOrderFile()
+        {           
+            ZipArchiveEntry readmeEntry = null;
+            using (FileStream zipToOpen = new FileStream(Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName), FileMode.Create, FileAccess.ReadWrite))
+            {
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    string EDIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName);
+                    this.EntryZipAndDeleteFile(readmeEntry, archive, EDIFile, OrderTransmission.OrderEDIFileName);                   
+
+                    if (MainForm.IsChoiceExportEGI)
+                    {
+                        string EGIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName);
+                        this.EntryZipAndDeleteFile(readmeEntry, archive, EGIFile, OrderTransmission.OrderEGIFileName);
+                    }
+                    if (MainForm.IsChoiceExportPlan)
+                    {
+                        for (int i = 1; i < 99; i++)
+                        {
+                            string JPGplanFile = Path.Combine(Order.orderDir, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
+                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGplanFile, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
+                        }
+                    }
+                    if (MainForm.IsChoiceExportElevation)
+                    {
+                        for (int i = 1; i < 99; i++)
+                        {
+                            string JPGelevFile = Path.Combine(Order.orderDir, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
+                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGelevFile, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
+                        }
+                    }
+                    if (MainForm.IsChoiceExportPerspective)
+                    {
+                        for (int i = 1; i < 99; i++)
+                        {
+                            string JPGpersFile = Path.Combine(Order.orderDir, OrderTransmission.PerspectiveName + "-" + i + OrderTransmission.ExtensionJPG);
+                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGpersFile, OrderTransmission.PerspectiveName + "-" + i + OrderTransmission.ExtensionJPG);
+                        }
+                    }
+                    if (MainForm.IsChoiceExportOrder)
+                    {
+                        string OrderFile = Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
+                        this.EntryZipAndDeleteFile(readmeEntry, archive, OrderFile, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
+                    }
+                }
+            }            
+        }
+       
+        private void EntryZipAndDeleteFile(ZipArchiveEntry readmeEntry, ZipArchive archive, string file, string entryFile)
+        {           
+            if (File.Exists(file))
+            {
+                readmeEntry = archive.CreateEntryFromFile(file, entryFile);
+                File.Delete(file);
+            }
+        }
+        #endregion
+
+
+        #region //EGI
         private void ClearStructureEGIList()
         {
             structureLineEGIList.Clear();
@@ -1072,7 +1346,7 @@ namespace Ord_Eancom
         }
         private void WriteLineInFileEGI(FileStream fs, string text)
         {
-            fs.Write(uniEncoding.GetBytes(text), 0, uniEncoding.GetByteCount(text));
+            fs.Write(utf8Encoding.GetBytes(text), 0, utf8Encoding.GetByteCount(text));
         }
 
         public void BuildEGI(Articles articles)
@@ -1138,7 +1412,7 @@ namespace Ord_Eancom
             structureLineEGIList.Add(_orderInformations.ReleaseChar("DrawTime=" + dateTime.ToString(OrderConstants.FormatTime_H_m_s)) + Separator.NewLine);
 
             string roomHeight = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-            string room = Convert.ToInt32(roomHeight).ToString("0.00");           
+            string room = Convert.ToInt32(roomHeight).ToString("0.00");
             structureLineEGIList.Add("RoomHeight=" + this.ConvertCommaToDot(room) + Separator.NewLine);
             structureLineEGIList.Add("Manufacturer=" + _fileEDI.ManufacturerID() + Separator.NewLine);
             structureLineEGIList.Add("System=" + _orderInformations.GetNameAndVersionSoftware() + Separator.NewLine);
@@ -1172,9 +1446,9 @@ namespace Ord_Eancom
 
         }
         public void SetWallInformations(List<Wall> wallList)
-        {            
+        {
             this.SetSceneReference(version);
-            
+
             int index = 1;
             foreach (Wall wall in wallList)
             {
@@ -1196,12 +1470,12 @@ namespace Ord_Eancom
             return "[Wall_" + wallIndex.ToString("0000") + "]" + Separator.NewLine;
         }
         private string WallPositionX(double value)
-        {           
+        {
             string data = "RefPntX=" + value.ToString("0.00");
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallPositionY(double value)
-        {            
+        {
             string data = "RefPntY=" + value.ToString("0.00");
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
@@ -1246,11 +1520,11 @@ namespace Ord_Eancom
                     y1 -= article.DimensionX * Math.Sin(angle);
                     break;
                 case "V1.51": //FBD
-                    //x1 -= article.DimensionX;
-                   // a -= article.AngleOXY;
+                              //x1 -= article.DimensionX;
+                              // a -= article.AngleOXY;
                     break;
                 default:
-                   // x1 -= article.DimensionX;
+                    // x1 -= article.DimensionX;
                     //a -= article.AngleOXY;
                     break;
             }
@@ -1281,7 +1555,7 @@ namespace Ord_Eancom
 
             foreach (Article article in articles)
             {
-                if (!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId)               
+                if (!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId)
                 {
                     this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
 
@@ -1308,10 +1582,10 @@ namespace Ord_Eancom
 
                     Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
                     if (childs != null)
-                    {                        
+                    {
                         foreach (Article child in childs)
                         {
-                            if (child.Name.StartsWith ("@F"))
+                            if (child.Name.StartsWith("@F"))
                             {
                                 double angleFilerDepth = child.DimensionY;
                                 structureLineEGIList.Add(ArticleAngleFilerDimensionX(child.DimensionY));
@@ -1321,11 +1595,11 @@ namespace Ord_Eancom
                             }
                         }
                     }
-                    
+
                     structureLineEGIList.Add(ArticleDimensionX(dimX));
                     structureLineEGIList.Add(ArticleDimensionZ(article.DimensionZ));
                     structureLineEGIList.Add(ArticleDimensionY(dimY));
-                   
+
                     structureLineEGIList.Add(ArticleConstructionType(article.KeyRef));
                     structureLineEGIList.Add(ArticleHinge(article));
 
@@ -1440,7 +1714,7 @@ namespace Ord_Eancom
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleShape(string str)
-        {            
+        {
             return "Shape=" + str.ToString() + Separator.NewLine;
         }
         private string ArticleDimensionX(double value)
@@ -1494,9 +1768,9 @@ namespace Ord_Eancom
                     hinge = "R";
                     break;
                 default:
-                    return null;                    
+                    return null;
             }
-            return "Hinge=" + hinge + Separator.NewLine;           
+            return "Hinge=" + hinge + Separator.NewLine;
         }
         private string ArticlePolyType(int polyType)
         {
@@ -1534,231 +1808,7 @@ namespace Ord_Eancom
                 fs.Dispose();
             }
         }
-
-        // Plan
-        public void BuildPlan()
-        {
-            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
-            this.SetView(KD.SDK.SceneEnum.ViewMode.TOP);
-            this.ZoomAdjusted();           
-            this.ExportTopImageJPG(1);           
-            this.SetView(currentViewMode);
-        }
-        private KD.SDK.SceneEnum.ViewMode GetView()
-        {
-            return this.CurrentAppli.Scene.ViewGetMode();
-        }
-        private bool SetView(KD.SDK.SceneEnum.ViewMode viewMode)
-        {
-            return this.CurrentAppli.Scene.ViewSetMode(viewMode);
-        }
-        private bool ZoomAdjusted()
-        {
-            return this.CurrentAppli.Scene.ZoomAdjusted();
-        }
-        private bool ExportTopImageJPG(int count)
-        {
-            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, OrderTransmission.PlanName + "-" + count + OrderTransmission.ExtensionJPG), 1200, 1200, "255,255,255", true, 100, 3);
-        }
-        private bool ExportElevImageJPG(int count)
-        {
-            return this.CurrentAppli.Scene.FileExportImage(Path.Combine(Order.orderDir, OrderTransmission.ElevName + "-" + count + OrderTransmission.ExtensionJPG), 1200, 1200, "255,255,255", true, 100, 3);
-        }
-
-        private bool IsPosedOn(Article article)
-        {
-            if (article.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.ON_OR_UNDER) == "0")
-            {
-                return true;
-            }
-            return false;
-        }
-        private bool IsPosedUnder(Article article)
-        {
-            if (article.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.ON_OR_UNDER) == "1")
-            {
-                return true;
-            }
-            return false;
-        }
-        private double GetRealPositionZByPosedOnOrUnder(Article article)
-        {
-            double positionZ = article.PositionZ;
-            if (this.IsPosedUnder(article))
-            {
-                positionZ = article.PositionZ - article.DimensionZ;
-            }
-            return positionZ;
-        }
-        private int GetArticlePolyType(Article article)
-        {
-            if (article.Topic == 0)
-            {
-                string type = this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
-                
-                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //Plinth
-                {
-                    return 2;
-                }
-                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //Worktop
-                {
-                    return 1;
-                }
-            }
-
-            return KD.Const.UnknownId;
-        }
-        private int GetArticlePolyCounter(Article article)
-        {
-            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
-            if (shapeList.Length > 0)
-            {
-                return shapeList.Length;
-            }
-            return 0;
-        }
-        private string[] GetArticlePolyPoint(Article article, int polyType)
-        {
-            if (polyType == 1)
-            {
-                Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
-                foreach (Article child in childs)
-                {
-                    article = child;
-                }
-
-            }
-            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
-            if (shapeList.Length > 0)
-            {
-                return shapeList;
-            }
-            return null;
-        }
-
-        // Elevation
-        public void BuildElevation()
-        {
-            KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
-
-            Articles articles = this.CurrentAppli.GetArticleList(FilterArticle.FilterToGetWallByValid());
-            if (articles != null && articles.Count > 0)
-            {
-                Walls walls = new Walls(articles);
-
-                foreach (Wall wall in walls)
-                {
-                    Articles articlesAgainst = wall.AgainstMeASC;
-
-                    if (articlesAgainst != null && articlesAgainst.Count > 0)
-                    {
-                        wall.IsActive = true;
-                        this.SetView(KD.SDK.SceneEnum.ViewMode.VECTELEVATION);
-                        this.ZoomAdjusted();
-                        this.ExportElevImageJPG(walls.IndexOf(wall) + 1);
-                    }
-
-                }
-                this.SetView(currentViewMode);
-            }
-        }
-
-        // Commande (PDF)
-        public void BuildOrder()
-        {
-            int supplierRank = this.CurrentAppli.GetSupplierRankFromIdent(this._orderInformations.GetSupplierName());
-
-            if (supplierRank != KD.Const.UnknownId)
-            {
-                this.ManagePdfFile(supplierRank);
-            }
-        }
-        private string GetSupplierFilePath()
-        {
-            string supplierId = Order._pluginWord.DocEngine.SupplierId();
-            string sceneDocDir = Order._pluginWord.DocEngine.SceneDocDir;
-            return Path.Combine(sceneDocDir, KD.Plugin.Word.Config.Const.SupplierOrderDirName, supplierId + KD.IO.File.Extension.Pdf);
-        }
-        private void ManagePdfFile(int supplierRank)
-        {
-            string pdfFlagState = this.CurrentAppli.SupplierGetInfo(supplierRank, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-
-            if (pdfFlagState == KD.StringTools.Const.One)
-            {
-                //    bool bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, KD.StringTools.Const.One, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-                string supplierFilePath = this.GetSupplierFilePath();
-                this.CopySupplierFile(supplierFilePath);
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("Afin de générer le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + Environment.NewLine +
-                    "Veuillez sélectionner 'Fichier PDF joint' dans votre fournisseurs", "Information");
-            }
-            //bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, pdfFlagState, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-        }
-        private void CopySupplierFile(string supplierFilePath)
-        {
-            if (File.Exists(supplierFilePath))
-            {
-                File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + 
-                    " n'a pas pu être généré.", "Information");
-            }
-        }
-
-        // ZIP
-        public void ZIPOrderFile()
-        {           
-            ZipArchiveEntry readmeEntry = null;
-            using (FileStream zipToOpen = new FileStream(Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName), FileMode.Create, FileAccess.ReadWrite))
-            {
-                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
-                {
-                    string EDIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName);
-                    this.EntryZipAndDeleteFile(readmeEntry, archive, EDIFile, OrderTransmission.OrderEDIFileName);                   
-
-                    if (MainForm.IsChoiceExportEGI)
-                    {
-                        string EGIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName);
-                        this.EntryZipAndDeleteFile(readmeEntry, archive, EGIFile, OrderTransmission.OrderEGIFileName);
-                    }
-                    if (MainForm.IsChoiceExportPlan)
-                    {
-                        for (int i = 1; i < 99; i++)
-                        {
-                            string JPGplanFile = Path.Combine(Order.orderDir, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
-                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGplanFile, OrderTransmission.PlanName + "-" + i + OrderTransmission.ExtensionJPG);
-                        }
-                    }
-                    if (MainForm.IsChoiceExportElevation)
-                    {
-                        for (int i = 1; i < 99; i++)
-                        {
-                            string JPGelevFile = Path.Combine(Order.orderDir, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
-                            this.EntryZipAndDeleteFile(readmeEntry, archive, JPGelevFile, OrderTransmission.ElevName + "-" + i + OrderTransmission.ExtensionJPG);
-                        }
-                    }
-                    if (MainForm.IsChoiceExportOrder)
-                    {
-                        string OrderFile = Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
-                        this.EntryZipAndDeleteFile(readmeEntry, archive, OrderFile, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
-                    }
-                }
-            }            
-        }
-        private void EntryZipAndDeleteFile(ZipArchiveEntry readmeEntry, ZipArchive archive, string file, string entryFile)
-        {           
-            if (File.Exists(file))
-            {
-                readmeEntry = archive.CreateEntryFromFile(file, entryFile);
-                File.Delete(file);
-            }
-        }
+        #endregion
     }
 
 }

@@ -14,7 +14,8 @@ namespace Eancom
         public const string E3035_SU = "SU";
         public const string E3035_BY = "BY";
         public const string E3035_DP = "DP";
-        public const string E3035_AB = "AB";
+        public const string E3035_AB = "AB"; //Not use yet
+        public const string E3035_MA = "MA"; //Not use yet
 
         private string _e3035;
         public string E3035
@@ -212,7 +213,7 @@ namespace Eancom
             return StructureEDI.NAD + Separator.DataGroup + this.E3035 + Separator.DataGroup + c082.Add() + c080.Add() + c059.Add() +
                 this.E3164 + Separator.DataGroup + Separator.DataGroup + this.E3251 + Separator.DataGroup + this.E3207 + Separator.EndLine;
         }
-        public string Add_BY()
+        public string Add_BY(int seg)
         {
             _e3035 = Eancom.NAD.E3035_BY;            
             _e3164 = _orderInformations.GetRetailerCity();
@@ -236,11 +237,11 @@ namespace Eancom
                 c082.E3055 = Eancom.NAD.C082.E3055_91;
             }
 
-            OrderWrite.segmentNumberBetweenUNHandUNT += 1;
+            OrderWrite.segmentNumberBetweenUNHandUNT += seg;
             return StructureEDI.NAD + Separator.DataGroup + this.E3035 + Separator.DataGroup + c082.Add() + c080.Add() + c059.Add() +
                 this.E3164 + Separator.DataGroup + Separator.DataGroup + this.E3251 + Separator.DataGroup + this.E3207 + Separator.EndLine;
         }
-        public string Add_Delivery_DP()
+        public string Add_Delivery_DP(int seg)
         {
             _e3035 = Eancom.NAD.E3035_DP;
 
@@ -267,7 +268,7 @@ namespace Eancom
                     c082.E3055 = Eancom.NAD.C082.E3055_91;
                 }
 
-                OrderWrite.segmentNumberBetweenUNHandUNT += 1;
+                OrderWrite.segmentNumberBetweenUNHandUNT += seg;
                 return StructureEDI.NAD + Separator.DataGroup + this.E3035 + Separator.DataGroup + c082.Add() + c080.Add() + c059.Add() +
                     this.E3164 + Separator.DataGroup + Separator.DataGroup + this.E3251 + Separator.DataGroup + this.E3207 + Separator.EndLine;
             }
@@ -300,6 +301,17 @@ namespace Eancom
             }
 
             return null;
+        }
+
+        //If delivery adress is different of buyer adress
+        //Be careful to don't add a segement line number (0)
+        public bool IsBYequalDDP() 
+        {
+            if (this.Add_BY(0).Equals(this.Add_Delivery_DP(0)))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
