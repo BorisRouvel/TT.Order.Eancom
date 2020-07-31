@@ -60,7 +60,7 @@ namespace Eancom
     public class FileEDI
     {
         #region /!\ Constantes
-        private const string IniOrderFileName = "orders.ini";
+        public const string IniOrderFileName = "orders.ini";
         private const string EANCOMPAIRINGTABLES = "EANCOM_PAIRINGTABLES";
 
         private const string generalSection = "GENERAL";
@@ -117,7 +117,7 @@ namespace Eancom
         private readonly OrderInformations _orderInformationsFromArticles = null;
         public string appairingCatalogFileName = String.Empty;
 
-        public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, IniOrderFileName));
+        public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
         private KD.CsvHelper.CsvFileReader csvFileReader = null;
         private KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
 

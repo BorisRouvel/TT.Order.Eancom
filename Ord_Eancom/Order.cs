@@ -41,52 +41,83 @@ namespace Ord_Eancom
         public bool ProcessOrder(int callParamsBlock)
         {
             _pluginWord = new KD.Plugin.Word.Plugin();
-          
+           
             string generateOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.GenerateOrder);
 
             if (!String.IsNullOrEmpty(generateOrder))
             {
                 bool.TryParse(generateOrder, out bool isGenerateOrder);
-
+               
                 if (isGenerateOrder)
-                {
+                {                    
                     orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-                    Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+                   
+                    Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);                   
+                    KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
 
-                    MainForm.EmailTo = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey);
-                    MainForm.EmailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey);
-
-                    string recipientAdress = MainForm.EmailTo; // "commande-EDI@discac.fr, commandes@discac.fr, ETL@discac.fr";
-
-                    if (!String.IsNullOrEmpty(recipientAdress))
-                    {
-                        this.SendMail(recipientAdress);                        
+                    MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey);
+                    MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey);
+                   
+                    string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr, commandes@discac.fr, ETL@discac.fr";
+                    
+                    if (!String.IsNullOrEmpty(recipientAddresses))
+                    {                       
+                        this.SendMail(recipientAddresses);
+                        return true;
                     }                    
                 }               
             }
+            
+            MessageBox.Show("La commande n'a pas été généré.");
+          
             return true;
         }
 
-        private void SendMail(string recipientAdress)
-        {
+        private void SendMail(string recipientAddresses)
+        {           
             string ccAdress = MainForm.EmailCc;
             string customerNumber = orderInformations.GetRetailerGLN();
             string commissiontNumber = orderInformations.GetCommissionNumber();
             string softWareVersion = orderInformations.GetNameAndVersionSoftware();
             string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);
-
+           
             DialogResult dialogResult = MessageBox.Show("Voulez-vous envoyer la commande ?", "InSitu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (dialogResult == DialogResult.Yes)
             {
-                bool bSend = this.CurrentAppli.EmailSend(String.Empty, //Contact name if exist
-                                                        recipientAdress,
-                                                        ccAdress, //cc
-                                                        OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
-                                                        String.Empty, //Body message
-                                                        attachedFilesPathsList, //AttachedFilesPathsList
-                                                        String.Empty, //AttachedFilesNamesList
-                                                        true); // show dialog
+                string[] recipientsAddress = recipientAddresses.Split(KD.CharTools.Const.SemiColon);
+                string recipientAddress = String.Empty;
+                string recipientName = String.Empty;
+
+                System.Net.Mail.MailAddressCollection mailAddresses = new System.Net.Mail.MailAddressCollection();
+
+                foreach (string address in recipientsAddress)
+                {
+                    //System.Net.Mail.MailAddress mailAddress = new System.Net.Mail.MailAddress(address);
+
+                    //recipientName += mailAddress.DisplayName + KD.StringTools.Const.WhiteSpace;
+                    recipientAddress += "<" + address + ">" + KD.CharTools.Const.SemiColon;//"Name" + KD.CharTools.Const.SemiColon +
+                    
+                }
+                
+                recipientAddress = recipientAddress.TrimEnd(KD.CharTools.Const.SemiColon);
+
+                //System.Net.Mail.MailMessage mailMessage = new System.Net.Mail.MailMessage("moi@gmail.com", recipientAddress);
+
+                //string mailTo = mailMessage.To.ToString();
+                //mailAddresses.Add(recipientAddress);
+                //System.Net.Mail.MailAddress mailAddress = new System.Net.Mail.MailAddress(recipientAddress);
+               
+               
+
+                bool bSend = this.CurrentAppli.EmailSend(recipientName, //Contact name if exist
+                                                         recipientAddress,
+                                                         ccAdress, //cc
+                                                         OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
+                                                         String.Empty, //Body message
+                                                         attachedFilesPathsList, //AttachedFilesPathsList
+                                                         String.Empty, //AttachedFilesNamesList
+                                                         true); // show dialog
             }
         }
 

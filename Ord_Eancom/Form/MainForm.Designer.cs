@@ -118,7 +118,6 @@
             // ChoiceEGI_CHB
             // 
             this.ChoiceEGI_CHB.AutoSize = true;
-            this.ChoiceEGI_CHB.Enabled = false;
             this.ChoiceEGI_CHB.Location = new System.Drawing.Point(6, 19);
             this.ChoiceEGI_CHB.Name = "ChoiceEGI_CHB";
             this.ChoiceEGI_CHB.Size = new System.Drawing.Size(44, 17);
