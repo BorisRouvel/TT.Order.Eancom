@@ -173,34 +173,59 @@ namespace Eancom
             List<string> FTXCommentList = new List<string>();            
             _e4451 = Eancom.FTX_H.E4451_AAI + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
 
+            //Mandatory delivery informations
+            //Get text in texbox box from windows form, max lenght = ?
+            string mandatoryText = _orderInformations.ReleaseChar(MainForm.MandatoryDeliveryInformation);
+            FTXCommentList.AddRange(this.SetAddComment(mandatoryText, 0, 2, true)); //Get the 2 first line
+
+            //Other comment from menu scene comment
             string commentScene = _orderInformations.GetCommentScene();
-            if (!String.IsNullOrEmpty(commentScene))
-            {                
-                string truncatedCommentScene = string.Empty;
-                commentScene = commentScene.Replace("\r\n", String.Empty);
+            FTXCommentList.AddRange(this.SetAddComment(commentScene, 2, OrderConstants.CommentSceneLinesMax, false));
+      
+            return FTXCommentList;
+        }
+        private List<string> SetAddComment(string text, int begin, int end, bool isMandatory)
+        {
+            List<string> FTXCommentList = new List<string>();
+
+            if (!String.IsNullOrEmpty(text))
+            {
                 int start = 0;
-                for (int line = 0; line < OrderConstants.CommentSceneLinesMax; line++)
+                string truncatedText = string.Empty;
+                text = text.Replace(KD.StringTools.Const.CrLf, String.Empty);
+                
+                for (int line = begin; line < end; line++)
                 {
-                    if (OrderConstants.CommentSceneCharactersPerLineMax + start > commentScene.Length)
-                    {
-                        int len = (commentScene.Length - (OrderConstants.CommentSceneCharactersPerLineMax + start));
-                        truncatedCommentScene = commentScene.Substring(start, (OrderConstants.CommentSceneCharactersPerLineMax + len));
-                        c108 = new C108(truncatedCommentScene);
+                    if (OrderConstants.CommentSceneCharactersPerLineMax + start > text.Length)
+                    {                        
+                        int len = (text.Length - (OrderConstants.CommentSceneCharactersPerLineMax + start));
+                        truncatedText = text.Substring(start, (OrderConstants.CommentSceneCharactersPerLineMax + len));
+                        truncatedText = this.IsMandatoryAddBracket(isMandatory, truncatedText);
+                        c108 = new C108(truncatedText);
 
                         OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                        FTXCommentList.Add(StructureEDI.FTX_H + Separator.DataGroup + this.E4451 + c108.Add() + Separator.DataGroup + this.E3453 + Separator.EndLine); 
-
+                        FTXCommentList.Add(StructureEDI.FTX_H + Separator.DataGroup + this.E4451 + c108.Add() + Separator.DataGroup + this.E3453 + Separator.EndLine);
                         break;
-                    }
-                    truncatedCommentScene = commentScene.Substring(start, OrderConstants.CommentSceneCharactersPerLineMax);
-                    c108 = new C108(truncatedCommentScene);
+                    }                   
+                    truncatedText = text.Substring(start, OrderConstants.CommentSceneCharactersPerLineMax);
+                    truncatedText = this.IsMandatoryAddBracket(isMandatory, truncatedText);                   
+                    c108 = new C108(truncatedText);
 
                     OrderWrite.segmentNumberBetweenUNHandUNT += 1;
                     FTXCommentList.Add(StructureEDI.FTX_H + Separator.DataGroup + this.E4451 + c108.Add() + Separator.DataGroup + this.E3453 + Separator.EndLine);
                     start += OrderConstants.CommentSceneCharactersPerLineMax;
-                }
+                }                
             }
+
             return FTXCommentList;
+        }
+        private string IsMandatoryAddBracket(bool isMandatory, string text)
+        {
+            if (isMandatory)
+            {
+                return OrderTransmission.HeaderTagMandatoryDeliveryInformation + text;
+            }
+            return text;
         }
     }
 }

@@ -9,11 +9,6 @@ using Ord_Eancom;
 
 namespace Eancom
 {    
-    public class Constants
-    {
-        public const string Version = "EANCOM_ORDER_V2.03";
-    }
-
     public class Separator
     {
         public static readonly string NewLine = Environment.NewLine;
@@ -118,34 +113,37 @@ namespace Eancom
         public string appairingCatalogFileName = String.Empty;
 
         public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
-        private KD.CsvHelper.CsvFileReader csvFileReader = null;
+        public KD.CsvHelper.CsvFileReader csvPairingFileReader = null;
         private KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
 
+        private bool OpenCsvPairingFile()
+        {
+            try
+            {
+                bool ok = this.CurrentAppli.Catalog.FileExportResourceFromName(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()), true);
+                csvPairingFileReader = new KD.CsvHelper.CsvFileReader(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()));
+
+                while (!csvPairingFileReader.EndOfStream)
+                {
+                    rowList.Add(csvPairingFileReader.ReadLine());
+                }                
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Fichier introuvable: " + Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()), "Informations", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+            return true;
+        }
         public FileEDI(AppliComponent appli, string supplierName, OrderInformations orderInformationsFromArticles)
         {
             this._currentAppli = appli;
             this._supplierName = supplierName;
             this._orderInformationsFromArticles = orderInformationsFromArticles;
-            this.appairingCatalogFileName = this._orderInformationsFromArticles.GetPairingCatalogFileName(this.CsvFileName());
+            this.appairingCatalogFileName = this._orderInformationsFromArticles.GetPairingCatalogFileName(this.CsvPairingFileName());
             rowList.Clear();
 
-            try
-            {
-                bool ok = this.CurrentAppli.Catalog.FileExportResourceFromName(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvFileName()), true);
-                
-                csvFileReader = new KD.CsvHelper.CsvFileReader(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvFileName()));
-
-                while (!csvFileReader.EndOfStream)
-                {
-                    rowList.Add(csvFileReader.ReadLine());
-                }
-                
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Fichier introuvable: " + Path.Combine(this.CurrentAppli.CatalogDir, this.CsvFileName()), "Informations", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            
+            this.OpenCsvPairingFile();            
         }        
 
         public string GetNextOrdersNumberHex()
@@ -161,7 +159,7 @@ namespace Eancom
             return valueHexa + valueHex;
         }
 
-        public string CsvFileName()
+        public string CsvPairingFileName()
         {
             return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
         }

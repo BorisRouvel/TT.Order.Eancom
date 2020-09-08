@@ -49,7 +49,7 @@ namespace Ord_Eancom
     {
         public const string ChoiceRetaillerDelivery = "IsChoiceRetaillerDelivery";
         public const string ChoiceCustomerDelivery = "IsChoiceCustomerDelivery";
-        public const string InformationInstallation = "InformationInstallation";
+        public const string MandatoryDeliveryInformation = "MandatoryDeliveryInformation";
         public const string ChoiceExportEGI = "IsChoiceExportEGI";
         public const string ChoiceExportPlan = "IsChoiceExportPlan";
         public const string ChoiceExportElevation = "IsChoiceExportElevation";
@@ -103,12 +103,12 @@ namespace Ord_Eancom
         public const string ExtensionTXT = KD.IO.File.Extension.Txt;
         public const string ExtensionJPG = KD.IO.File.Extension.Jpg;
         public const string ExtensionPDF = KD.IO.File.Extension.Pdf;
-
-        //public const string VersionOrderDataFormat = "EANCOM_ORDER_V2.03"; //i must get the string in IDM
+       
+        public const string VersionEancomOrder = "EANCOM_ORDER_V2.03";
         public const string VersionEdigraph = "EDIGRAPH_V1.50";
         public const string HeaderSubject = "EDI-ORDER";
 
-
+        public const string HeaderTagMandatoryDeliveryInformation = "{}";
     }
 
     public class OrderInformations
@@ -237,6 +237,10 @@ namespace Ord_Eancom
                 }                    
             }
             return null;
+        }
+        public string GetOrderDir()
+        {
+            return this.CurrentAppli.GetCallParamsInfoDirect(CallParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
         }
         public string GetSupplierName()
         {
@@ -741,7 +745,7 @@ namespace Ord_Eancom
 
     public class OrderWrite
     {
-        Encoding utf8Encoding = Encoding.UTF8;
+        Encoding encodingOrder = Encoding.Default;
         static List<string> structureLineEDIList = new List<string>();
         static List<string> structureLineEGIList = new List<string>();
         readonly OrderInformations _orderInformations = null;
@@ -913,12 +917,12 @@ namespace Ord_Eancom
         private void WriteLineInFileEDI(FileStream fs, string text)
         {
             // Convert the string into a byte array.
-            byte[] unicodeBytes = utf8Encoding.GetBytes(text);
+            byte[] encodingBytes = encodingOrder.GetBytes(text);
 
             // Perform the conversion from one encoding to the other.
-            byte[] uft8Bytes = Encoding.Convert(utf8Encoding, utf8Encoding, unicodeBytes);
+            byte[] encodingConvertByte = Encoding.Convert(encodingOrder, encodingOrder, encodingBytes);
 
-            fs.Write(uft8Bytes, 0, utf8Encoding.GetByteCount(text));
+            fs.Write(encodingConvertByte, 0, encodingOrder.GetByteCount(text));
         }
 
         public void BuildEDI(Articles articles)
@@ -1346,7 +1350,7 @@ namespace Ord_Eancom
         }
         private void WriteLineInFileEGI(FileStream fs, string text)
         {
-            fs.Write(utf8Encoding.GetBytes(text), 0, utf8Encoding.GetByteCount(text));
+            fs.Write(encodingOrder.GetBytes(text), 0, encodingOrder.GetByteCount(text));
         }
 
         public void BuildEGI(Articles articles)

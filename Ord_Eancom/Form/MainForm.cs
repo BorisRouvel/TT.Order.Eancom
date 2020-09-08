@@ -103,18 +103,18 @@ namespace Ord_Eancom
             }
         }
 
-        //private static string _informationInstallation;
-        //public static string InformationInstallation
-        //{
-        //    get
-        //    {
-        //        return _informationInstallation;
-        //    }
-        //    set
-        //    {
-        //        _informationInstallation = value;
-        //    }
-        //}
+        private static string _mandatoryDeliveryInformation;
+        public static string MandatoryDeliveryInformation
+        {
+            get
+            {
+                return _mandatoryDeliveryInformation;
+            }
+            set
+            {
+                _mandatoryDeliveryInformation = value;
+            }
+        }
 
         private static string _emailTo;
         public static string EmailTo
@@ -142,12 +142,15 @@ namespace Ord_Eancom
             }
         }
 
+        OrderInformations _orderInformations = null;
+        string _supplierName = null;
 
-        public MainForm()
+        public MainForm(OrderInformations orderInformations)
         {
             InitializeComponent();
 
-            this.InitializeMembers();
+            _orderInformations = orderInformations;
+            this.InitializeMembers();            
         }
 
         // Event
@@ -160,7 +163,8 @@ namespace Ord_Eancom
             _isChoiceExportOrder = this.ChoiceOrder_CHB.Checked;
             _isChoiceRetaillerDelivery = this.RetaillerDelivery_RBN.Checked;
             _isChoiceCustomerDelivery = this.CustomerDelivery_RBN.Checked;
-            //_informationInstallation = String.Empty;
+            _mandatoryDeliveryInformation = String.Empty;
+            _supplierName = _orderInformations.GetSupplierName();
         }
         private bool IsChecked(Control control)
         {
@@ -208,7 +212,7 @@ namespace Ord_Eancom
         {
             string choiceRetaillerDelivery = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceRetaillerDelivery);
             string choiceCustomerDelivery = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceCustomerDelivery);
-            string informationInstallation = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.InformationInstallation);
+            string mandatoryDeliveryInformation = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.MandatoryDeliveryInformation);
             string choiceExportEGI = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportEGI);
             string choiceExportPlan = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportPlan);
             string choiceExportElevation = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportElevation);
@@ -217,7 +221,7 @@ namespace Ord_Eancom
 
             this.SetCheckedControl(this.RetaillerDelivery_RBN, choiceRetaillerDelivery);
             this.SetCheckedControl(this.CustomerDelivery_RBN, choiceCustomerDelivery);            
-            //this.InformationInstallation_TXB.Text = informationInstallation;
+            this.MandatoryDeliveryInformation_TBX.Text = mandatoryDeliveryInformation;
             this.SetCheckedControl(this.ChoiceEGI_CHB, choiceExportEGI);
             this.SetCheckedControl(this.ChoicePlan_CHB, choiceExportPlan);
             this.SetCheckedControl(this.ChoiceElevation_CHB, choiceExportElevation);
@@ -228,7 +232,7 @@ namespace Ord_Eancom
         {
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceRetaillerDelivery), OrderKey.ChoiceRetaillerDelivery);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceCustomerDelivery), OrderKey.ChoiceCustomerDelivery);
-            //Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.InformationInstallation), OrderKey.InformationInstallation);
+            Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.MandatoryDeliveryInformation), OrderKey.MandatoryDeliveryInformation);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportEGI), OrderKey.ChoiceExportEGI);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportPlan), OrderKey.ChoiceExportPlan);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportElevation), OrderKey.ChoiceExportElevation);
@@ -237,16 +241,16 @@ namespace Ord_Eancom
         }
         private void LoadInfoFromIni()
         {
-            _emailTo = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey);
+            _emailTo = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + _supplierName);
             this.EmailTo_TBX.Text = EmailTo;
 
-            _emailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey);
+            _emailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName);
             this.EmailCc_TBX.Text = EmailCc;
         }
         private void SaveInfoToIni()
-        {          
-            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey, EmailTo);
-            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey, EmailCc);           
+        {            
+            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + _supplierName, EmailTo);
+            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName, EmailCc);           
         }      
         private void UpdateForm()
         {
@@ -323,6 +327,11 @@ namespace Ord_Eancom
         private void EmailCc_TBX_TextChanged(object sender, EventArgs e)
         {
             _emailCc = this.EmailCc_TBX.Text;
+        }
+
+        private void MandatoryDeliveryInformation_TBX_TextChanged(object sender, EventArgs e)
+        {
+            _mandatoryDeliveryInformation = this.MandatoryDeliveryInformation_TBX.Text;
         }
     }
 }

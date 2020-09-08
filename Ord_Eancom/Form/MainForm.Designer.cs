@@ -44,9 +44,12 @@
             this.EmailTo_LAB = new System.Windows.Forms.Label();
             this.EmailCc_TBX = new System.Windows.Forms.TextBox();
             this.EmailTo_TBX = new System.Windows.Forms.TextBox();
+            this.MandatoryDeliveryInformation_TBX = new System.Windows.Forms.TextBox();
+            this.MandatoryDeliveryInformation_GBX = new System.Windows.Forms.GroupBox();
             this.MainFrame.SuspendLayout();
             this.Delivery_GBX.SuspendLayout();
             this.AdressEmail_GBX.SuspendLayout();
+            this.MandatoryDeliveryInformation_GBX.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainFrame
@@ -128,7 +131,7 @@
             // 
             // Ok_BTN
             // 
-            this.Ok_BTN.Location = new System.Drawing.Point(124, 170);
+            this.Ok_BTN.Location = new System.Drawing.Point(124, 240);
             this.Ok_BTN.Name = "Ok_BTN";
             this.Ok_BTN.Size = new System.Drawing.Size(75, 23);
             this.Ok_BTN.TabIndex = 1;
@@ -139,7 +142,7 @@
             // version_LNK
             // 
             this.version_LNK.AutoSize = true;
-            this.version_LNK.Location = new System.Drawing.Point(9, 175);
+            this.version_LNK.Location = new System.Drawing.Point(12, 245);
             this.version_LNK.Name = "version_LNK";
             this.version_LNK.Size = new System.Drawing.Size(13, 13);
             this.version_LNK.TabIndex = 12;
@@ -230,13 +233,34 @@
             this.EmailTo_TBX.TabIndex = 2;
             this.EmailTo_TBX.TextChanged += new System.EventHandler(this.EmailTo_TBX_TextChanged);
             // 
+            // MandatoryDeliveryInformation_TBX
+            // 
+            this.MandatoryDeliveryInformation_TBX.Location = new System.Drawing.Point(6, 19);
+            this.MandatoryDeliveryInformation_TBX.MaxLength = 120;
+            this.MandatoryDeliveryInformation_TBX.Multiline = true;
+            this.MandatoryDeliveryInformation_TBX.Name = "MandatoryDeliveryInformation_TBX";
+            this.MandatoryDeliveryInformation_TBX.Size = new System.Drawing.Size(288, 39);
+            this.MandatoryDeliveryInformation_TBX.TabIndex = 17;
+            this.MandatoryDeliveryInformation_TBX.TextChanged += new System.EventHandler(this.MandatoryDeliveryInformation_TBX_TextChanged);
+            // 
+            // MandatoryDeliveryInformation_GBX
+            // 
+            this.MandatoryDeliveryInformation_GBX.Controls.Add(this.MandatoryDeliveryInformation_TBX);
+            this.MandatoryDeliveryInformation_GBX.Location = new System.Drawing.Point(12, 170);
+            this.MandatoryDeliveryInformation_GBX.Name = "MandatoryDeliveryInformation_GBX";
+            this.MandatoryDeliveryInformation_GBX.Size = new System.Drawing.Size(300, 64);
+            this.MandatoryDeliveryInformation_GBX.TabIndex = 18;
+            this.MandatoryDeliveryInformation_GBX.TabStop = false;
+            this.MandatoryDeliveryInformation_GBX.Text = "Impératif de livraison :";
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Ok_BTN;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(324, 200);
+            this.ClientSize = new System.Drawing.Size(324, 271);
             this.ControlBox = false;
+            this.Controls.Add(this.MandatoryDeliveryInformation_GBX);
             this.Controls.Add(this.AdressEmail_GBX);
             this.Controls.Add(this.Delivery_GBX);
             this.Controls.Add(this.version_LNK);
@@ -252,6 +276,8 @@
             this.Delivery_GBX.PerformLayout();
             this.AdressEmail_GBX.ResumeLayout(false);
             this.AdressEmail_GBX.PerformLayout();
+            this.MandatoryDeliveryInformation_GBX.ResumeLayout(false);
+            this.MandatoryDeliveryInformation_GBX.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -275,5 +301,7 @@
         private System.Windows.Forms.Label EmailTo_LAB;
         private System.Windows.Forms.TextBox EmailCc_TBX;
         private System.Windows.Forms.TextBox EmailTo_TBX;
+        private System.Windows.Forms.TextBox MandatoryDeliveryInformation_TBX;
+        private System.Windows.Forms.GroupBox MandatoryDeliveryInformation_GBX;
     }
 }

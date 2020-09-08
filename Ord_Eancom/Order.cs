@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
+using System.Net.Mail;
 
 // ---------------------------------------
 // for KD self registration via RegAsm
 using System.Runtime.InteropServices;
 // ---------------------------------------
 using KD.Model;
-using KD.Analysis;
 
 using Eancom;
 
 
 namespace Ord_Eancom
 {
-    
     public class Order : KD.Plugin.PluginBase
     {
         OrderInformations orderInformations = null;
@@ -41,7 +40,8 @@ namespace Ord_Eancom
         public bool ProcessOrder(int callParamsBlock)
         {
             _pluginWord = new KD.Plugin.Word.Plugin();
-           
+            orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+
             string generateOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.GenerateOrder);
 
             if (!String.IsNullOrEmpty(generateOrder))
@@ -49,16 +49,15 @@ namespace Ord_Eancom
                 bool.TryParse(generateOrder, out bool isGenerateOrder);
                
                 if (isGenerateOrder)
-                {                    
-                    orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
-                   
-                    Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);                   
+                {
+                    string supplierName = orderInformations.GetSupplierName();
+                    Order.orderDir = orderInformations.GetOrderDir();                   
                     KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
 
-                    MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey);
-                    MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey);
+                    MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + supplierName);
+                    MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + supplierName);
                    
-                    string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr, commandes@discac.fr, ETL@discac.fr";
+                    string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr;commandes@discac.fr;ETL@discac.fr";
                     
                     if (!String.IsNullOrEmpty(recipientAddresses))
                     {                       
@@ -68,8 +67,7 @@ namespace Ord_Eancom
                 }               
             }
             
-            MessageBox.Show("La commande n'a pas été généré.");
-          
+            MessageBox.Show("La commande n'a pas été généré.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);          
             return true;
         }
 
@@ -79,38 +77,28 @@ namespace Ord_Eancom
             string customerNumber = orderInformations.GetRetailerGLN();
             string commissiontNumber = orderInformations.GetCommissionNumber();
             string softWareVersion = orderInformations.GetNameAndVersionSoftware();
-            string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);
-           
+            string attachedFilesPathsList = ""; // Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);           
+            
+
             DialogResult dialogResult = MessageBox.Show("Voulez-vous envoyer la commande ?", "InSitu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (dialogResult == DialogResult.Yes)
             {
-                string[] recipientsAddress = recipientAddresses.Split(KD.CharTools.Const.SemiColon);
-                string recipientAddress = String.Empty;
-                string recipientName = String.Empty;
-
-                System.Net.Mail.MailAddressCollection mailAddresses = new System.Net.Mail.MailAddressCollection();
+                string[] recipientsAddress = recipientAddresses.Split(KD.CharTools.Const.SemiColon);                
+                string recipientAddress = String.Empty;                
 
                 foreach (string address in recipientsAddress)
                 {
-                    //System.Net.Mail.MailAddress mailAddress = new System.Net.Mail.MailAddress(address);
-
-                    //recipientName += mailAddress.DisplayName + KD.StringTools.Const.WhiteSpace;
-                    recipientAddress += "<" + address + ">" + KD.CharTools.Const.SemiColon;//"Name" + KD.CharTools.Const.SemiColon +
-                    
+                    recipientAddress += address;// + KD.CharTools.Const.SemiColon; //   "<" +      + ">"     
                 }
-                
-                recipientAddress = recipientAddress.TrimEnd(KD.CharTools.Const.SemiColon);
 
-                //System.Net.Mail.MailMessage mailMessage = new System.Net.Mail.MailMessage("moi@gmail.com", recipientAddress);
+                //recipientAddress = recipientAddress.TrimEnd(KD.CharTools.Const.SemiColon);
 
-                //string mailTo = mailMessage.To.ToString();
-                //mailAddresses.Add(recipientAddress);
-                //System.Net.Mail.MailAddress mailAddress = new System.Net.Mail.MailAddress(recipientAddress);
-               
-               
+                MailAddress mailAddress = new MailAddress(recipientAddresses);
 
-                bool bSend = this.CurrentAppli.EmailSend(recipientName, //Contact name if exist
+                string recipientName = mailAddress.User;
+
+                bool bSend = this.CurrentAppli.EmailSend("", //Contact name if exist
                                                          recipientAddress,
                                                          ccAdress, //cc
                                                          OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
@@ -118,6 +106,8 @@ namespace Ord_Eancom
                                                          attachedFilesPathsList, //AttachedFilesPathsList
                                                          String.Empty, //AttachedFilesNamesList
                                                          true); // show dialog
+
+                        
             }
         }
 
@@ -136,14 +126,15 @@ namespace Ord_Eancom
         {
             _pluginWord = new KD.Plugin.Word.Plugin();
             _pluginWord.InitializeAll(callParamsBlock);
-
-            Order.orderDir = this.CurrentAppli.GetCallParamsInfoDirect(callParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+            
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+            Order.orderDir = orderInformations.GetOrderDir();
+
             Articles articles = SupplierArticleValidInScene();
 
             if (this.IsGenerateOrders(articles))
             {
-                this.mainForm = new MainForm();
+                this.mainForm = new MainForm(orderInformations);
                 this.Main(callParamsBlock, articles);
 
                 //MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);                          
@@ -204,6 +195,12 @@ namespace Ord_Eancom
             orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
             fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
+            if (fileEDI.csvPairingFileReader == null)
+            {
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                return;
+            }
+
             orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
 
             if (MainForm.IsChoiceExportEGI)

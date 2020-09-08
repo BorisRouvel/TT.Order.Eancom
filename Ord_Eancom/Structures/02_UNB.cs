@@ -205,7 +205,7 @@ namespace Eancom
             _e0020 = Order.orderFile + Separator.DataGroup + Separator.DataGroup;
             _e0026 = _orderInformations.GetNameAndVersionSoftware() + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
 
-            string EDIversion = Eancom.Constants.Version; // _fileEDI.Order_();
+            string EDIversion = OrderTransmission.VersionEancomOrder; // _fileEDI.Order_();
             if (String.IsNullOrEmpty(EDIversion))
             {
                 EDIversion = _fileEDI.Orders();
