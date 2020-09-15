@@ -51,17 +51,20 @@ namespace Ord_Eancom
                 if (isGenerateOrder)
                 {
                     string supplierName = orderInformations.GetSupplierName();
+                    string retaillerNumber = orderInformations.GetRetailerNumber();
                     Order.orderDir = orderInformations.GetOrderDir();                   
                     KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
 
                     MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + supplierName);
                     MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + supplierName);
-                   
+                    MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.mandatoryDeliveryInformation + retaillerNumber);
+
                     string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr;commandes@discac.fr;ETL@discac.fr";
-                    
+                    string ccAdress = MainForm.EmailCc;
+
                     if (!String.IsNullOrEmpty(recipientAddresses))
                     {                       
-                        this.SendMail(recipientAddresses);
+                        this.SendMail(recipientAddresses, ccAdress);
                         return true;
                     }                    
                 }               
@@ -71,47 +74,30 @@ namespace Ord_Eancom
             return true;
         }
 
-        private void SendMail(string recipientAddresses)
-        {           
-            string ccAdress = MainForm.EmailCc;
+        private void SendMail(string recipientAddresses, string ccAdress)
+        {            
             string customerNumber = orderInformations.GetRetailerGLN();
             string commissiontNumber = orderInformations.GetCommissionNumber();
             string softWareVersion = orderInformations.GetNameAndVersionSoftware();
-            string attachedFilesPathsList = ""; // Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);           
+            string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);           
             
 
             DialogResult dialogResult = MessageBox.Show("Voulez-vous envoyer la commande ?", "InSitu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (dialogResult == DialogResult.Yes)
             {
-                string[] recipientsAddress = recipientAddresses.Split(KD.CharTools.Const.SemiColon);                
-                string recipientAddress = String.Empty;                
-
-                foreach (string address in recipientsAddress)
-                {
-                    recipientAddress += address;// + KD.CharTools.Const.SemiColon; //   "<" +      + ">"     
-                }
-
-                //recipientAddress = recipientAddress.TrimEnd(KD.CharTools.Const.SemiColon);
-
-                MailAddress mailAddress = new MailAddress(recipientAddresses);
-
-                string recipientName = mailAddress.User;
-
-                bool bSend = this.CurrentAppli.EmailSend("", //Contact name if exist
-                                                         recipientAddress,
-                                                         ccAdress, //cc
-                                                         OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
-                                                         String.Empty, //Body message
-                                                         attachedFilesPathsList, //AttachedFilesPathsList
-                                                         String.Empty, //AttachedFilesNamesList
-                                                         true); // show dialog
-
-                        
-            }
+               
+                    bool bSend = this.CurrentAppli.EmailSend("", //Contact name if exist
+                                                             recipientAddresses,
+                                                             ccAdress, //cc
+                                                             OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
+                                                             String.Empty, //Body message
+                                                             attachedFilesPathsList, //AttachedFilesPathsList
+                                                             String.Empty, //AttachedFilesNamesList
+                                                             true); // show dialog
+            }           
         }
-
-
+       
 
 
         /// <summary>
@@ -136,8 +122,7 @@ namespace Ord_Eancom
             {
                 this.mainForm = new MainForm(orderInformations);
                 this.Main(callParamsBlock, articles);
-
-                //MessageBox.Show("Terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);                          
+              
                 Cursor.Current = Cursors.Arrow;
                 return true;
             }            
@@ -189,46 +174,58 @@ namespace Ord_Eancom
         {
             this.mainForm.ShowDialog();
 
-            OrderWrite.segmentNumberBetweenUNHandUNT = 0;
-            RFF_A.refPosList.Clear();                   
-           
-            orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
+            if (!String.IsNullOrEmpty(MainForm.EmailTo))
+            {
+                if (!this.IsMailAddressValid(MainForm.EmailTo) || !this.IsMailAddressValid(MainForm.EmailCc))
+                {
+                    MessageBox.Show("Adresse mail non valide.", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Main(callParamsBlock, articles);                  
+                }               
+            }        
 
-            fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
-            if (fileEDI.csvPairingFileReader == null)
+            if (!MainForm.Cancel)
             {
-                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
-                return;
-            }
+                OrderWrite.segmentNumberBetweenUNHandUNT = 0;
+                RFF_A.refPosList.Clear();
 
-            orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
+                orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
-            if (MainForm.IsChoiceExportEGI)
-            {
-                orderWrite.BuildEGI(articles);
-                orderWrite.EGIOrderFile();
-            }
-            if (MainForm.IsChoiceExportPlan)
-            {
-                orderWrite.BuildPlan();
-            }
-            if (MainForm.IsChoiceExportElevation)
-            {
-                orderWrite.BuildElevation();
-            }
-            if (MainForm.IsChoiceExportPerspective)
-            {
-                orderWrite.BuildPerspective();
-            }
-            if (MainForm.IsChoiceExportOrder)
-            {
-                orderWrite.BuildOrder();
-            }
+                fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
+                if (fileEDI.csvPairingFileReader == null)
+                {
+                    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                    return;
+                }
 
-            orderWrite.BuildEDI(articles);
-            orderWrite.EDIOrderFileStream();
+                orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
 
-            orderWrite.ZIPOrderFile();
+                if (MainForm.IsChoiceExportEGI)
+                {
+                    orderWrite.BuildEGI(articles);
+                    orderWrite.EGIOrderFile();
+                }
+                if (MainForm.IsChoiceExportPlan)
+                {
+                    orderWrite.BuildPlan();
+                }
+                if (MainForm.IsChoiceExportElevation)
+                {
+                    orderWrite.BuildElevation();
+                }
+                if (MainForm.IsChoiceExportPerspective)
+                {
+                    orderWrite.BuildPerspective();
+                }
+                if (MainForm.IsChoiceExportOrder)
+                {
+                    orderWrite.BuildOrder();
+                }
+
+                orderWrite.BuildEDI(articles);
+                orderWrite.EDIOrderFileStream();
+
+                orderWrite.ZIPOrderFile();
+            }
         }
       
         private int GetObjectNbFromHeading()
@@ -236,7 +233,6 @@ namespace Ord_Eancom
             return this.CurrentAppli.Scene.HeadingGetObjectsNb((int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false);
         }
      
-
         private bool IsSceneComplete(Articles articles)
         {
             List<string> catalogsList = this.CatalogsByManufacturerValidList();
@@ -276,6 +272,26 @@ namespace Ord_Eancom
                 }
             }
             return list;
+        }
+        private bool IsMailAddressValid(string addresses)
+        {
+            //this test is for copy adress valid when empty. For the principal address the test is alreday do.
+            if (String.IsNullOrEmpty(addresses))
+            {
+                return true;
+            }
+
+            addresses = addresses.Replace(KD.CharTools.Const.Comma, KD.CharTools.Const.SemiColon);
+            string[] recipientsAddress = addresses.Split(KD.CharTools.Const.SemiColon);
+
+            foreach (string address in recipientsAddress)
+            {
+                if (!address.Contains("@"))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 

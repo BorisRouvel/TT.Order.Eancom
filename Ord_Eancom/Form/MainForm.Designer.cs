@@ -46,6 +46,7 @@
             this.EmailTo_TBX = new System.Windows.Forms.TextBox();
             this.MandatoryDeliveryInformation_TBX = new System.Windows.Forms.TextBox();
             this.MandatoryDeliveryInformation_GBX = new System.Windows.Forms.GroupBox();
+            this.Cancel_BTN = new System.Windows.Forms.Button();
             this.MainFrame.SuspendLayout();
             this.Delivery_GBX.SuspendLayout();
             this.AdressEmail_GBX.SuspendLayout();
@@ -131,7 +132,7 @@
             // 
             // Ok_BTN
             // 
-            this.Ok_BTN.Location = new System.Drawing.Point(124, 240);
+            this.Ok_BTN.Location = new System.Drawing.Point(83, 240);
             this.Ok_BTN.Name = "Ok_BTN";
             this.Ok_BTN.Size = new System.Drawing.Size(75, 23);
             this.Ok_BTN.TabIndex = 1;
@@ -253,13 +254,26 @@
             this.MandatoryDeliveryInformation_GBX.TabStop = false;
             this.MandatoryDeliveryInformation_GBX.Text = "Impératif de livraison :";
             // 
+            // Cancel_BTN
+            // 
+            this.Cancel_BTN.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.Cancel_BTN.Location = new System.Drawing.Point(164, 240);
+            this.Cancel_BTN.Name = "Cancel_BTN";
+            this.Cancel_BTN.Size = new System.Drawing.Size(75, 23);
+            this.Cancel_BTN.TabIndex = 19;
+            this.Cancel_BTN.Text = "Annuler";
+            this.Cancel_BTN.UseVisualStyleBackColor = true;
+            this.Cancel_BTN.Click += new System.EventHandler(this.Cancel_BTN_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Ok_BTN;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.Cancel_BTN;
             this.ClientSize = new System.Drawing.Size(324, 271);
             this.ControlBox = false;
+            this.Controls.Add(this.Cancel_BTN);
             this.Controls.Add(this.MandatoryDeliveryInformation_GBX);
             this.Controls.Add(this.AdressEmail_GBX);
             this.Controls.Add(this.Delivery_GBX);
@@ -303,5 +317,6 @@
         private System.Windows.Forms.TextBox EmailTo_TBX;
         private System.Windows.Forms.TextBox MandatoryDeliveryInformation_TBX;
         private System.Windows.Forms.GroupBox MandatoryDeliveryInformation_GBX;
+        private System.Windows.Forms.Button Cancel_BTN;
     }
 }

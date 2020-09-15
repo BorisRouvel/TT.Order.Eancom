@@ -78,6 +78,8 @@ namespace Ord_Eancom
         public const string LeftAssemblyFinishType = "19";
         public const string RightAssemblyFinishType = "20";
 
+        public const double FrontDepth = 20.0;
+
         public const int ArticleSupplierId_InFile_Position = 0;
         public const int ArticleSerieNo_InFile_Position = 1;
         public const int ArticleEDPNumber_InFile_Position = 2;
@@ -415,12 +417,12 @@ namespace Ord_Eancom
         }
         public string GetRetailerGLN()
         {
-            string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteCode(" + supplierID + ")"));
+            string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.CodeClient(" + supplierID + ")"));
             return this.ReleaseChar(text);
-        }
+        }       
         public string GetRetailerNumber()
         {
-            string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.CodeClient(" + supplierID + ")"));
+            string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteCode(" + supplierID + ")"));
             return this.ReleaseChar(text);
         }
         public string GetRetailerName1()
@@ -1593,7 +1595,14 @@ namespace Ord_Eancom
                             {
                                 double angleFilerDepth = child.DimensionY;
                                 structureLineEGIList.Add(ArticleAngleFilerDimensionX(child.DimensionY));
-                                structureLineEGIList.Add(ArticleAngleDimensionY(article.DimensionY));
+
+                                double angleDimY = article.DimensionY;
+                                if (this.IsUnit(article))
+                                {
+                                    angleDimY -= OrderConstants.FrontDepth;
+                                }
+                                structureLineEGIList.Add(ArticleAngleDimensionY(angleDimY));
+
                                 dimY = child.DimensionX + article.DimensionY;
                                 break;
                             }
@@ -1602,6 +1611,11 @@ namespace Ord_Eancom
 
                     structureLineEGIList.Add(ArticleDimensionX(dimX));
                     structureLineEGIList.Add(ArticleDimensionZ(article.DimensionZ));
+
+                    if (this.IsUnit(article))
+                    {
+                        dimY -= OrderConstants.FrontDepth;
+                    }
                     structureLineEGIList.Add(ArticleDimensionY(dimY));
 
                     structureLineEGIList.Add(ArticleConstructionType(article.KeyRef));
@@ -1636,6 +1650,18 @@ namespace Ord_Eancom
                 }
             }
 
+        }
+
+        private bool IsUnit(Article article)
+        {
+            if (article.Topic == 0)
+            {
+                if (article.Layer == 3 || article.Layer == 4 || article.Layer == 9 || article.Layer == 10)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private string ArticleIndexation(int articleIndex)

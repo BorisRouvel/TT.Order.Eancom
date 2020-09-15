@@ -139,6 +139,7 @@ namespace Eancom
             }
             return String.Empty;
         }
+        // Do not use IDMHinge
         private string GetIDMHinge(string keyRef)
         {          
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(keyRef, 1);
@@ -157,7 +158,36 @@ namespace Eancom
             }
             return String.Empty;
         }
-        private string GetConstructionID(string keyRef)
+        private string GetHinge(Article article)
+        {
+            string hinge = String.Empty;
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);
+            if (!String.IsNullOrEmpty(articleReferenceKey))
+            {
+                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
+                if (articleInformation.Length > OrderConstants.ArticleHinge_InFile_Position)
+                {
+                    hinge = articleInformation[OrderConstants.ArticleHinge_InFile_Position];
+                    if (hinge == "L" || hinge == "R" || hinge == "M")
+                    {
+                        return hinge;
+                    }
+                    else
+                    {
+                        if (article.Handing == article.CurrentAppli.GetTranslatedText("G"))
+                        {
+                            return "L";
+                        }
+                        else if (article.Handing == article.CurrentAppli.GetTranslatedText("D"))
+                        {
+                            return "R";
+                        }
+                    }
+                }
+            }           
+            return String.Empty;
+        }
+        private string GetIDMConstructionID(string keyRef)
         {
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
@@ -166,10 +196,10 @@ namespace Eancom
                 if (articleInformation.Length > OrderConstants.ArticleConstructionId_InFile_Position)
                 {
                     string constructionID = articleInformation[OrderConstants.ArticleConstructionId_InFile_Position];
-                    //if (constructionID == "L" || constructionID == "R")
-                    //{
+                    if (constructionID == "L" || constructionID == "R")
+                    {
                         return constructionID;
-                    //}
+                    }
                 }
             }
             return String.Empty;
@@ -278,7 +308,7 @@ namespace Eancom
         }
         public string Add_Hinge(Article article)
         {
-            c212.E7140 = this.GetIDMHinge(article.KeyRef);
+            c212.E7140 = this.GetHinge(article);
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {
@@ -291,9 +321,9 @@ namespace Eancom
             }
             return null;
         }
-        public string Add_ConstructionID(Article article)//How to put this Serie No in catalog ?
+        public string Add_ConstructionID(Article article)
         {
-            c212.E7140 = this.GetConstructionID(article.KeyRef);//Set with another than hinge
+            c212.E7140 = this.GetIDMConstructionID(article.KeyRef);
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {
@@ -306,9 +336,9 @@ namespace Eancom
             }
             return null;
         }
-        public string Add_VisibleSide(Article article)//How to put this Serie No in catalog ?
+        public string Add_VisibleSide(Article article)
         {
-            c212.E7140 = this.GetVisibleSide(article);//Set with another than hinge
+            c212.E7140 = this.GetVisibleSide(article);
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {
@@ -473,12 +503,12 @@ namespace Eancom
             }
             return null;
         }
-        public string Add_WorktopAssemblyConstructionID(string assemblyReference)//How to put this Serie No in catalog ?
+        public string Add_WorktopAssemblyConstructionID(string assemblyReference)
         {
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
-            c212.E7140 = this.GetConstructionID(assemblyReference);
+            c212.E7140 = this.GetIDMConstructionID(assemblyReference);
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {

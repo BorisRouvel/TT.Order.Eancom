@@ -80,6 +80,7 @@ namespace Eancom
         public const string ediSection = "EDI";
         public const string emailToKey = "EmailTo";
         public const string emailCcKey = "EmailCc";
+        public const string mandatoryDeliveryInformation = "MandatoryDeliveryInformation";
         #endregion
 
         private AppliComponent _currentAppli;
