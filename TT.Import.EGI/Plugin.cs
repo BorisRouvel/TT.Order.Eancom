@@ -23,6 +23,10 @@ namespace TT.Import.EGI
         private ManageCatalog manageCatalog = null;
         private GlobalSegment globalSegment = null;
         private WallSegment wallSegment = null;
+        private DoorSegment doorSegment = null;
+        public WindowSegment windowSegment = null;
+        //private RecessSegment recessSegment = null;
+        //private HindranceSegment hindranceSegment = null;
         private ArticleSegment articleSegment = null;
 
         public static double sceneDimX = 0.0;
@@ -125,6 +129,10 @@ namespace TT.Import.EGI
                 SetSceneReference(version);
 
                 this.PlaceWallsInScene();
+                this.PlaceDoorsInScene();
+                this.PlaceWindowsInScene();
+                //this.PlaceRecessInScene();
+                //this.PlaceHindrancesInScene();
                 this.PlaceArticlesInScene();
 
                 this.ResetReference();
@@ -150,58 +158,41 @@ namespace TT.Import.EGI
             return String.Empty;
         }
 
-        private List<string> WallSectionsList()
+        private List<string> TypeSectionsList(string type)
         {
             List<string> sectionsList = CurrentFileEGI.GetSectionsNames();
-            List<string> wallList = new List<string>(0);
+            List<string> list = new List<string>(0);
 
             foreach (string section in sectionsList)
             {
-                if (section.StartsWith(SegmentName.Wall_))
+                if (section.StartsWith(type))
                 {
-                    wallList.Add(section);
+                    list.Add(section);
                 }
             }
-            return wallList;
-        }
-        private List<string> ArticleSectionsList()
-        {
-            List<string> sectionsList = CurrentFileEGI.GetSectionsNames();
-            List<string> articleList = new List<string>(0);
-
-            foreach (string section in sectionsList)
-            {
-                if (section.StartsWith(SegmentName.Article_))
-                {
-                    articleList.Add(section);
-                }
-            }
-            return articleList;
+            return list;
         }
 
         public static void SetSceneReference(string version)
         {
             switch (version.ToUpper())
             {
-                case GlobalSegment.V1_50: //Discac
+                case ItemValue.V1_50: //DISCAC
                     sceneDimX = -ScnDimX  / 2;
-                    sceneDimY = ScnDimY / 2;
-                    //strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
+                    sceneDimY = ScnDimY / 2;                   
+                    sceneDimZ = 0; 
                     angleScene = (0 * System.Math.PI) / 180;
                     break;
-                case GlobalSegment.V1_51: //FBD , Bauformat
+                case ItemValue.V1_51: //FBD , BAUFORMAT
                     sceneDimX = -ScnDimX / 2;
                     sceneDimY = -ScnDimY / 2;
-                    //strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
+                    sceneDimZ = 0; 
                     angleScene = (0 * System.Math.PI) / 180; 
                     break;
-                default:
+                default: // V1_51
                     sceneDimX = -ScnDimX / 2;
-                    sceneDimY = ScnDimY / 2;
-                    //strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
+                    sceneDimY = -ScnDimY / 2;
+                    sceneDimZ = 0;
                     angleScene = (0 * System.Math.PI) / 180;
                     break;
             }
@@ -219,12 +210,47 @@ namespace TT.Import.EGI
  
         private void PlaceWallsInScene()
         {
-            foreach (string wallSection in this.WallSectionsList())
+            foreach (string wallSection in this.TypeSectionsList(SegmentName.Wall_))
             {
                 wallSegment = new WallSegment(this, this.CurrentFileEGI, wallSection);               
-                wallSegment.Add();                              
+                wallSegment.Add();
+                this.CurrentAppli.Scene.ViewRefresh();
             }
         }
+        private void PlaceDoorsInScene()
+        {
+            foreach (string doorSection in this.TypeSectionsList(SegmentName.Door_))
+            {
+                doorSegment = new DoorSegment(this, this.CurrentFileEGI, doorSection);
+                doorSegment.Add();
+                this.CurrentAppli.Scene.ViewRefresh();
+            }
+        }
+        private void PlaceWindowsInScene()
+        {
+            foreach (string windowSection in this.TypeSectionsList(SegmentName.Window_))
+            {
+                windowSegment = new WindowSegment(this, this.CurrentFileEGI, windowSection);
+                windowSegment.Add();
+                this.CurrentAppli.Scene.ViewRefresh();
+            }
+        }
+        //private void PlaceRecessInScene()
+        //{
+        //    foreach (string recessSection in this.TypeSectionsList(SegmentName.Recess_))
+        //    {
+        //        recessSegment = new DoorSegment(this, this.CurrentFileEGI, recessSection);
+        //        recessSegment.Add();
+        //    }
+        //}
+        //private void PlaceHindranceInScene()
+        //{
+        //    foreach (string hindranceSection in this.TypeSectionsList(SegmentName.Hindrance_))
+        //    {
+        //        hindranceSegment = new DoorSegment(this, this.CurrentFileEGI, hindranceSection);
+        //        hindranceSegment.Add();
+        //    }
+        //}
         private void PlaceArticlesInScene()
         {
             #region //INFO
@@ -238,31 +264,29 @@ namespace TT.Import.EGI
             Plugin.notPlacedArticleList.Clear();
             Plugin.articleAlreadyPlacedDict.Clear();
 
-            foreach (string articleSection in this.ArticleSectionsList())
-            {
-                //if (articleSection != "Article_0034")
-                //{
-                //    continue;
-                //}
+            foreach (string articleSection in this.TypeSectionsList(SegmentName.Article_))
+            {              
                 articleSegment = new ArticleSegment(this, this.CurrentFileEGI, articleSection, manageCatalog);
+                SegmentClassification segmentClassification = new SegmentClassification(articleSection, this.CurrentFileEGI);
                 List<string> catalogsList = manageCatalog.CatalogsByManufacturerList(articleSegment.Manufacturer);
               
-                if (articleSegment.HasPolytype())
+                if (segmentClassification.HasSectionPolytype())
                 {
-                   
-                   
-                        articleSegment.PlaceLinearArticle(articleSection, catalogsList);
-                    
+                    articleSegment.AddLinear(articleSection, catalogsList);                    
                 }
                 else
                 {
-                    articleSegment.PlaceArticle(articleSection, catalogsList);
+                    articleSegment.Add(articleSection, catalogsList);
                 }
 
                 this.ResetReference();
+                this.CurrentAppli.Scene.ViewRefresh();
             }
 
-            articleSegment.NoPlacedArticleMessage();
+            if (articleSegment != null)
+            {
+                articleSegment.NoPlacedArticleMessage();
+            }
         }      
   
         private void TerminateMessage()
@@ -318,19 +342,19 @@ namespace TT.Import.EGI
             switch (this.Language)
             {
                 case "FRA":
-                    translate = "Murs et Articles (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
+                    translate = "Plan (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
                     break;
                 case "ENG":
-                    translate = "Walls and Articles (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
+                    translate = "Plan (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
                     break;
                 case "ESP":
-                    translate = "Paredes y artículos (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
+                    translate = "Plan (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
                     break;
                 case "DEU":
-                    translate = "Wände und Artikel (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
+                    translate = "Planen (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
                     break;
                 default:
-                    translate = "Walls and Articles (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
+                    translate = "Plan (.EGI)...";// + KD.CharTools.Const.Tab + "Ctrl+...";
                     break;
             }
             return translate;

@@ -9,10 +9,10 @@ using KD.SDKComponent;
 using KD.CatalogProperties;
 using KD.Analysis;
 using KD.Model;
+using KD;
 
-using KD.Plugin.Word;
-using KD.SortedArticle;
 using Eancom;
+using TT.Import.EGI;
 
 
 namespace Ord_Eancom
@@ -34,7 +34,7 @@ namespace Ord_Eancom
             CORNICE_SKETCH = 45,
             FLOORING_SKETCH = 46,
             OTHER = 99
-        }        
+        }
 
         public enum Format
         {
@@ -43,6 +43,23 @@ namespace Ord_Eancom
             PDF = 50,
             Others = 99
         }
+    }
+
+    public class OrderDescription
+    {
+        public const string EDIGRAPH = "EDIGRAPH";
+        public const string FLOOR_PLAN = "Plan de base";
+        public const string WALL_FRONT_VIEW = "Vue de face";
+        public const string TILE_PLAN = "Plan de carrelage";
+        public const string INSTALLATION_PLAN = "Plan d'installation";
+        public const string PERSPECTIVE = "Perspective";
+        public const string PLINTH_SKETCH = "Croquis de socle";
+        public const string WORKTOP_SKETCH = "Croquis plan de travail";
+        public const string WALL_SEALING_PROFILE_SKETCH = "Croquis du profil d'étanchéité murale";
+        public const string LIGHT_PELMET_SKETCH = "Croquis de cache-lumière";
+        public const string CORNICE_SKETCH = "Croquis de corniche";
+        public const string FLOORING_SKETCH = "Croquis du sol";
+        public const string OTHER = "Autre";
     }
 
     public class OrderKey
@@ -59,11 +76,12 @@ namespace Ord_Eancom
     }
 
     public class OrderConstants
-    {        
+    {
         public const string Insitu = "INSITU";
         public const string HandleName = "_HDL";
 
-        public const string FormatDate_yMd = "yyyyMMdd";
+        public const string FormatDate_4yMd = "yyyyMMdd";
+        public const string FormatDate_2yMd = "yyMMdd";
         public const string FormatDate_dMy = "ddMMyy";
         public const string FormatDate_d_M_y = "dd/MM/yyyy";
         public const string FormatDate_yW = "yyyyww";
@@ -86,10 +104,11 @@ namespace Ord_Eancom
         public const int ArticleEANNumber_InFile_Position = 3;
         public const int ArticleHinge_InFile_Position = 4;
         public const int ArticleConstructionId_InFile_Position = 5;
+        public const int ArticleShape_InFile_Position = 6;
     }
 
     public class OrderTransmission
-    {      
+    {
         public const string OrderEDIFileName = "Order.edi";
         public const string OrderEGIFileName = "Order.egi";
         public const string OrderName = "Commande";
@@ -105,9 +124,10 @@ namespace Ord_Eancom
         public const string ExtensionTXT = KD.IO.File.Extension.Txt;
         public const string ExtensionJPG = KD.IO.File.Extension.Jpg;
         public const string ExtensionPDF = KD.IO.File.Extension.Pdf;
-       
+
         public const string VersionEancomOrder = "EANCOM_ORDER_V2.03";
-        public const string VersionEdigraph = "EDIGRAPH_V1.50";
+        public const string VersionEdigraph_1_50 = "EDIGRAPH_V1.50";
+        public const string VersionEdigraph_1_51 = "EDIGRAPH_V1.51";
         public const string HeaderSubject = "EDI-ORDER";
 
         public const string HeaderTagMandatoryDeliveryInformation = "{}";
@@ -164,11 +184,16 @@ namespace Ord_Eancom
         private SceneAnalysis sceneAnalysis = null;
 
         public static string deliveryDate = String.Empty;
-        public static string installationDate = String.Empty;        
+        public static string installationDate = String.Empty;
         private readonly CultureInfo provider = CultureInfo.InvariantCulture;
 
         private string supplierID = String.Empty;
-        
+        private List<string> releaseList = new List<string>() { KD.StringTools.Const.QuestionMark, //"?",
+                                                            KD.StringTools.Const.Colon, //":",
+                                                            KD.StringTools.Const.PlusSign, //"+",
+                                                            KD.StringTools.Const.SimpleQuote, //"'",
+                                                            "’" };
+
         public OrderInformations(AppliComponent appli, int callParamsBlock)
         {
             this._currentAppli = appli;
@@ -179,10 +204,10 @@ namespace Ord_Eancom
             this._currentAppli = appli;
             this._callParamsBlock = callParamsBlock;
             this._articles = articles;
-            sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());           
+            sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
         }
         public OrderInformations(Article article)
-        {          
+        {
             this._article = article;
         }
 
@@ -190,12 +215,11 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(text))
             {
-                List<string> releaseList = new List<string>() { "?", ":", "+", "'" };
                 foreach (string releaseChar in releaseList)
                 {
                     if (text.Contains(releaseChar))
                     {
-                        text = text.Replace(releaseChar, "?" + releaseChar);
+                        text = text.Replace(releaseChar, KD.StringTools.Const.QuestionMark + releaseChar);
                     }
                 }
                 return text;
@@ -236,7 +260,7 @@ namespace Ord_Eancom
                 if (article.HeadingRank <= 19)
                 {
                     return article;
-                }                    
+                }
             }
             return null;
         }
@@ -250,7 +274,7 @@ namespace Ord_Eancom
             return (supplierID);
         }
         public string GetReferenceNumberEDIFile(FileEDI fileEDI) //UNB 0020
-        {           
+        {
             return fileEDI.GetNextOrdersNumberHex();
         }
         public string GetReferenceNumberEDIMessage() //UNH 0062
@@ -274,7 +298,7 @@ namespace Ord_Eancom
             string weekDelivery = this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.LivraisonSemaine()");
 
             if (!String.IsNullOrEmpty(exactDayDelivery))
-            {               
+            {
                 deliveryDate = ConvertStringToDate(exactDayDelivery);
                 return Eancom.DTM.C507.E2005_2;
             }
@@ -302,8 +326,8 @@ namespace Ord_Eancom
             string weekInstallation = this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.InstallationSemaine()");
 
             if (!String.IsNullOrEmpty(dayInstallation))
-            {                
-                installationDate = ConvertStringToDate(dayInstallation);               
+            {
+                installationDate = ConvertStringToDate(dayInstallation);
                 return Eancom.DTM.C507.E2005_18;
             }
             else if (!String.IsNullOrEmpty(weekInstallation))
@@ -323,11 +347,11 @@ namespace Ord_Eancom
 
             try
             {
-                DateTime result = DateTime.ParseExact(dateString, OrderConstants.FormatDate_yMd, provider);               
+                DateTime result = DateTime.ParseExact(dateString, OrderConstants.FormatDate_4yMd, provider);
                 return Eancom.DTM.C507.E2379_102;
             }
             catch (FormatException)
-            {                
+            {
                 try
                 {
                     DateTime result = DateTime.ParseExact(dateString.Substring(0, 4), OrderConstants.FormatDate_y, provider);
@@ -340,13 +364,13 @@ namespace Ord_Eancom
                 catch (FormatException)
                 {
                     return String.Empty;
-                }                
+                }
             }
             return String.Empty;
         }
         public string GetCommentScene()
         {
-           string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Scène.Commentaire()"));
+            string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Scène.Commentaire()"));
             return this.ReleaseChar(text);
 
         }
@@ -393,7 +417,9 @@ namespace Ord_Eancom
         public string GetSupplierCountry()
         {
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.Pays(" + supplierID + ")"));
-            return this.ReleaseChar(text);
+            string SupplierCountryTwoLetterISOName = CountryTable.GetTwoLetterISO(text);
+
+            return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
         public string GetSupplierPhone()
         {
@@ -419,7 +445,7 @@ namespace Ord_Eancom
         {
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.CodeClient(" + supplierID + ")"));
             return this.ReleaseChar(text);
-        }       
+        }
         public string GetRetailerNumber()
         {
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteCode(" + supplierID + ")"));
@@ -456,7 +482,9 @@ namespace Ord_Eancom
         public string GetRetailerCountry()
         {
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SitePays(" + supplierID + ")"));
-            return this.ReleaseChar(text);
+            string SupplierCountryTwoLetterISOName = CountryTable.GetTwoLetterISO(text);
+
+            return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
         public string GetRetailerPhone()
         {
@@ -492,7 +520,10 @@ namespace Ord_Eancom
         }
         public string GetDeliveryCountry()
         {
-            return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteLivraisonPays(" + supplierID + ")")));
+            string text = this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteLivraisonPays(" + supplierID + ")");
+            string SupplierCountryTwoLetterISOName = CountryTable.GetTwoLetterISO(text);
+
+            return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
         public string GetCustomerDeliveryName1()
         {
@@ -515,7 +546,10 @@ namespace Ord_Eancom
         }
         public string GetCustomerDeliveryCountry()
         {
-            return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.LivraisonPays(" + supplierID + ")")));
+            string text = this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.LivraisonPays(" + supplierID + ")");
+            string SupplierCountryTwoLetterISOName = CountryTable.GetTwoLetterISO(text);
+
+            return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
         public string GetSellerID()
         {
@@ -524,7 +558,7 @@ namespace Ord_Eancom
         public string GetSellerInformations()
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.VendeurNom()") + KD.StringTools.Const.SemiColon + this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.VendeurPrénom()")));
-        }        
+        }
         public string GetCatalogModelCodeAndName()
         {
             bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
@@ -537,19 +571,19 @@ namespace Ord_Eancom
             return null;
         }
         public List<string> GetGenericCatalogFinishCodeAndName()
-        {            
+        {
             List<string> finishesList = new List<string>();
             sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
 
             bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
             if (IsGenerik)
             {
-                for (int fin = 0; fin < generikFinishTypes.Length; fin++) 
+                for (int fin = 0; fin < generikFinishTypes.Length; fin++)
                 {
                     int.TryParse(generikFinishTypes[fin], out int generikFinishType);
-                    int.TryParse(generikFinishes[fin], out int generikFinish);                   
+                    int.TryParse(generikFinishes[fin], out int generikFinish);
                     int type = sceneAnalysis.GetFinishTypeNumber(generikFinishType);
-                    finishesList.Add(sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) + 
+                    finishesList.Add(sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
                 return finishesList;
@@ -610,7 +644,7 @@ namespace Ord_Eancom
         }
 
         private bool IsPlinthFinishType(int generikFinishType)
-        {            
+        {
             int type = sceneAnalysis.GetFinishTypeNumber(generikFinishType);
             if (type.ToString() == OrderConstants.PlinthFinishType)
             {
@@ -621,7 +655,7 @@ namespace Ord_Eancom
         private string ConvertStringToDate(string dateString)
         {
             if (dateString.Contains(KD.StringTools.Const.MinusSign))
-            {            
+            {
                 return dateString.Replace(KD.StringTools.Const.MinusSign, String.Empty);
             }
             else if (dateString.Contains(KD.StringTools.Const.Slatch))
@@ -629,7 +663,7 @@ namespace Ord_Eancom
                 dateString = dateString.Replace(KD.StringTools.Const.Slatch, String.Empty);
                 DateTime dateTime = DateTime.ParseExact(dateString, OrderConstants.FormatDate_dMy, provider);
 
-                return dateTime.ToString(OrderConstants.FormatDate_yMd);
+                return dateTime.ToString(OrderConstants.FormatDate_4yMd);
             }
             return dateString;
         }
@@ -656,7 +690,7 @@ namespace Ord_Eancom
         }
         public bool IsWorktop()
         {
-            if (this.Article.Type == 5 && this.Article.Layer == 5) 
+            if (this.Article.Type == 5 && this.Article.Layer == 5)
             {
                 return true;
             }
@@ -741,7 +775,7 @@ namespace Ord_Eancom
             return null;
         }
 
-        
+
     }
 
 
@@ -787,16 +821,15 @@ namespace Ord_Eancom
         }
 
         double sceneDimX = 0.0;
-        double sceneDimY = 0.0;
-        string strSceneDimZ = String.Empty;
+        double sceneDimY = 0.0;        
         double sceneDimZ = 0.0;
         double angleScene = 0.0;
 
         private readonly string x = String.Empty;
         private readonly string y = String.Empty;
         private readonly string z = String.Empty;
-        private readonly string ab = String.Empty;       
-        
+        private readonly string ab = String.Empty;
+
         private double x1 = 0.0;
         private double y1 = 0.0;
         private double z1 = 0.0;
@@ -835,15 +868,15 @@ namespace Ord_Eancom
 
         public OrderWrite(AppliComponent appli, OrderInformations orderInformations, OrderInformations orderInformationsFromArticles, Articles articles, FileEDI fileEDI)
         {
-            this._currentAppli = appli;
-            this._orderInformations = orderInformations;
-            this._orderInformationsFromArticles = orderInformationsFromArticles;
-            this._fileEDI = fileEDI;
-            this._utility = new Eancom.Utility();
+            _currentAppli = appli;
+            _orderInformations = orderInformations;
+            _orderInformationsFromArticles = orderInformationsFromArticles;
+            _fileEDI = fileEDI;
+            _utility = new Eancom.Utility();
 
             this.InitializeEancomStructure();
 
-            version = OrderTransmission.VersionEdigraph.Split(KD.CharTools.Const.Underscore)[1];
+            version = OrderTransmission.VersionEdigraph_1_51.Split(KD.CharTools.Const.Underscore)[1];
         }
 
         #region //EDI      
@@ -888,7 +921,7 @@ namespace Ord_Eancom
         private void SetLineEDIList(string text)
         {
             if (!String.IsNullOrEmpty(text))
-            {                
+            {
                 structureLineEDIList.Add(text); //OrderWrite.segmentNumberBetweenUNHandUNT + " // " + 
             }
         }
@@ -929,10 +962,10 @@ namespace Ord_Eancom
 
         public void BuildEDI(Articles articles)
         {
-           this.HeaderEDI();
-           this.HeaderData();
-           this.LineData(articles);
-           this.EndEDI(); //here set segement number between UNH and UNT include
+            this.HeaderEDI();
+            this.HeaderData();
+            this.LineData(articles);
+            this.EndEDI(); //here set segement number between UNH and UNT include
         }
 
         private void HeaderEDI()
@@ -960,7 +993,7 @@ namespace Ord_Eancom
             SetLineEDIList(cOM.Add_Supplier_TE());
             SetLineEDIList(cOM.Add_Supplier_FX());
             SetLineEDIList(cOM.Add_Supplier_EM());
-            
+
             SetLineEDIList(nAD.Add_BY(1));
 
             SetLineEDIList(cTA.Add_Seller_OC());
@@ -1079,7 +1112,7 @@ namespace Ord_Eancom
                 fs.Dispose();
             }
         }
-       
+
         #endregion
 
         #region //Plan for EDI
@@ -1087,8 +1120,8 @@ namespace Ord_Eancom
         {
             KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
             this.SetView(KD.SDK.SceneEnum.ViewMode.TOP);
-            this.ZoomAdjusted();           
-            this.ExportImageJPG(1, OrderTransmission.PlanName);           
+            this.ZoomAdjusted();
+            this.ExportImageJPG(1, OrderTransmission.PlanName);
             this.SetView(currentViewMode);
         }
         private KD.SDK.SceneEnum.ViewMode GetView()
@@ -1134,17 +1167,17 @@ namespace Ord_Eancom
         }
         private int GetArticlePolyType(Article article)
         {
-            if (article.Topic == 0)
+            if (article.HighUnitic == 0)
             {
                 string type = this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
-                
-                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //Plinth
+
+                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //5 = Worktop
                 {
-                    return 2;
+                    return PolytypeValue.Polytype_WorkTop;
                 }
-                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //Worktop
+                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //2 = Plinth 
                 {
-                    return 1;
+                    return PolytypeValue.Polytype_Base;
                 }
             }
 
@@ -1162,17 +1195,38 @@ namespace Ord_Eancom
         }
         private string[] GetArticlePolyPoint(Article article, int polyType)
         {
-            if (polyType == 1)
+            string shapePointList = String.Empty;
+            string newShapePointList = string.Empty;
+
+            if (polyType == PolytypeValue.Polytype_Base)
             {
                 Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
                 foreach (Article child in childs)
                 {
                     article = child;
+                    shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
+                    newShapePointList = shapePointList;
                 }
 
             }
-            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
+            else if (polyType == PolytypeValue.Polytype_WorkTop)
+            {
+                SetSceneReference(version);
+                
+                shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
+                string[] points = shapePointList.Split(KD.CharTools.Const.SemiColon); // 5 pts
+                foreach (string point in points)
+                {
+                    string[] coords = point.Split(KD.CharTools.Const.Comma);
+                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[0]) - sceneDimX) + KD.CharTools.Const.Comma;
+                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[1]) - sceneDimY) + KD.CharTools.Const.Comma;
+                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[2]) - sceneDimZ) + KD.CharTools.Const.Comma;
+                    newShapePointList += coords[3] + KD.CharTools.Const.SemiColon;
+                }
+                
+            }
+            
+            string[] shapeList = newShapePointList.Split(KD.CharTools.Const.SemiColon);
             if (shapeList.Length > 0)
             {
                 return shapeList;
@@ -1213,11 +1267,11 @@ namespace Ord_Eancom
         public void BuildPerspective()
         {
             KD.SDK.SceneEnum.ViewMode currentViewMode = this.GetView();
-           
+
             this.SetView(KD.SDK.SceneEnum.ViewMode.OGLREAL);
             this.ZoomAdjusted();
-            this.ExportImageJPG(1, OrderTransmission.PerspectiveName);                  
-            this.SetView(currentViewMode);           
+            this.ExportImageJPG(1, OrderTransmission.PerspectiveName);
+            this.SetView(currentViewMode);
         }
         #endregion
 
@@ -1262,7 +1316,7 @@ namespace Ord_Eancom
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" + 
+                System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" +
                     " n'a pas pu être généré.", "Information");
             }
         }
@@ -1270,14 +1324,14 @@ namespace Ord_Eancom
 
         #region //ZIP for EDI
         public void ZIPOrderFile()
-        {           
+        {
             ZipArchiveEntry readmeEntry = null;
             using (FileStream zipToOpen = new FileStream(Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName), FileMode.Create, FileAccess.ReadWrite))
             {
                 using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
                     string EDIFile = Path.Combine(Order.orderDir, OrderTransmission.OrderEDIFileName);
-                    this.EntryZipAndDeleteFile(readmeEntry, archive, EDIFile, OrderTransmission.OrderEDIFileName);                   
+                    this.EntryZipAndDeleteFile(readmeEntry, archive, EDIFile, OrderTransmission.OrderEDIFileName);
 
                     if (MainForm.IsChoiceExportEGI)
                     {
@@ -1314,11 +1368,11 @@ namespace Ord_Eancom
                         this.EntryZipAndDeleteFile(readmeEntry, archive, OrderFile, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF);
                     }
                 }
-            }            
+            }
         }
-       
+
         private void EntryZipAndDeleteFile(ZipArchiveEntry readmeEntry, ZipArchive archive, string file, string entryFile)
-        {           
+        {
             if (File.Exists(file))
             {
                 readmeEntry = archive.CreateEntryFromFile(file, entryFile);
@@ -1359,6 +1413,10 @@ namespace Ord_Eancom
         {
             this.HeaderEGI();
             this.SetWallInformations(this.GetWallsList());
+            //this.SetDoorInformations();
+            //this.SetWindowInformations();
+            //this.SetRecessInformations();
+            //this.SetHindranceInformations();
             this.SetArticleInformations(articles);
 
             this.CurrentAppli.SceneComponent.ResetSceneReference();
@@ -1409,44 +1467,45 @@ namespace Ord_Eancom
             //AngleZ=0.00
             #endregion
             DateTime dateTime = DateTime.Now;
-            //soumettre au detecteur de char ??
-            structureLineEGIList.Add("[Global]" + Separator.NewLine);
-            structureLineEGIList.Add("Version=" + OrderTransmission.VersionEdigraph + Separator.NewLine);
-            structureLineEGIList.Add(_orderInformations.ReleaseChar("Name=" + _orderInformations.GetCommissionNumber()) + Separator.NewLine);
-            structureLineEGIList.Add(_orderInformations.ReleaseChar("Number=" + _orderInformations.GetOrderNumber()) + Separator.NewLine);
-            structureLineEGIList.Add(_orderInformations.ReleaseChar("DrawDate=" + dateTime.ToString(OrderConstants.FormatDate_d_M_y)) + Separator.NewLine);
-            structureLineEGIList.Add(_orderInformations.ReleaseChar("DrawTime=" + dateTime.ToString(OrderConstants.FormatTime_H_m_s)) + Separator.NewLine);
+            //soumettre au detecteur de char ?? _orderInformations.ReleaseChar()
+            structureLineEGIList.Add(KD.StringTools.Format.Bracketed(SegmentName.Global) + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.Version + KD.StringTools.Const.EqualSign + OrderTransmission.VersionEdigraph_1_51 + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.Name + KD.StringTools.Const.EqualSign + _orderInformations.GetCommissionNumber() + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.Number + KD.StringTools.Const.EqualSign + _orderInformations.GetOrderNumber() + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.DrawDate + KD.StringTools.Const.EqualSign + dateTime.ToString(OrderConstants.FormatDate_d_M_y) + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.DrawTime + KD.StringTools.Const.EqualSign + dateTime.ToString(OrderConstants.FormatTime_H_m_s) + Separator.NewLine);
 
             string roomHeight = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-            string room = Convert.ToInt32(roomHeight).ToString("0.00");
-            structureLineEGIList.Add("RoomHeight=" + this.ConvertCommaToDot(room) + Separator.NewLine);
-            structureLineEGIList.Add("Manufacturer=" + _fileEDI.ManufacturerID() + Separator.NewLine);
-            structureLineEGIList.Add("System=" + _orderInformations.GetNameAndVersionSoftware() + Separator.NewLine);
+            string room = Convert.ToInt32(roomHeight).ToString(SegmentFormat.DotDecimal);
+            structureLineEGIList.Add(ItemKey.RoomHeight + KD.StringTools.Const.EqualSign + this.ConvertCommaToDot(room) + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + _fileEDI.ManufacturerID() + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.System + KD.StringTools.Const.EqualSign + _orderInformations.GetNameAndVersionSoftware() + Separator.NewLine);
         }
         private void SetSceneReference(string version)
         {
             switch (version.ToUpper())
             {
-                case "V1.50": //DISCAC
+                case ItemValue.V1_50: //DISCAC
                     sceneDimX = -this.CurrentAppli.SceneDimX / 2;
                     sceneDimY = this.CurrentAppli.SceneDimY / 2;
-                    strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
+                    sceneDimZ = 0; 
                     angleScene = (0 * System.Math.PI) / 180;
                     break;
-                case "V1.51": //FBD
+                case ItemValue.V1_51: //FBD , BAUFORMAT
                     sceneDimX = -this.CurrentAppli.SceneDimX / 2;
-                    sceneDimY = this.CurrentAppli.SceneDimY / 2;
-                    strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
-                    angleScene = (270 * System.Math.PI) / 180;
+                    sceneDimY = -this.CurrentAppli.SceneDimY / 2;
+                    sceneDimZ = 0;
+                    angleScene = (0 * System.Math.PI) / 180;
                     break;
-                default:
+                    //sceneDimX = -this.CurrentAppli.SceneDimX / 2;
+                    //sceneDimY = this.CurrentAppli.SceneDimY / 2;
+                    //sceneDimZ = 0;
+                    //angleScene = (270 * System.Math.PI) / 180;
+                default: //V1_51
                     sceneDimX = -this.CurrentAppli.SceneDimX / 2;
-                    sceneDimY = this.CurrentAppli.SceneDimY / 2;
-                    strSceneDimZ = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
-                    sceneDimZ = 0; // Convert.ToDouble(strSceneDimZ);
-                    angleScene = (270 * System.Math.PI) / 180;
+                    sceneDimY = -this.CurrentAppli.SceneDimY / 2;
+                    sceneDimZ = 0;
+                    angleScene = (0 * System.Math.PI) / 180;
                     break;
             }
 
@@ -1460,7 +1519,7 @@ namespace Ord_Eancom
             {
                 this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
 
-                structureLineEGIList.Add(this.WallIndexation(index));
+                structureLineEGIList.Add(WallIndexation(index));
                 structureLineEGIList.Add(WallPositionX(wall.PositionX));
                 structureLineEGIList.Add(WallPositionY(wall.PositionY));
                 structureLineEGIList.Add(WallPositionZ(wall.PositionZ));
@@ -1473,41 +1532,41 @@ namespace Ord_Eancom
         }
         private string WallIndexation(int wallIndex)
         {
-            return "[Wall_" + wallIndex.ToString("0000") + "]" + Separator.NewLine;
+            return KD.StringTools.Format.Bracketed(SegmentName.Wall_ + wallIndex.ToString(SegmentFormat.FourZero)) + Separator.NewLine;
         }
         private string WallPositionX(double value)
         {
-            string data = "RefPntX=" + value.ToString("0.00");
+            string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallPositionY(double value)
         {
-            string data = "RefPntY=" + value.ToString("0.00");
+            string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallPositionZ(double value)
         {
-            string data = "RefPntZ=" + value.ToString("0.00");
+            string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallDimensionX(double value)
         {
-            string data = "Width=" + value.ToString("0.00");
+            string data = ItemKey.Width + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallDimensionY(double value)
         {
-            string data = "Depth=" + value.ToString("0.00");
+            string data = ItemKey.Depth + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallDimensionZ(double value)
         {
-            string data = "Height=" + value.ToString("0.00");
+            string data = ItemKey.Height + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string WallAngle(double angle)
         {
-            string data = "AngleZ=" + angle.ToString("0.00");
+            string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + angle.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
 
@@ -1518,20 +1577,25 @@ namespace Ord_Eancom
             z1 = article.PositionZ;
             a = article.AngleOXY - 180;
 
+            double angle = 0.0;
             switch (version.ToUpper())
             {
-                case "V1.50": //DISCAC                    
-                    double angle = 2 * Math.PI * (a / 360);
+                case ItemValue.V1_50: //DISCAC                    
+                    angle = 2 * Math.PI * (a / 360);
                     x1 -= article.DimensionX * Math.Cos(angle);
                     y1 -= article.DimensionX * Math.Sin(angle);
                     break;
-                case "V1.51": //FBD
-                              //x1 -= article.DimensionX;
-                              // a -= article.AngleOXY;
-                    break;
-                default:
-                    // x1 -= article.DimensionX;
+                case ItemValue.V1_51: //FBD //BAUFORMAT
+                    angle = 2 * Math.PI * (a / 360);
+                    x1 -= article.DimensionX * Math.Cos(angle);
+                    y1 -= article.DimensionX * Math.Sin(angle);
+                    //x1 -= article.DimensionX;
                     //a -= article.AngleOXY;
+                    break;
+                default: //V1_51
+                    angle = 2 * Math.PI * (a / 360);
+                    x1 -= article.DimensionX * Math.Cos(angle);
+                    y1 -= article.DimensionX * Math.Sin(angle);
                     break;
             }
         }
@@ -1563,63 +1627,79 @@ namespace Ord_Eancom
             {
                 if (!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId)
                 {
-                    this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
+                    SegmentClassification segmentClassification = new SegmentClassification(article);
 
-                    structureLineEGIList.Add(this.ArticleIndexation(index));
-                    structureLineEGIList.Add(_orderInformations.ReleaseChar(ArticleManufacturer(article.KeyRef)));
-                    structureLineEGIList.Add(_orderInformations.ReleaseChar(ArticleReference(article.KeyRef)));
-                    structureLineEGIList.Add(_orderInformations.ReleaseChar(ArticleKeyReference(article.KeyRef)));
+                    this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
+                    //_orderInformations.ReleaseChar
+                    structureLineEGIList.Add(ArticleIndexation(index));
+                    structureLineEGIList.Add(ArticleManufacturer(article.KeyRef));                    
                     structureLineEGIList.Add(ArticleRefNo(article.ObjectId.ToString())); //RFF.LI  
                     structureLineEGIList.Add(ArticleRefPos(article.ObjectId.ToString())); // RFF.ON
 
-                    this.MoveArticlePerRepere(article);
+                    if (!segmentClassification.IsArticleCornerFiler())
+                    {
+                        this.MoveArticlePerRepere(article);
+                    }
+                    else
+                    {
+                        x1 = article.PositionX + 20;
+                        y1 = article.PositionY + 20;
+                        z1 = article.PositionZ;
+                        a = article.AngleOXY + 90;
+                    }
 
                     structureLineEGIList.Add(ArticlePositionX(x1));
                     structureLineEGIList.Add(ArticlePositionY(y1));
 
                     double positionZ = this.GetRealPositionZByPosedOnOrUnder(article);
-                    structureLineEGIList.Add(ArticlePositionZ(positionZ));
+                    structureLineEGIList.Add(ArticlePositionZ(positionZ));                                     
+
+                    //double dimX = article.DimensionX;
+                    //double dimY = article.DimensionY;
+
+                    //Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());                    
+                    //if (childs != null)
+                    //{
+                    //    foreach (Article child in childs)
+                    //    {
+                    //        if (child.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
+                    //        {
+                    //            double angleFilerDepth = child.DimensionY;
+                    //            structureLineEGIList.Add(ArticleAngleFilerDimensionX(child.DimensionY));
+
+                    //            double angleDimY = article.DimensionY;
+                    //            if (segmentClassification.IsUnit())
+                    //            {
+                    //                angleDimY -= OrderConstants.FrontDepth;
+                    //            }
+                    //            structureLineEGIList.Add(ArticleAngleDimensionY(angleDimY));
+
+                    //            dimY = child.DimensionX + article.DimensionY;
+                    //            break;
+                    //        }
+                    //    }
+                    //}
+
+                    structureLineEGIList.Add(ArticleDimensionX(article.DimensionX));
+                    structureLineEGIList.Add(ArticleDimensionZ(article.DimensionZ));                    
+                    structureLineEGIList.Add(ArticleDimensionY(article, article.DimensionY));
+
+                    string shape = this.GetShapeNumberByType(article.KeyRef);
+                    if (!shape.Equals(KD.StringTools.Const.Zero))
+                    {
+                        structureLineEGIList.AddRange(ArticleMeasureShapeList(article.KeyRef));                       
+                    }
 
                     structureLineEGIList.Add(ArticleAngle(a));
-                    structureLineEGIList.Add(ArticleShape("1"));
-
-                    double dimX = article.DimensionX;
-                    double dimY = article.DimensionY;
-
-                    Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
-                    if (childs != null)
-                    {
-                        foreach (Article child in childs)
-                        {
-                            if (child.Name.StartsWith("@F"))
-                            {
-                                double angleFilerDepth = child.DimensionY;
-                                structureLineEGIList.Add(ArticleAngleFilerDimensionX(child.DimensionY));
-
-                                double angleDimY = article.DimensionY;
-                                if (this.IsUnit(article))
-                                {
-                                    angleDimY -= OrderConstants.FrontDepth;
-                                }
-                                structureLineEGIList.Add(ArticleAngleDimensionY(angleDimY));
-
-                                dimY = child.DimensionX + article.DimensionY;
-                                break;
-                            }
-                        }
-                    }
-
-                    structureLineEGIList.Add(ArticleDimensionX(dimX));
-                    structureLineEGIList.Add(ArticleDimensionZ(article.DimensionZ));
-
-                    if (this.IsUnit(article))
-                    {
-                        dimY -= OrderConstants.FrontDepth;
-                    }
-                    structureLineEGIList.Add(ArticleDimensionY(dimY));
-
+                    structureLineEGIList.Add(ArticleReference(article.KeyRef));
+                    //structureLineEGIList.Add(ArticleKeyReference(article.KeyRef));
                     structureLineEGIList.Add(ArticleConstructionType(article.KeyRef));
                     structureLineEGIList.Add(ArticleHinge(article));
+
+                    if (!shape.Equals(KD.StringTools.Const.Zero))
+                    {
+                        structureLineEGIList.Add(ArticleShape(shape));
+                    }
 
                     int polyType = this.GetArticlePolyType(article);
                     if (polyType != KD.Const.UnknownId)
@@ -1645,28 +1725,16 @@ namespace Ord_Eancom
                                 }
                             }
                         }
-                    }
+                    }                   
+                    
                     index += 1;
                 }
             }
-
-        }
-
-        private bool IsUnit(Article article)
-        {
-            if (article.Topic == 0)
-            {
-                if (article.Layer == 3 || article.Layer == 4 || article.Layer == 9 || article.Layer == 10)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        }       
 
         private string ArticleIndexation(int articleIndex)
         {
-            return "[Article_" + articleIndex.ToString("0000") + "]" + Separator.NewLine;
+            return KD.StringTools.Format.Bracketed(SegmentName.Article_ + articleIndex.ToString(SegmentFormat.FourZero)) + Separator.NewLine;
         }
         private string ArticleManufacturer(string keyRef)
         {
@@ -1677,7 +1745,7 @@ namespace Ord_Eancom
                 if (articleInfos != null)
                 {
                     string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                    return "Manufacturer=" + articleInfo[OrderConstants.ArticleSupplierId_InFile_Position] + Separator.NewLine;
+                    return ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleSupplierId_InFile_Position] + Separator.NewLine;
                 }
             }
             return null;
@@ -1686,7 +1754,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                return "Name=" + this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
+                return ItemKey.Name + KD.StringTools.Const.EqualSign + this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
             }
             return null;
         }
@@ -1694,7 +1762,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                return "#Name=" + keyRef + Separator.NewLine; ;
+                return SegmentFormat.CommentChar + ItemKey.Name + KD.StringTools.Const.EqualSign + keyRef + Separator.NewLine; ;
             }
             return null;
         }
@@ -1702,7 +1770,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(iD))
             {
-                return "RefNo=" + iD + Separator.NewLine; ;
+                return ItemKey.RefNo + KD.StringTools.Const.EqualSign + iD + Separator.NewLine; ;
             }
             return null;
         }
@@ -1717,7 +1785,7 @@ namespace Ord_Eancom
                     string refPos = IdRefPos[1];
                     if (iD.Equals(id))
                     {
-                        return "RefPos=" + refPos + Separator.NewLine;
+                        return ItemKey.RefPos + KD.StringTools.Const.EqualSign + refPos + Separator.NewLine;
                     }
                 }
             }
@@ -1725,51 +1793,89 @@ namespace Ord_Eancom
         }
         private string ArticlePositionX(double value)
         {
-            string data = "RefPntX=" + value.ToString("0.00");
+            string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticlePositionY(double value)
         {
-            string data = "RefPntY=" + value.ToString("0.00");
+            string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticlePositionZ(double value)
         {
-            string data = "RefPntZ=" + value.ToString("0.00");
+            string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngle(double value)
         {
-            string data = "AngleZ=" + value.ToString("0.00");
+            string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleShape(string str)
         {
-            return "Shape=" + str.ToString() + Separator.NewLine;
+            return ItemKey.Shape + KD.StringTools.Const.EqualSign + str.ToString() + Separator.NewLine;
+        }
+        private List<string> ArticleMeasureShapeList(string keyRef)
+        {
+            List<string> list = new List<string>();
+            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
+            if (articleInfos != null)
+            {
+                string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
+                if (articleInfo.Length > 7)
+                {
+                    for (int index = 7; index <= articleInfo.Length - 1; index++)
+                    {
+                        list.Add(ItemKey.Measure_ + this.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                    }
+                }
+            }
+            return list;
         }
         private string ArticleDimensionX(double value)
         {
-            string data = "Measure_B=" + value.ToString("0.00");
+            string data = ItemKey.Measure_B + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleFilerDimensionX(double value)
         {
-            string data = "Measure_B1=" + value.ToString("0.00");
+            string data = ItemKey.Measure_B1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionZ(double value)
         {
-            string data = "Measure_H=" + value.ToString("0.00");
+            string data = ItemKey.Measure_H + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
-        private string ArticleDimensionY(double value)
+        private string ArticleDimensionY(Article article, double value)
         {
-            string data = "Measure_T=" + value.ToString("0.00");
+            SegmentClassification segmentClassification = new SegmentClassification(article);
+            if (segmentClassification.IsArticleUnit())
+            {
+                value -= OrderConstants.FrontDepth;
+            }
+           
+            Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+            if (childs != null && childs.Count > 0)
+            {
+                foreach (Article child in childs)
+                {
+                    SegmentClassification childClassification = new SegmentClassification(child);
+                    if (childClassification.IsArticleFiler())
+                    {
+                        value += child.DimensionX;
+                        break;
+                    }
+                }
+            }
+            
+            string data = ItemKey.Measure_T + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionY(double value)
         {
-            string data = "Measure_T1=" + value.ToString("0.00");
+            string data = ItemKey.Measure_T1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleConstructionType(string keyRef)
@@ -1779,7 +1885,7 @@ namespace Ord_Eancom
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                return "ConstructionType=" + articleInfo[OrderConstants.ArticleConstructionId_InFile_Position] + Separator.NewLine;
+                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleConstructionId_InFile_Position] + Separator.NewLine;
             }
             return null;
         }
@@ -1792,35 +1898,35 @@ namespace Ord_Eancom
                 case "0":
                     return null;
                 case "1":
-                    hinge = "L";
+                    hinge = ItemValue.Left_Hinge;
                     break;
                 case "2":
-                    hinge = "R";
+                    hinge = ItemValue.Right_Hinge;
                     break;
                 default:
                     return null;
             }
-            return "Hinge=" + hinge + Separator.NewLine;
+            return ItemKey.Hinge + KD.StringTools.Const.EqualSign + hinge + Separator.NewLine;
         }
         private string ArticlePolyType(int polyType)
         {
-            return "PolyType=" + polyType.ToString() + Separator.NewLine;
+            return ItemKey.PolyType + KD.StringTools.Const.EqualSign + polyType.ToString() + Separator.NewLine;
         }
         private string ArticlePolyCounter(int polyCounter)
         {
-            return "PolyCounter=" + polyCounter.ToString() + Separator.NewLine;
+            return ItemKey.PolyCounter + KD.StringTools.Const.EqualSign + polyCounter.ToString() + Separator.NewLine;
         }
         private string ArticlePolyPointX(int counter, string value)
         {
-            return "PolyPntX_" + counter.ToString("0000") + "=" + value.ToString() + Separator.NewLine;
+            return ItemKey.PolyPntX + KD.StringTools.Const.Underscore + counter.ToString(SegmentFormat.FourZero) + KD.StringTools.Const.EqualSign + value.ToString() + Separator.NewLine;
         }
         private string ArticlePolyPointY(int counter, string value)
         {
-            return "PolyPntY_" + counter.ToString("0000") + "=" + value.ToString() + Separator.NewLine;
+            return ItemKey.PolyPntY + KD.StringTools.Const.Underscore + counter.ToString(SegmentFormat.FourZero) + KD.StringTools.Const.EqualSign + value.ToString() + Separator.NewLine;
         }
         private string ArticlePolyPointZ(int counter, string value)
         {
-            return "PolyPntZ_" + counter.ToString("0000") + "=" + value.ToString() + Separator.NewLine;
+            return ItemKey.PolyPntZ + KD.StringTools.Const.Underscore + counter.ToString(SegmentFormat.FourZero) + KD.StringTools.Const.EqualSign + value.ToString() + Separator.NewLine;
         }
 
         public void EGIOrderFile()
@@ -1838,7 +1944,19 @@ namespace Ord_Eancom
                 fs.Dispose();
             }
         }
+
+        private string GetShapeNumberByType(string keyRef)
+        {
+            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
+            if (articleInfos != null)
+            {
+                string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
+                return articleInfo[OrderConstants.ArticleShape_InFile_Position];
+            }
+            return KD.StringTools.Const.Zero;
+        }        
         #endregion
     }
-
 }
+

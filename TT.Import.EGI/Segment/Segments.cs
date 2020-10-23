@@ -1,15 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using KD.Model;
+using KD.Config;
 
 namespace TT.Import.EGI
 {
+    public class SegmentFormat
+    {
+        public const string CommentChar = "#";
+        public const string DotDecimal = "0.00";
+        public const string FourZero = "0000";
+    }
+
     public class SegmentName
     {
         public const string Global = "Global";
         public const string Wall_ = "Wall_";
+        public const string Door_ = "Door_";
+        public const string Window_ = "Window_";
+        public const string Recess_ = "Recess_";
+        public const string Hindrance_ = "Hindrance_";
         public const string Article_ = "Article_";
     }
 
@@ -33,13 +43,16 @@ namespace TT.Import.EGI
         public const string RefPntX = "RefPntX";
         public const string RefPntY = "RefPntY";
         public const string RefPntZ = "RefPntZ";
+        public const string Measure_ = "Measure_";
         public const string Measure_B = "Measure_B";
         public const string Measure_B1 = "Measure_B1";
         public const string Measure_B2 = "Measure_B2";
         public const string Measure_B3 = "Measure_B3";
+        public const string Measure_BE = "Measure_BE";
         public const string Measure_H = "Measure_H";
         public const string Measure_T = "Measure_T";
         public const string Measure_T1 = "Measure_T1";
+        public const string Measure_TE = "Measure_TE";
         public const string AngleZ = "AngleZ";
         public const string Name = "Name";
         //public const string Name_ = "#Name"; // # mean comment
@@ -51,39 +64,54 @@ namespace TT.Import.EGI
         public const string PolyPntX = "PolyPntX";
         public const string PolyPntY = "PolyPntY";
         public const string PolyPntZ = "PolyPntZ";
+
+        public const string WallRefNo = "WallRefNo";
+        public const string Opening = "Opening";
+        public const string RefPntXRel = "RefPntXRel";
+        public const string RefPntYRel = "RefPntYRel";
+        public const string RefPntZRel = "RefPntZRel";
     }
 
     public class ItemValue
     {
+        public const string V1_50 = "V1.50"; //DISCAC
+        public const string V1_51 = "V1.51"; //FBD //BAUFORMAT
         public const string Left_Hinge = "L";
         public const string Right_Hinge = "R";
+        public const string InWards = "I";
+        public const string OutWard = "O";
+        public const string Slide = "S";
+        public const string None = "N";
+
+        public const string Shape_20_CornerOrFiler = "20";
+        public const string Shape_27_AngleWithFiler = "27";
     }
 
     public class PolytypeValue
     {
-        private const string Meaning_Base = "Base";
-        private const string Meaning_WorkTop = "Work Top";
-        private const string Meaning_WallConnection = "Wall Connection";
-        private const string Meaning_LightPelmet = "Light Pelmet";
-        private const string Meaning_Cornice = "Cornice";
-        private const string Meaning_MouldedFloor = "Moulded Floor";
-        private const string Meaning_Railing = "Railing";
-        private const string Meaning_Hindrance = "Hindrance";
+        public const string Meaning_Base = "Base";
+        public const string Meaning_WorkTop = "Work Top";
+        public const string Meaning_WallConnection = "Wall Connection";
+        public const string Meaning_LightPelmet = "Light Pelmet";
+        public const string Meaning_Cornice = "Cornice";
+        public const string Meaning_MouldedFloor = "Moulded Floor";
+        public const string Meaning_Railing = "Railing";
+        public const string Meaning_Hindrance = "Hindrance";
 
-        private const string Z_Coordinate_Top = "Top Edge";
-        private const string Z_Coordinate_Bottom = "Bottom Edge";
+        public const string Z_Coordinate_Top = "Top Edge";
+        public const string Z_Coordinate_Bottom = "Bottom Edge";
 
-        private const string Polyline_Open = "Open";
-        private const string Polyline_Closed = "Closed";
+        public const string Polyline_Open = "Open";
+        public const string Polyline_Closed = "Closed";
 
-        private const int Polytype_Base = 1;
-        private const int Polytype_WorkTop = 2;
-        private const int Polytype_WallConnection = 3;
-        private const int Polytype_LightPelmet = 4;
-        private const int Polytype_Cornice = 5;
-        private const int Polytype_MouldedFloor = 6;
-        private const int Polytype_Railing = 7;
-        private const int Polytype_Hindrance = 99;
+        public const int Polytype_Base = 1;
+        public const int Polytype_WorkTop = 2;
+        public const int Polytype_WallConnection = 3;
+        public const int Polytype_LightPelmet = 4;
+        public const int Polytype_Cornice = 5;
+        public const int Polytype_MouldedFloor = 6;
+        public const int Polytype_Railing = 7;
+        public const int Polytype_Hindrance = 99;
 
         private int _polytype = 0;
         public int Polytype
@@ -110,6 +138,7 @@ namespace TT.Import.EGI
                 _meaning = value;
             }
         }
+
 
         private string _z_Coordinate;
         public string Z_Coordinate
@@ -198,5 +227,138 @@ namespace TT.Import.EGI
             }
 
         }
+    } 
+
+    public class CatalogBlockName
+    {
+        public const string Filer = "Fileur";
+        public const string FilerCode = "@F";
+        public const string Coin = "_COIN";        
+    }
+
+    public class CatalogConstante
+    {
+        public const double FrontDepth = 20.0;
+    }
+
+    public class SegmentClassification
+    {
+        private Article _article;
+
+        public Article Article
+        {
+            get
+            {
+                return _article;
+            }
+            set
+            {
+                _article = value;
+            }
+        }
+
+        private string _section;
+        private IniFile _currentFileEGI = null;
+
+        public SegmentClassification(Article article)
+        {
+            _article = article;
+        }
+        public SegmentClassification(string section, IniFile currentFileEGI)
+        {           
+            _section = section;
+            _currentFileEGI = currentFileEGI;
+        }
+        public SegmentClassification(Article article, string section, IniFile currentFileEGI)
+        {
+            _article = article;
+            _section = section;
+            _currentFileEGI = currentFileEGI;
+        }
+
+        public bool HasSectionPolytype()
+        {
+            if (!String.IsNullOrEmpty(_currentFileEGI.GetStringValue(_section, ItemKey.PolyType)))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool HasSectionMeasureT1()
+        {
+            if (!String.IsNullOrEmpty(_currentFileEGI.GetStringValue(_section, ItemKey.Measure_T1)))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool IsSectionSpecialShape()
+        {
+            if (IsSectionAngleWithFiler() || IsSectionCorner())
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool IsSectionAngleWithFiler() //Shape 27 Angle
+        {
+            string value = _currentFileEGI.GetStringValue(_section, ItemKey.Shape);
+            if (!String.IsNullOrEmpty(value))
+            {
+                if (value == ItemValue.Shape_27_AngleWithFiler)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsSectionCorner() //Shape 20 filer
+        {
+            string value = _currentFileEGI.GetStringValue(_section, ItemKey.Shape);
+            if (!String.IsNullOrEmpty(value))
+            {
+                if (value == ItemValue.Shape_20_CornerOrFiler)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleFiler()
+        {
+            if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
+                this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool IsArticleCornerFiler()
+        {
+            if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
+                this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
+            {
+                if (this.Article.Name.ToUpper().Contains("90".ToUpper()) || this.Article.Name.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleUnit()
+        {
+            if (this.Article.HighUnitic == 0)
+            {
+                if (this.Article.Layer == 3 || this.Article.Layer == 4 || this.Article.Layer == 9 || this.Article.Layer == 10)
+                {
+                    if (!this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                    {
+                        return true;
+                    }                    
+                }
+            }
+            return false;
+        }
     }
 }
+

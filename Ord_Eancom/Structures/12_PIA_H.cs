@@ -125,11 +125,14 @@ namespace Eancom
             if (codeAndName.Length == 3)
             {
                 string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                string name = codeAndName[2];
-                int nameCharStart = 0;                
+                code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
 
+                string name = codeAndName[2];
+                name = _orderInformationsFromArticles.ReleaseChar(name);
+
+                int nameCharStart = 0;
                 for (int c = 0; c < Utility.finishLineMaxNb; c++)
-                {
+                {                    
                     code = utility.GetCodeLen(code);
                     
                     StringBuilder codeStringBuilder = utility.CodeStringBuilder(code);
@@ -166,13 +169,16 @@ namespace Eancom
                     if (codeAndName.Length == 4)
                     {
                         string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                        code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+
                         if (utility.IsPlinth(codeAndName[3]))//Cause exept plinth height 402 //KD.StringTools.Const.TrueCamelCase
                         {
                             continue;
                         } 
                         string name = codeAndName[2];
-                        int nameCharStart = 0;                       
+                        //name = _orderInformationsFromArticles.ReleaseChar(name);
 
+                        int nameCharStart = 0;
                         for (int c = 0; c < Utility.finishLineMaxNb; c++)
                         {
                             code = utility.GetCodeLen(code);

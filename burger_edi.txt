@@ -7,7 +7,7 @@ OK - 1 - NAD + BY + <numéro client chez le fournisseur> :: 91 ++ TRANSTEC CUISI
 
 OK - 1 - Dans votre exemple, NAD + BY + 10008 :: 9 ++ TRANSTEC CUISINES BF ++ 12 avenue des prés - - + Montigny-le-bretonneux ++ 78180 + 'a été transmis, où 10008 n'est pas un ILN valide.
 
-En cours - 2 - Les variantes 402, 700 et 750 doivent être transférées à chaque commande
+OK - 2 - Les variantes 402, 700 et 750 doivent être transférées à chaque commande
 OK - 3 - Les attaques doivent être transmises comme suit:
 OK - 3 - PIA + 1 + <L / R / M>: 6 :: 91 '
 
@@ -16,8 +16,15 @@ OK - 3 - Dans votre exemple, PIA + 1 + J: 6 :: 91 'a été transmis
 OK - 4 - La profondeur d'une armoire doit toujours être transmise dans le fichier EGI sans l'épaisseur de la façade:
 OK - 4 - Mesure_T = 575,00 => Mesure_T = 555,00
 
-En cours - 5 - Puis j'ai remarqué que vous n'aviez pas commandé avec un catalogue actuel. Les articles ECO ... etc. ne sont plus inclus dans le nouveau catalogue 2020.
+OK - 5 - Puis j'ai remarqué que vous n'aviez pas commandé avec un catalogue actuel. Les articles ECO ... etc. ne sont plus inclus dans le nouveau catalogue 2020.
 
 Je suis heureux de répondre à toute question supplémentaire.
 
 Cordialement
+
+
+Remarque suite réunion le 30/09/2020
+OK - 1 - Hauteur de socle mettre uniqueme la valeur dans le code du catalogue
+OK - 2 - FTX+ZZZ EGI description EDIGRAPH
+
+

@@ -60,6 +60,7 @@
   <ItemGroup>
     <Reference Include="KD.Plugin.Word">
       <HintPath>..\..\..\..\Ic90dev\Plugins\Standard\Word\KD.Plugin.Word.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="kd.sdk, Version=8.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -184,6 +185,9 @@
       <Link>src\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="..\TT.Import.EGI\Segment\Segments.cs">
+      <Link>Segment\Segments.cs</Link>
+    </Compile>
     <Compile Include="Eancom.cs" />
     <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>
@@ -221,6 +225,7 @@
     <Compile Include="Structures\22_UNZ.cs" />
     <Compile Include="Structures\02_UNB.cs" />
     <Compile Include="Structures\03_UNH.cs" />
+    <Compile Include="CountryTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form\MainForm.resx">

@@ -293,8 +293,18 @@ namespace Eancom
         }
         public string Add_EDPNumber(Article article) //EDI
         {
-            _e4347 = PIA_A.E4347_5;
-            c212.E7140 = utility.DelCharAndAllAfter(article.CodeNoDoublons, KD.StringTools.Const.Underscore);
+            _e4347 = PIA_A.E4347_5;           
+            c212.E7140 = String.Empty;//utility.DelCharAndAllAfter(article.CodeNoDoublons, KD.StringTools.Const.Underscore);
+
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);            
+            if (!String.IsNullOrEmpty(articleReferenceKey))
+            {
+                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
+                if (articleInformation.Length > OrderConstants.ArticleEDPNumber_InFile_Position)
+                {
+                    c212.E7140 = articleInformation[2];
+                }
+            }
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {

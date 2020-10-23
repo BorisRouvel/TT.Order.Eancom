@@ -203,9 +203,11 @@
     <Compile Include="ManageCatalog.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Segment\DoorSegment.cs" />
     <Compile Include="Segment\GlobalSegment.cs" />
     <Compile Include="Segment\Segments.cs" />
     <Compile Include="Segment\WallSegment.cs" />
+    <Compile Include="Segment\WindowSegment.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

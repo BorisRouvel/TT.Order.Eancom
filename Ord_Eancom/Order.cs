@@ -179,7 +179,7 @@ namespace Ord_Eancom
                 if (!this.IsMailAddressValid(MainForm.EmailTo) || !this.IsMailAddressValid(MainForm.EmailCc))
                 {
                     MessageBox.Show("Adresse mail non valide.", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Main(callParamsBlock, articles);                  
+                    this.Main(callParamsBlock, articles);                 
                 }               
             }        
 
@@ -198,6 +198,11 @@ namespace Ord_Eancom
                 }
 
                 orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
+
+                // put method at the end for ??
+                // control this if miss some infos in EDI file
+                orderWrite.BuildEDI(articles);
+                orderWrite.EDIOrderFileStream();
 
                 if (MainForm.IsChoiceExportEGI)
                 {
@@ -221,8 +226,10 @@ namespace Ord_Eancom
                     orderWrite.BuildOrder();
                 }
 
-                orderWrite.BuildEDI(articles);
-                orderWrite.EDIOrderFileStream();
+                // put method ahead for list RFF_A object refpos number
+                // control this if miss some infos in EDI file
+                //orderWrite.BuildEDI(articles);
+                //orderWrite.EDIOrderFileStream();
 
                 orderWrite.ZIPOrderFile();
             }

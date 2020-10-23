@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KD.Model;
 
 using Ord_Eancom;
+using TT.Import.EGI;
 
 namespace Eancom
 {
@@ -73,11 +74,19 @@ namespace Eancom
                 }
                 else
                 {
-                    Article parent = this.GetParent(article);
-                    string parentChildLevel = this.GetChildLevel(parent, childLevel);
+                    //case of a filer is a component of a Coin, set the number yet
+                    if (article.Name.ToUpper().Contains(article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                    {
+                        c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                    }
+                    else
+                    {
+                        Article parent = this.GetParent(article);
+                        string parentChildLevel = this.GetChildLevel(parent, childLevel);
 
-                    childLevelList.Add(parentChildLevel);
-                    c506.E1154 = parentChildLevel;
+                        childLevelList.Add(parentChildLevel);
+                        c506.E1154 = parentChildLevel;
+                    }
                 }
 
                 if (c506.E1154.StartsWith(KD.Const.UnknownId.ToString()))

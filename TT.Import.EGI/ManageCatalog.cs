@@ -10,6 +10,7 @@ namespace TT.Import.EGI
     public class ManageCatalog
     {
         private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
+        public const string ConstraintCatalogName = "@CONSTR";
 
         private string _catalogManufacturer = String.Empty;
         public string CatalogManufacturer

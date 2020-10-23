@@ -164,7 +164,7 @@ namespace Eancom
         {
             return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
         }
-        public string GetCsvValue(string value, int position)
+        public string GetCsvValue(string value, int position = 1)
         {            
            foreach (string dataLine in rowList)
             {

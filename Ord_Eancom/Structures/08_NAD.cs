@@ -17,6 +17,9 @@ namespace Eancom
         public const string E3035_AB = "AB"; //Not use yet
         public const string E3035_MA = "MA"; //Not use yet
 
+        private string nadBYCompare = String.Empty;
+        private string nadDPCompare = String.Empty;
+
         private string _e3035;
         public string E3035
         {
@@ -307,7 +310,10 @@ namespace Eancom
         //Be careful to don't add a segement line number (0)
         public bool IsBYequalDDP() 
         {
-            if (this.Add_BY(0).Equals(this.Add_Delivery_DP(0)))
+            nadBYCompare = this.Add_BY(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_BY + Separator.DataGroup, String.Empty);
+            nadDPCompare = this.Add_Delivery_DP(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_DP + Separator.DataGroup, String.Empty);
+
+            if (nadBYCompare.Equals(nadDPCompare))
             {
                 return true;
             }

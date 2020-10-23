@@ -34,18 +34,7 @@ namespace TT.Import.EGI
                 _wall = value;
             }
         }
-        //public Segment Segment
-        //{
-        //    get
-        //    {
-        //        return _segment;
-        //    }
-        //    set
-        //    {
-        //        _segment = value;
-        //    }
-        //}
-
+     
         public double RefPntX
         {
             get
@@ -176,7 +165,6 @@ namespace TT.Import.EGI
             this.SetAngle();
         }
         
-
         private void Place()
         {
             int wallId = _plugin.CurrentAppli.Scene.EditPlaceWalls((int)this.Depth, (int)this.Height, shapeWallPoint);
@@ -184,23 +172,23 @@ namespace TT.Import.EGI
         }
         private void SetDimensions()
         {
-            this.Wall.DimensionX = this.Width; 
-            this.Wall.DimensionY = this.Depth;
-            this.Wall.DimensionZ = this.Height;
+            _wall.DimensionX = this.Width;
+            _wall.DimensionY = this.Depth;
+            _wall.DimensionZ = this.Height;
         }
         private void SetPositions()
         {
             _plugin.SetReference();
 
-            this.Wall.PositionX = this.RefPntX;
-            this.Wall.PositionY = this.RefPntY;
-            this.Wall.PositionZ = this.RefPntZ;
+            _wall.PositionX = this.RefPntX;
+            _wall.PositionY = this.RefPntY;
+            _wall.PositionZ = this.RefPntZ;
         }
         private void SetAngle()
         {
             _plugin.SetReference();
 
-            this.Wall.AngleOXY = this.AngleZ;
+            _wall.AngleOXY = this.AngleZ;
         }
      
     }

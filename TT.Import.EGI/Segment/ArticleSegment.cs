@@ -18,10 +18,17 @@ namespace TT.Import.EGI
         private double _measure_B1 = 0.0;
         private double _measure_B2 = 0.0;
         private double _measure_B3 = 0.0;
+        private double _measure_BE = 0.0;
         private double _measure_T = 0.0;
         private double _measure_T1 = 0.0;
+        private double _measure_TE = 0.0;
         private double _measure_H = 0.0;
         private double _angleZ = 0.0;
+
+        private double _dimX = 0.0;
+        private double _dimY = 0.0;
+        private double _dimZ = 0.0;
+        private double _angZ = 0.0;
 
         private string _manufacturer = String.Empty;
         private string _name = String.Empty;
@@ -38,12 +45,13 @@ namespace TT.Import.EGI
         private string _section = String.Empty;
         private KD.Config.IniFile _currentFileEGI = null;
         private ManageCatalog _manageCatalog = null;
+        private PolytypeValue polytypeValue = null;
 
         //private List<String> notPlacedArticleList = new List<string>(0);
         //private Dictionary<int, string> articleAlreadyPlacedDict = new Dictionary<int, string>(0);
 
-        public const string RefPointFormat = "0000";        
-        
+        private const string RefPointFormat = SegmentFormat.FourZero;       
+
         public double RefPntX
         {
             get
@@ -121,6 +129,17 @@ namespace TT.Import.EGI
                 _measure_B3 = value;
             }
         }
+        public double Measure_BE
+        {
+            get
+            {
+                return _measure_BE;
+            }
+            set
+            {
+                _measure_BE = value;
+            }
+        }
         public double Measure_T
         {
             get
@@ -143,6 +162,17 @@ namespace TT.Import.EGI
                 _measure_T1 = value;
             }
         }
+        public double Measure_TE
+        {
+            get
+            {
+                return _measure_TE;
+            }
+            set
+            {
+                _measure_TE = value;
+            }
+        }
         public double Measure_H
         {
             get
@@ -163,6 +193,51 @@ namespace TT.Import.EGI
             set
             {
                 _angleZ = value;
+            }
+        }
+
+        public double DimX
+        {
+            get
+            {
+                return _dimX;
+            }
+            set
+            {
+                _dimX = value;
+            }
+        }
+        public double DimY
+        {
+            get
+            {
+                return _dimY;
+            }
+            set
+            {
+                _dimY = value;
+            }
+        }
+        public double DimZ
+        {
+            get
+            {
+                return _dimZ;
+            }
+            set
+            {
+                _dimZ = value;
+            }
+        }
+        public double AngZ
+        {
+            get
+            {
+                return _angZ;
+            }
+            set
+            {
+                _angZ = value;
             }
         }
 
@@ -360,24 +435,29 @@ namespace TT.Import.EGI
             _refPntZ = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.RefPntZ));
 
             _measure_B = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B));
-            _measure_T = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_T));
+            _dimX = _measure_B;
+            _measure_T = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_T));// + ArticleSegment.FrontDepth;
+            _dimY = _measure_T;
             _measure_H = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_H));
+            _dimZ = _measure_H;
 
             _angleZ = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.AngleZ));
+            _angZ = _angleZ;
 
-            //_measure_B1 = KD.StringTools.Convert.ToDouble(this.CurrentFileEGI.GetStringValue(_section, ItemKey.Measure_B1));
-            //_measure_B2 = KD.StringTools.Convert.ToDouble(this.CurrentFileEGI.GetStringValue(_section, ItemKey.Measure_B2));
-            //_measure_B3 = KD.StringTools.Convert.ToDouble(this.CurrentFileEGI.GetStringValue(_section, ItemKey.Measure_B3));
-            //_measure_T1 = KD.StringTools.Convert.ToDouble(this.CurrentFileEGI.GetStringValue(_section, ItemKey.Measure_T1));
+            _measure_B1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B1));
+            _measure_B2 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B2));
+            _measure_B3 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B3));
+            _measure_T1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_T1));// + ArticleSegment.FrontDepth;
+            _measure_BE = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_BE));
+            _measure_TE = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_TE));
 
             _polyType = _currentFileEGI.GetStringValue(_section, ItemKey.PolyType);
             _polyCounter = _currentFileEGI.GetStringValue(_section, ItemKey.PolyCounter);
 
         }
 
-
-
-        public void PlaceArticle(string section, List<string> catalogsList)
+        // i must organise SHAPE when 20 = filer, 27 = angle (file IDM17_sous-version2_Partie3_fr_nouvelleversion)
+        public void Add(string section, List<string> catalogsList)
         {
             _manageCatalog.SetLastManufacturerCatalog(catalogsList);
 
@@ -391,30 +471,37 @@ namespace TT.Import.EGI
                 }
                 else
                 {
-                    this.CatalogManufacturer = _manageCatalog.CatalogManufacturer;
-                    this.PlaceObject();
+                    this.CatalogManufacturer = _manageCatalog.CatalogManufacturer;                    
+                    _article = this.PlaceObject();
 
                     if (this.Article != null && this.Article.IsValid)
                     {
-                        this.MoveArticlePerRepere();
-                        if (this.HasMeasureT1())
+                        SegmentClassification segmentClassification = new SegmentClassification(this.Article, _section, _currentFileEGI);
+                        if (segmentClassification.IsSectionCorner() && segmentClassification.IsArticleFiler()) //shape 20 and filer
                         {
-                            if (this.IsAngle())
+                            _name += CatalogBlockName.Coin;
+                            _article = this.ReplaceObject();
+                            this.ChangeFilerDimensions();                           
+                            this.ChangeFilerChildDimensions();
+                        }
+                        else
+                        {
+                            this.MoveArticlePerRepere();                           
+
+                            if (segmentClassification.IsArticleUnit())
                             {
-                                this.SetAngleDimensionsFromEGI();
-                                this.SetAngleChildDimensions();
-                                this.SetAnglePositionAngle();
+                                this.ChangeCarcasseDimY();
                             }
-                            if (this.IsCorner())
-                            {
-                                this.SetCornerDimensions();
-                            }
+                        }                        
+                       
+                        if (segmentClassification.IsSectionAngleWithFiler()) //shape 27 angle
+                        {
+                            this.SetAngleDimensionsFromEGI();
+                            this.SetAngleChildDimensions();
+                            this.SetAnglePositionAngle();
                         }
 
-                        if (!String.IsNullOrEmpty(this.RefPos) && !this.RefPos.Contains(KD.StringTools.Const.Dot))
-                        {
-                            this.Article.Number = Convert.ToInt16(this.RefPos);
-                        }
+                        this.SetArticleNumber();
                         this.AddPlacedArticleDict(this.Article, this.RefPos);
                     }
                     else
@@ -422,7 +509,7 @@ namespace TT.Import.EGI
                         if (catalogsList.Count > 1)
                         {
                             catalogsList.Remove(_manageCatalog.CatalogManufacturer);
-                            this.PlaceArticle(section, catalogsList);
+                            this.Add(section, catalogsList);
                         }
                         else
                         {
@@ -431,52 +518,54 @@ namespace TT.Import.EGI
                     }
                 }
             }
-        }
-
-        private int GetLinearType(string type)
-        {
-            PolytypeValue polytypeValue = new PolytypeValue(Convert.ToInt16(type));
-            return polytypeValue.Number();
-
-            #region // First edit
-            //switch (type)
-            //{
-            //    case "1": //Plinthe
-            //        return 0;
-            //    case "2": //WorkTop
-            //        return 1;
-            //    case "3": //Cache lumière
-            //        return 2;
-            //    case "4": //Corniche
-            //        return 3;
-            //    case "5": //Edge workTop
-            //        return 4;
-            //    default:
-            //        return -1;
-            //}
-            #endregion
-        }
-        public void PlaceLinearArticle( string section, List<string> catalogsList)
+        } 
+        public void AddLinear(string section, List<string> catalogsList)
         {
             string polyPoints = String.Empty;
             string typePoint = "0;";
-            //polyType = this.GetPolyTypeFromEGI(section);
-            //int linearType = this.GetLinearType(polyType); // not used actually
+            
+            string polyType = this.GetPolyTypeFromEGI(section);
+            int linearType = this.GetLinearType(polyType); 
             //polyCounter = segment.SetPolyCounterFromEGI();
+            
             int.TryParse(this.PolyCounter, out int valueCounter);
 
             if (valueCounter != 0)
             {
+                string polyFirstPoints = String.Empty;
                 for (int count = 1; count <= valueCounter; count++)
                 {
-                    string polyPntX = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntX + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat)) + KD.StringTools.Const.Comma;
-                    string polyPntY = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntY + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat)) + KD.StringTools.Const.Comma;
-                    string polyPntZ = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntZ + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat)) + KD.StringTools.Const.Comma;
-                    
+                    string polyPntX = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntX + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat));
+                    string polyPntY = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntY + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat));
+                    string polyPntZ = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntZ + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat));
+
+                    if (linearType.Equals(PolytypeValue.Polytype_WorkTop))
+                    {
+                        polyPntX = (KD.StringTools.Convert.ToDouble(polyPntX) + Plugin.sceneDimX).ToString();
+                        polyPntY = (KD.StringTools.Convert.ToDouble(polyPntY) + Plugin.sceneDimY).ToString();
+                    }
+
+                    polyPntX += KD.StringTools.Const.Comma;
+                    polyPntY += KD.StringTools.Const.Comma;
+                    polyPntZ += KD.StringTools.Const.Comma;
+
                     polyPoints += polyPntX + polyPntY + polyPntZ + typePoint;
+
+                    // For the closed linear like worktop, moulded floor and hindrance, stock the first point
+                    if (count == 1)
+                    {
+                        polyFirstPoints = polyPoints;
+                    }
                 }
-                polyPoints = polyPoints.Substring(0, polyPoints.Length - 1);
+                // For the closed linear like worktop, moulded floor and hindrance, add first point
+                if (polytypeValue.Polyline.Equals(PolytypeValue.Polyline_Closed))
+                {
+                    polyPoints += polyFirstPoints;
+                }
+
+                polyPoints = polyPoints.Substring(0, polyPoints.Length - 1);               
                 _plugin.CurrentAppli.Scene.SceneAddShape(polyPoints);
+                bool bshape = _plugin.CurrentAppli.Scene.SceneSetActiveShapeRank(0);
 
                 bool isPlace = false;
                 string linearReferences = String.Empty;
@@ -510,8 +599,31 @@ namespace TT.Import.EGI
                         {
                             if (linearReference.StartsWith(this.Name))
                             {
-                                isPlace = _plugin.CurrentAppli.Scene.EditPlaceLinearObject(_manageCatalog.CatalogManufacturer, linearReference, KD.StringTools.Const.Zero, true);
+                                if (linearType.Equals(PolytypeValue.Polytype_WorkTop))
+                                {
+                                    double positionZ = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.RefPntZ));
+                                    double dimensionZ = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.Measure_H));
+                                    // perhaps put the "_GAB" reference but there is not all references in catalog, often the most width AP10K120_GEB
+                                    _plugin.SetReference();
+                                    int linearId = _plugin.CurrentAppli.Scene.EditPlaceObject(_manageCatalog.CatalogManufacturer, linearReference, 0, 1000, 1000, (int)dimensionZ, 1, 1, (int)positionZ, 0, 0, false, false, false);                                    
+
+                                    if (!linearId.Equals(KD.Const.UnknownId))
+                                    {
+                                        _plugin.CurrentAppli.Scene.ObjectSetShape(linearId, polyPoints);
+                                    }
+                                    //else
+                                    //{
+                                    //    linearId = _plugin.CurrentAppli.Scene.EditPlaceObject(_manageCatalog.CatalogManufacturer, linearReference, 0, 1000, 1000, (int)dimensionZ, 1, 1, (int)positionZ, 0, 0, false, false, false);
+                                    //    _plugin.CurrentAppli.Scene.ObjectSetShape(linearId, polyPoints);
+                                    //}
+                                }
+                                else
+                                {
+                                    _plugin.SetReference();
+                                    isPlace = _plugin.CurrentAppli.Scene.EditPlaceLinearObject(_manageCatalog.CatalogManufacturer, linearReference, KD.StringTools.Const.Zero, true);                                    
+                                }
                                 linearRef = linearReference;
+                                isPlace = true;
                                 break;
                             }
                         }
@@ -520,7 +632,7 @@ namespace TT.Import.EGI
                             if (catalogsList.Count > 1)
                             {
                                 catalogsList.Remove(_manageCatalog.CatalogManufacturer);
-                                this.PlaceLinearArticle(section, catalogsList);
+                                this.AddLinear(section, catalogsList);
                             }
                             else
                             {
@@ -541,60 +653,43 @@ namespace TT.Import.EGI
                             //}
                         }
                     }
-                   // _plugin.SetReference();
+                    // _plugin.SetReference();
                 }
 
-                //_plugin.CurrentAppli.Scene.SceneDeleteAllShapes();
+                _plugin.CurrentAppli.Scene.SceneDeleteAllShapes();
             }
+            
         }
 
-
-
-
-
-
-        public bool HasPolytype()
+        private int GetLinearType(string type)
         {
-            if (!String.IsNullOrEmpty(_currentFileEGI.GetStringValue(_section, ItemKey.PolyType)))
-            {
-                return true;
-            }
-            return false;
+            polytypeValue = new PolytypeValue(Convert.ToInt16(type));
+            return polytypeValue.Number();
+
+            #region // First edit
+            //switch (type)
+            //{
+            //    case "1": //Plinthe
+            //        return 0;
+            //    case "2": //WorkTop
+            //        return 1;
+            //    case "3": //Cache lumière
+            //        return 2;
+            //    case "4": //Corniche
+            //        return 3;
+            //    case "5": //Edge workTop
+            //        return 4;
+            //    default:
+            //        return -1;
+            //}
+            #endregion
         }
-        public bool HasMeasureT1()
+        private string GetPolyTypeFromEGI(string section)
         {
-            if (!String.IsNullOrEmpty(_currentFileEGI.GetStringValue(_section, ItemKey.Measure_T1)))
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsAngle()
-        {
-            string value = _currentFileEGI.GetStringValue(_section, ItemKey.Shape);
-            if (!String.IsNullOrEmpty(value))
-            {
-                if (value == "27")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        public bool IsCorner()
-        {
-            string value = _currentFileEGI.GetStringValue(_section, ItemKey.Shape);
-            if (!String.IsNullOrEmpty(value))
-            {
-                if (value == "20")
-                {
-                    return true;
-                }
-            }
-            return false;
+            return _currentFileEGI.GetStringValue(section, ItemKey.PolyType);
         }
 
-        public void PlaceObject()
+        private Article PlaceObject()
         {
             _plugin.SetReference();           
 
@@ -613,11 +708,11 @@ namespace TT.Import.EGI
 
             if (!objectID.Equals(KD.Const.UnknownId))
             {
-                _article = new Article(_plugin.CurrentAppli, objectID);
+                return new Article(_plugin.CurrentAppli, objectID);
             }
-            
+            return null;
         }
-        public Article PlaceComponentObject()
+        private Article PlaceComponentObject()
         {
             if (this.RefPos.Contains(KD.StringTools.Const.Dot))
             {
@@ -665,69 +760,121 @@ namespace TT.Import.EGI
             }
             return null;
         }
-        public void MoveArticlePerRepere()
+        private Article ReplaceObject()
+        {
+            _plugin.SetReference();
+
+            bool bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.Name, this.HingeType, (int)this.Measure_B,
+                (int)this.Measure_T, (int)this.Measure_H, false);
+
+            if (!bReplace)
+            {
+                _plugin.SetReference();
+
+                bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.Name, 0, (int)this.Measure_B,
+                 (int)this.Measure_T, (int)this.Measure_H, false);
+            }
+
+            if (bReplace)
+            {
+                return _plugin.CurrentAppli.ActiveArticle;
+            }
+            return null;
+        }
+        private void MoveArticlePerRepere()
         {
             GlobalSegment globalSegment = new GlobalSegment(this._currentFileEGI);
             string version = globalSegment.GetVersion();
             _plugin.CurrentAppli.SceneComponent.SetReferenceFromObject(this.Article, false);
             switch (version)
             {
-                case GlobalSegment.V1_50: //DISCAC
-                    this.Article.PositionX += this.Measure_B; //w1
-                    this.Article.AngleOXY += 180;
+                case ItemValue.V1_50: //DISCAC
+                    _article.PositionX += this.Measure_B;
+                    _article.AngleOXY += 180;
                     break;
-                case GlobalSegment.V1_51: //FBD et Bauformat
-                    this.Article.PositionX += this.Measure_B; // w1;
-                    this.Article.AngleOXY += 180;
+                case ItemValue.V1_51: //FBD et Bauformat
+                    _article.PositionX += this.Measure_B;
+                    _article.AngleOXY += 180;
                     break;
                 default:
-                    this.Article.PositionX += this.Measure_B; // w1;
-                    this.Article.AngleOXY += 180;
+                    _article.PositionX += this.Measure_B; 
+                    _article.AngleOXY += 180;
                     break;
             }
         }
-        public void SetAngleChildDimensions()
+        private void ChangeCarcasseDimY()
         {
-            this.Article.DimensionY = this.Measure_T1; // dB1;
+            _article.DimensionY += CatalogConstante.FrontDepth;           
+        }
+      
+        private void ChangeFilerDimensions() 
+        {
+            _article.DimensionX = this.Measure_B1; 
+            _article.DimensionY = this.Measure_T1;      
+            _article.AngleOXY -= 90.0;
+        }
+        private void ChangeFilerChildDimensions()
+        {
+            Articles childs = this.Article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+            if (childs != null && childs.Count > 0)
+            {
+                foreach (Article child in childs)
+                {
+                    if (child.Name.ToUpper().Contains(_plugin.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper()))) 
+                    {
+                        child.DimensionX = (this.Measure_B - this.Measure_B1);
+                        child.DimensionY = (this.Measure_T - this.Measure_T1);
+                    }
+                }
+            }
+        }
+       
+        private void SetAnglePositionAngle()
+        {
+            List<string> firstBraceParameters = KD.StringTools.Helper.ExtractParameters(this.Article.Script, String.Empty, KD.StringTools.Const.BraceOpen, KD.StringTools.Const.BraceClose);
+
+            if (this.Article.Handing == _plugin.CurrentAppli.GetTranslatedText("G") && firstBraceParameters.Contains("SI".ToUpper()))
+            {
+                _article.AngleOXY += 90.0;
+                _plugin.SetReference();
+                _article.PositionY += this.Measure_B; // w1;
+            }
+        }
+        private void SetAngleDimensionsFromEGI()
+        {
+            _measure_B1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B1)) + CatalogConstante.FrontDepth; //Distance between filer and vide sanitaire
+            _measure_B2 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B2)); //Width of the front
+            _measure_B3 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B3)); //Width of the carcasse
+            _measure_T -= CatalogConstante.FrontDepth;
+            _measure_T1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_T1)) + CatalogConstante.FrontDepth; //Depth of the carcasse
+        }
+        private void SetAngleChildDimensions()
+        {
+            _article.DimensionY = this.Measure_T1;
 
             Articles childs = this.Article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
             if (childs != null && childs.Count > 0)
             {
                 foreach (Article child in childs)
                 {
-                    if (child.Name.ToUpper().Contains(_plugin.CurrentAppli.GetTranslatedText("Fileur".ToUpper()))) //Name.StartsWith("@F")) 
+                    if (child.Name.ToUpper().Contains(_plugin.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))  
                     {
-                        child.DimensionX = this.Measure_T - this.Measure_T1; // d1 - dB1; //angleFilerWidth;
-                        child.DimensionY = this.Measure_B1; // wB1; // angleFilerDepth;                     
+                        child.DimensionX = this.Measure_T - this.Measure_T1;
+                        child.DimensionY = this.Measure_B1;
                     }
                 }
             }
         }
-        public void SetCornerDimensions()
-        {
-            this.Article.DimensionX = this.Measure_B - this.Measure_B1; // w1 - wB1; //angleFilerWidth;
-            this.Article.DimensionY = this.Measure_T - this.Measure_T1; // d1 - dB1; // angleFilerDepth;            
-        }
-        public void SetAnglePositionAngle()
-        {
-            List<string> firstBraceParameters = KD.StringTools.Helper.ExtractParameters(this.Article.Script, String.Empty, KD.StringTools.Const.BraceOpen, KD.StringTools.Const.BraceClose);
 
-            if (this.Article.Handing == _plugin.CurrentAppli.GetTranslatedText("G") && firstBraceParameters.Contains("SI".ToUpper()))
+        private void SetArticleNumber()
+        {
+            if (!String.IsNullOrEmpty(this.RefPos) && !this.RefPos.Contains(KD.StringTools.Const.Dot))
             {
-                this.Article.AngleOXY += 90.0;
-                _plugin.SetReference();              
-                this.Article.PositionY += this.Measure_B; // w1;
+                _article.Number = Convert.ToInt16(this.RefPos);
             }
         }
-        public void SetAngleDimensionsFromEGI()
-        {
-            _measure_B1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B1));
-            _measure_B2 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B2));
-            _measure_B3 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_B3));
-            _measure_T1 = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_T1));
-        }
 
-        public void AddPlacedArticleDict(Article article, string refPos)
+        private void AddPlacedArticleDict(Article article, string refPos)
         {
             if (article != null && article.IsValid && article.Number != KD.Const.UnknownId)
             {

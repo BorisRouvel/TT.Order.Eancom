@@ -8,9 +8,6 @@ namespace TT.Import.EGI
 {
     public class GlobalSegment
     {
-        public const string V1_50 = "V1.50"; // Discac
-        public const string V1_51 = "V1.51"; // FBD , Bauformat
-
         private string _version = String.Empty;
         private string _system = String.Empty;
         private string _name = String.Empty;

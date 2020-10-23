@@ -77,7 +77,7 @@ namespace Eancom
         {            
             DateTime dateTime = DateTime.Now;
             _e2005 = DTM.C507.E2005_137;
-            _e2380 = dateTime.ToString(OrderConstants.FormatDate_yMd);
+            _e2380 = dateTime.ToString(OrderConstants.FormatDate_4yMd);
             _e2379 = DTM.C507.E2379_102;
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;

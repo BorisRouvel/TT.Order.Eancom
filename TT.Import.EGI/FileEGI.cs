@@ -24,7 +24,7 @@ namespace TT.Import.EGI
         private const string FilterEGIFile = "Fichiers egi (*.egi)|*.egi";
         
         public static string orderDir = String.Empty;
-        private string orderEGIFileName = String.Empty;
+        private string orderEGIFilePath = String.Empty;      
 
         public FileEGI(KD.SDKComponent.AppliComponent currentAppli)
         {
@@ -36,13 +36,15 @@ namespace TT.Import.EGI
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = FileEGI.FilterEGIFile;
-            openFile.InitialDirectory = orderDir;
+            openFile.RestoreDirectory = true;
+            //openFile.InitialDirectory = orderDir;
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 Cursor.Current = Cursors.WaitCursor;
 
-                orderEGIFileName = Path.GetFileName(openFile.FileName);
+                orderEGIFilePath = openFile.FileName;
+               
                 return true;
             }
             return false;       
@@ -52,7 +54,7 @@ namespace TT.Import.EGI
         {
             if (Open())
             {
-                KD.Config.IniFile iniFile = new KD.Config.IniFile(Path.Combine(orderDir, orderEGIFileName));
+                KD.Config.IniFile iniFile = new KD.Config.IniFile(orderEGIFilePath);
                 return iniFile;
             }
             return null;

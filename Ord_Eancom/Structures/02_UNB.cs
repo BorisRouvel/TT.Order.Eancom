@@ -198,7 +198,7 @@ namespace Eancom
             }
 
             DateTime dateTime = DateTime.Now;
-            s004.E0017 = dateTime.ToString(OrderConstants.FormatDate_yMd);
+            s004.E0017 = dateTime.ToString(OrderConstants.FormatDate_2yMd);
             s004.E0019 = dateTime.ToString(OrderConstants.FormatTime_Hm);
             
             Order.orderFile = _orderInformations.GetReferenceNumberEDIFile(_fileEDI);

@@ -73,7 +73,7 @@ namespace Eancom
                 fileType = Convert.ToInt16(OrderEnum.Type.EDIGRAPH).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.EDIGRAPH).ToString();
                 fileName = OrderTransmission.OrderEGIFileName;
-                fileDescription = OrderTransmission.OrderEGIFileName;
+                fileDescription = OrderDescription.EDIGRAPH;
 
                 fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
             }
@@ -91,7 +91,7 @@ namespace Eancom
                     if (jPGfile.ToUpper().Contains(OrderTransmission.PlanName.ToUpper()))
                     {
                         fileName = System.IO.Path.GetFileName(jPGfile);//  OrderTransmission.PlanName + index + OrderTransmission.ExtensionJPG;
-                        fileDescription = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.PlanName + index + OrderTransmission.ExtensionJPG;
+                        fileDescription = OrderDescription.FLOOR_PLAN; // System.IO.Path.GetFileName(jPGfile);// OrderTransmission.PlanName + index + OrderTransmission.ExtensionJPG;
 
                         fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
 
@@ -103,7 +103,7 @@ namespace Eancom
 
             if (MainForm.IsChoiceExportElevation)
             {
-                int index = 1;
+                //int index = 1;
 
                 fileType = Convert.ToInt16(OrderEnum.Type.WALL_FRONT_VIEW).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.JPEG).ToString();
@@ -114,17 +114,17 @@ namespace Eancom
                     if (jPGfile.ToUpper().Contains(OrderTransmission.ElevName.ToUpper()))
                     {
                         fileName = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.ElevName + index + OrderTransmission.ExtensionJPG;
-                        fileDescription = System.IO.Path.GetFileName(jPGfile);// OrderTransmission.ElevName + index + OrderTransmission.ExtensionJPG;
+                        fileDescription = OrderDescription.WALL_FRONT_VIEW; // System.IO.Path.GetFileName(jPGfile);// OrderTransmission.ElevName + index + OrderTransmission.ExtensionJPG;
 
                         fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
-                        index++;
+                        //index++;
                     }
                 }
             }
 
             if (MainForm.IsChoiceExportPerspective)
             {
-                int index = 1;
+                //int index = 1;
 
                 fileType = Convert.ToInt16(OrderEnum.Type.PERSPECTIVE).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.JPEG).ToString();
@@ -135,10 +135,10 @@ namespace Eancom
                     if (jPGfile.ToUpper().Contains(OrderTransmission.PerspectiveName.ToUpper()))
                     {
                         fileName = System.IO.Path.GetFileName(jPGfile);
-                        fileDescription = System.IO.Path.GetFileName(jPGfile);
+                        fileDescription = OrderDescription.PERSPECTIVE; // System.IO.Path.GetFileName(jPGfile);
 
                         fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
-                        index++;
+                        //index++;
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace Eancom
                 fileType = Convert.ToInt16(OrderEnum.Type.OTHER).ToString();
                 fileFormat = Convert.ToInt16(OrderEnum.Format.PDF).ToString();
                 fileName = OrderTransmission.OrderName + OrderTransmission.ExtensionPDF;
-                fileDescription = OrderTransmission.OrderName + OrderTransmission.ExtensionPDF;
+                fileDescription = OrderDescription.OTHER; // OrderTransmission.OrderName + OrderTransmission.ExtensionPDF;
 
                 fileInformation += this.SetAdd(fileType + KD.StringTools.Const.SemiColon + fileFormat + KD.StringTools.Const.SemiColon + fileName + KD.StringTools.Const.SemiColon + fileDescription);
             }
