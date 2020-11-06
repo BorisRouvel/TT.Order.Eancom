@@ -42,7 +42,7 @@ namespace TT.Import.EGI
         private string _polyCounter = String.Empty;
 
         private Plugin _plugin = null;        
-        private string _section = String.Empty;
+        private readonly string _section = String.Empty;
         private KD.Config.IniFile _currentFileEGI = null;
         private ManageCatalog _manageCatalog = null;
         private PolytypeValue polytypeValue = null;
@@ -479,10 +479,17 @@ namespace TT.Import.EGI
                         SegmentClassification segmentClassification = new SegmentClassification(this.Article, _section, _currentFileEGI);
                         if (segmentClassification.IsSectionCorner() && segmentClassification.IsArticleFiler()) //shape 20 and filer
                         {
-                            _name += CatalogBlockName.Coin;
-                            _article = this.ReplaceObject();
-                            this.ChangeFilerDimensions();                           
-                            this.ChangeFilerChildDimensions();
+                            if (segmentClassification.HasSectionCoin())
+                            {
+                                _name += CatalogBlockName.Coin;
+                                _article = this.ReplaceObject();
+                                this.ChangeFilerDimensions();
+                                this.ChangeFilerChildDimensions();
+                            }
+                            else
+                            {
+                                this.ChangeFilerPositionsAndDimensions();
+                            }                           
                         }
                         else
                         {
@@ -525,9 +532,7 @@ namespace TT.Import.EGI
             string typePoint = "0;";
             
             string polyType = this.GetPolyTypeFromEGI(section);
-            int linearType = this.GetLinearType(polyType); 
-            //polyCounter = segment.SetPolyCounterFromEGI();
-            
+            int linearType = this.GetLinearType(polyType);            
             int.TryParse(this.PolyCounter, out int valueCounter);
 
             if (valueCounter != 0)
@@ -539,8 +544,8 @@ namespace TT.Import.EGI
                     string polyPntY = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntY + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat));
                     string polyPntZ = _currentFileEGI.GetStringValue(section, ItemKey.PolyPntZ + KD.StringTools.Const.Underscore + count.ToString(ArticleSegment.RefPointFormat));
 
-                    if (linearType.Equals(PolytypeValue.Polytype_WorkTop))
-                    {
+                    if (linearType.Equals(PolytypeValue.Polytype_WorkTop) || linearType.Equals(PolytypeValue.Polytype_Base))
+                    {                       
                         polyPntX = (KD.StringTools.Convert.ToDouble(polyPntX) + Plugin.sceneDimX).ToString();
                         polyPntY = (KD.StringTools.Convert.ToDouble(polyPntY) + Plugin.sceneDimY).ToString();
                     }
@@ -599,23 +604,27 @@ namespace TT.Import.EGI
                         {
                             if (linearReference.StartsWith(this.Name))
                             {
-                                if (linearType.Equals(PolytypeValue.Polytype_WorkTop))
+                                if (linearType.Equals(PolytypeValue.Polytype_WorkTop) || linearType.Equals(PolytypeValue.Polytype_Base))
                                 {
+                                    double positionX = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.RefPntX));
+                                    double positionY = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.RefPntY));
                                     double positionZ = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.RefPntZ));
+                                    double dimensionX = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.Measure_B));
+                                    double dimensionY = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.Measure_T));
                                     double dimensionZ = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.Measure_H));
-                                    // perhaps put the "_GAB" reference but there is not all references in catalog, often the most width AP10K120_GEB
-                                    _plugin.SetReference();
-                                    int linearId = _plugin.CurrentAppli.Scene.EditPlaceObject(_manageCatalog.CatalogManufacturer, linearReference, 0, 1000, 1000, (int)dimensionZ, 1, 1, (int)positionZ, 0, 0, false, false, false);                                    
+                                    double angleZ = KD.StringTools.Convert.ToDouble(_currentFileEGI.GetStringValue(section, ItemKey.AngleZ));
+                                    //For plinth the position is under the value
+                                    if (linearType.Equals(PolytypeValue.Polytype_Base))
+                                    {
+                                        positionZ -= dimensionZ;
+                                    }
+                                    // perhaps put the "_GAB" reference but there is not all references in catalog, often the most width AP10K120_GAB                                   
+                                    int linearId = _plugin.CurrentAppli.Scene.EditPlaceObject(_manageCatalog.CatalogManufacturer, linearReference, 0, (int)dimensionX, (int)dimensionY, (int)dimensionZ, (int)positionX, (int)positionY, (int)positionZ, 0, angleZ, false, false, false);                                    
 
                                     if (!linearId.Equals(KD.Const.UnknownId))
                                     {
                                         _plugin.CurrentAppli.Scene.ObjectSetShape(linearId, polyPoints);
-                                    }
-                                    //else
-                                    //{
-                                    //    linearId = _plugin.CurrentAppli.Scene.EditPlaceObject(_manageCatalog.CatalogManufacturer, linearReference, 0, 1000, 1000, (int)dimensionZ, 1, 1, (int)positionZ, 0, 0, false, false, false);
-                                    //    _plugin.CurrentAppli.Scene.ObjectSetShape(linearId, polyPoints);
-                                    //}
+                                    }                                   
                                 }
                                 else
                                 {
@@ -652,13 +661,11 @@ namespace TT.Import.EGI
                             //    this.AddPlacedArticleDict(linearArticles[0]);
                             //}
                         }
-                    }
-                    // _plugin.SetReference();
+                    }                   
                 }
 
                 _plugin.CurrentAppli.Scene.SceneDeleteAllShapes();
-            }
-            
+            }            
         }
 
         private int GetLinearType(string type)
@@ -829,6 +836,15 @@ namespace TT.Import.EGI
             }
         }
        
+        private void ChangeFilerPositionsAndDimensions()
+        {
+            _article.PositionX -= CatalogConstante.FrontDepth;
+            _article.PositionY -= CatalogConstante.FrontDepth;
+            _article.DimensionX = this.Measure_B + CatalogConstante.FrontDepth;
+            _article.DimensionY = this.Measure_T + CatalogConstante.FrontDepth;
+            _article.AngleOXY -= 90.0;
+        }
+
         private void SetAnglePositionAngle()
         {
             List<string> firstBraceParameters = KD.StringTools.Helper.ExtractParameters(this.Article.Script, String.Empty, KD.StringTools.Const.BraceOpen, KD.StringTools.Const.BraceClose);

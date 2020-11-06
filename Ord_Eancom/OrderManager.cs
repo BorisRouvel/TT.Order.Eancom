@@ -9,7 +9,6 @@ using KD.SDKComponent;
 using KD.CatalogProperties;
 using KD.Analysis;
 using KD.Model;
-using KD;
 
 using Eancom;
 using TT.Import.EGI;
@@ -108,7 +107,7 @@ namespace Ord_Eancom
     }
 
     public class OrderTransmission
-    {
+    {        
         public const string OrderEDIFileName = "Order.edi";
         public const string OrderEGIFileName = "Order.egi";
         public const string OrderName = "Commande";
@@ -188,7 +187,7 @@ namespace Ord_Eancom
         private readonly CultureInfo provider = CultureInfo.InvariantCulture;
 
         private string supplierID = String.Empty;
-        private List<string> releaseList = new List<string>() { KD.StringTools.Const.QuestionMark, //"?",
+        private readonly List<string> releaseList = new List<string>() { KD.StringTools.Const.QuestionMark, //"?",
                                                             KD.StringTools.Const.Colon, //":",
                                                             KD.StringTools.Const.PlusSign, //"+",
                                                             KD.StringTools.Const.SimpleQuote, //"'",
@@ -208,7 +207,7 @@ namespace Ord_Eancom
         }
         public OrderInformations(Article article)
         {
-            this._article = article;
+            this._article = article;            
         }
 
         public string ReleaseChar(string text)
@@ -830,10 +829,14 @@ namespace Ord_Eancom
         private readonly string z = String.Empty;
         private readonly string ab = String.Empty;
 
-        private double x1 = 0.0;
-        private double y1 = 0.0;
-        private double z1 = 0.0;
+        private double posX = 0.0;
+        private double posY = 0.0;
+        private double posZ = 0.0;
         private double a = 0.0;
+
+        private double dimX = 0.0;
+        private double dimY = 0.0;
+        private double dimZ = 0.0;
 
         string version = String.Empty;
 
@@ -965,7 +968,7 @@ namespace Ord_Eancom
             this.HeaderEDI();
             this.HeaderData();
             this.LineData(articles);
-            this.EndEDI(); //here set segement number between UNH and UNT include
+            this.EndEDI(); //here set segment number between UNH and UNT include
         }
 
         private void HeaderEDI()
@@ -1167,18 +1170,29 @@ namespace Ord_Eancom
         }
         private int GetArticlePolyType(Article article)
         {
-            if (article.HighUnitic == 0)
-            {
-                string type = this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+            SegmentClassification segmentClassification = new SegmentClassification(article);
+           
+            int type = Convert.ToInt16(this.CurrentAppli.Scene.ObjectGetInfo(article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE));
 
-                if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && article.Layer == 5) //5 = Worktop
-                {
-                    return PolytypeValue.Polytype_WorkTop;
-                }
-                else if (Convert.ToInt16(type) == Convert.ToInt16(KD.SDK.SceneEnum.ObjectType.STANDARD) && article.Layer == 2) //2 = Plinth 
-                {
-                    return PolytypeValue.Polytype_Base;
-                }
+            if (type == (int)(KD.SDK.SceneEnum.ObjectType.PLANARTICLE) && segmentClassification.IsArticleWorkTop()) 
+            {
+                PolytypeValue polytypeValue = new PolytypeValue(PolytypeValue.Polytype_WorkTop);
+                return PolytypeValue.Polytype_WorkTop;
+            }
+            else if ((type == (int)(KD.SDK.SceneEnum.ObjectType.STANDARD) || type == (int)(KD.SDK.SceneEnum.ObjectType.LINEAR)) && segmentClassification.IsArticlePlinth())
+            {
+                PolytypeValue polytypeValue = new PolytypeValue(PolytypeValue.Polytype_Base);
+                return PolytypeValue.Polytype_Base;
+            }
+            else if ((type == (int)(KD.SDK.SceneEnum.ObjectType.STANDARD) || type == (int)(KD.SDK.SceneEnum.ObjectType.LINEAR)) && segmentClassification.IsArticleLightPelmet())
+            {
+                PolytypeValue polytypeValue = new PolytypeValue(PolytypeValue.Polytype_LightPelmet);
+                return PolytypeValue.Polytype_LightPelmet;
+            }
+            else if ((type == (int)(KD.SDK.SceneEnum.ObjectType.STANDARD) || type == (int)(KD.SDK.SceneEnum.ObjectType.LINEAR)) && segmentClassification.IsArticleCornice())
+            {
+                PolytypeValue polytypeValue = new PolytypeValue(PolytypeValue.Polytype_Cornice);
+                return PolytypeValue.Polytype_Cornice;
             }
 
             return KD.Const.UnknownId;
@@ -1193,42 +1207,66 @@ namespace Ord_Eancom
             }
             return 0;
         }
-        private string[] GetArticlePolyPoint(Article article, int polyType)
+        private string[] GetArticlePolyPoint(Article article)
         {
+            SegmentClassification segmentClassification = new SegmentClassification(article);
             string shapePointList = String.Empty;
             string newShapePointList = string.Empty;
 
-            if (polyType == PolytypeValue.Polytype_Base)
-            {
-                Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
-                foreach (Article child in childs)
-                {
-                    article = child;
-                    shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-                    newShapePointList = shapePointList;
-                }
+            SetSceneReference(version);
+            shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
 
-            }
-            else if (polyType == PolytypeValue.Polytype_WorkTop)
+            if (String.IsNullOrEmpty(shapePointList))
             {
-                SetSceneReference(version);
-                
-                shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-                string[] points = shapePointList.Split(KD.CharTools.Const.SemiColon); // 5 pts
-                foreach (string point in points)
-                {
-                    string[] coords = point.Split(KD.CharTools.Const.Comma);
-                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[0]) - sceneDimX) + KD.CharTools.Const.Comma;
-                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[1]) - sceneDimY) + KD.CharTools.Const.Comma;
-                    newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[2]) - sceneDimZ) + KD.CharTools.Const.Comma;
-                    newShapePointList += coords[3] + KD.CharTools.Const.SemiColon;
+                if (segmentClassification.IsArticlePlinth())
+                {                   
+                    if (article.HasParent())
+                    {
+                        SegmentClassification segmentParentClassification = new SegmentClassification(article.Parent);
+                        if (segmentParentClassification.IsArticlePlinth())
+                        {
+                            shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.Parent.ObjectId);                            
+                        }
+                    }
+                    else
+                    {
+                        Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+                        if (childs.Count > 0)
+                        {
+                            foreach (Article child in childs)
+                            {
+                                SegmentClassification segmentChildClassification = new SegmentClassification(child);
+                                if (segmentChildClassification.IsArticlePlinth())
+                                {
+                                    shapePointList = this.CurrentAppli.Scene.ObjectGetShape(child.ObjectId);                                   
+                                }
+                            }
+                        }
+                    }
+                    
                 }
-                
-            }
+            }                
             
+            string[] points = shapePointList.Split(KD.CharTools.Const.SemiColon); // 5 pts
+            foreach (string point in points)
+            {
+                string[] coords = point.Split(KD.CharTools.Const.Comma);
+                newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[0]) - sceneDimX) + KD.CharTools.Const.Comma;
+                newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[1]) - sceneDimY) + KD.CharTools.Const.Comma;
+                newShapePointList += Convert.ToString(KD.StringTools.Convert.ToDouble(coords[2]) - sceneDimZ) + KD.CharTools.Const.Comma;
+                newShapePointList += coords[3] + KD.CharTools.Const.SemiColon;
+            }            
+
             string[] shapeList = newShapePointList.Split(KD.CharTools.Const.SemiColon);
             if (shapeList.Length > 0)
             {
+                //Determine the position for linear because in Insitu is 0,0 and we need the first shape point.
+                if (segmentClassification.IsArticleLinear() || segmentClassification.IsArticleWorkTop())
+                {
+                    posX = KD.StringTools.Convert.ToDouble(shapeList[0].Split(KD.CharTools.Const.Comma)[0]);
+                    posY = KD.StringTools.Convert.ToDouble(shapeList[0].Split(KD.CharTools.Const.Comma)[1]);
+                }
+
                 return shapeList;
             }
             return null;
@@ -1373,11 +1411,11 @@ namespace Ord_Eancom
 
         private void EntryZipAndDeleteFile(ZipArchiveEntry readmeEntry, ZipArchive archive, string file, string entryFile)
         {
-            if (File.Exists(file))
-            {
-                readmeEntry = archive.CreateEntryFromFile(file, entryFile);
-                File.Delete(file);
-            }
+            //if (File.Exists(file))
+            //{
+            //    readmeEntry = archive.CreateEntryFromFile(file, entryFile);
+            //    File.Delete(file);
+            //}
         }
         #endregion
 
@@ -1572,9 +1610,9 @@ namespace Ord_Eancom
 
         private void MoveArticlePerRepere(Article article)
         {
-            x1 = article.PositionX;
-            y1 = article.PositionY;
-            z1 = article.PositionZ;
+            posX = article.PositionX;
+            posY = article.PositionY;
+            posZ = article.PositionZ;
             a = article.AngleOXY - 180;
 
             double angle = 0.0;
@@ -1582,20 +1620,20 @@ namespace Ord_Eancom
             {
                 case ItemValue.V1_50: //DISCAC                    
                     angle = 2 * Math.PI * (a / 360);
-                    x1 -= article.DimensionX * Math.Cos(angle);
-                    y1 -= article.DimensionX * Math.Sin(angle);
+                    posX -= article.DimensionX * Math.Cos(angle);
+                    posY -= article.DimensionX * Math.Sin(angle);
                     break;
                 case ItemValue.V1_51: //FBD //BAUFORMAT
                     angle = 2 * Math.PI * (a / 360);
-                    x1 -= article.DimensionX * Math.Cos(angle);
-                    y1 -= article.DimensionX * Math.Sin(angle);
+                    posX -= article.DimensionX * Math.Cos(angle);
+                    posY -= article.DimensionX * Math.Sin(angle);
                     //x1 -= article.DimensionX;
                     //a -= article.AngleOXY;
                     break;
                 default: //V1_51
                     angle = 2 * Math.PI * (a / 360);
-                    x1 -= article.DimensionX * Math.Cos(angle);
-                    y1 -= article.DimensionX * Math.Sin(angle);
+                    posX -= article.DimensionX * Math.Cos(angle);
+                    posY -= article.DimensionX * Math.Sin(angle);
                     break;
             }
         }
@@ -1625,10 +1663,10 @@ namespace Ord_Eancom
 
             foreach (Article article in articles)
             {
-                if (!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId)
-                {
-                    SegmentClassification segmentClassification = new SegmentClassification(article);
+                SegmentClassification segmentClassification = new SegmentClassification(article);
 
+                if ((!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId) || segmentClassification.IsArticleLinear())
+                {                    
                     this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
                     //_orderInformations.ReleaseChar
                     structureLineEGIList.Add(ArticleIndexation(index));
@@ -1636,58 +1674,35 @@ namespace Ord_Eancom
                     structureLineEGIList.Add(ArticleRefNo(article.ObjectId.ToString())); //RFF.LI  
                     structureLineEGIList.Add(ArticleRefPos(article.ObjectId.ToString())); // RFF.ON
 
-                    if (!segmentClassification.IsArticleCornerFiler())
+                    this.SetAllPositionsAndDimensions(segmentClassification, article);
+
+                    bool hasPolytype = false;
+                    string[] polyPoints = { };
+                    int polyType = this.GetArticlePolyType(article);
+                    if (polyType != KD.Const.UnknownId)
                     {
-                        this.MoveArticlePerRepere(article);
-                    }
-                    else
-                    {
-                        x1 = article.PositionX + 20;
-                        y1 = article.PositionY + 20;
-                        z1 = article.PositionZ;
-                        a = article.AngleOXY + 90;
-                    }
+                        polyPoints = this.GetArticlePolyPoint(article);                       
+                        hasPolytype = true;
+                    }                                      
 
-                    structureLineEGIList.Add(ArticlePositionX(x1));
-                    structureLineEGIList.Add(ArticlePositionY(y1));
-
-                    double positionZ = this.GetRealPositionZByPosedOnOrUnder(article);
-                    structureLineEGIList.Add(ArticlePositionZ(positionZ));                                     
-
-                    //double dimX = article.DimensionX;
-                    //double dimY = article.DimensionY;
-
-                    //Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());                    
-                    //if (childs != null)
-                    //{
-                    //    foreach (Article child in childs)
-                    //    {
-                    //        if (child.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
-                    //        {
-                    //            double angleFilerDepth = child.DimensionY;
-                    //            structureLineEGIList.Add(ArticleAngleFilerDimensionX(child.DimensionY));
-
-                    //            double angleDimY = article.DimensionY;
-                    //            if (segmentClassification.IsUnit())
-                    //            {
-                    //                angleDimY -= OrderConstants.FrontDepth;
-                    //            }
-                    //            structureLineEGIList.Add(ArticleAngleDimensionY(angleDimY));
-
-                    //            dimY = child.DimensionX + article.DimensionY;
-                    //            break;
-                    //        }
-                    //    }
-                    //}
-
-                    structureLineEGIList.Add(ArticleDimensionX(article.DimensionX));
-                    structureLineEGIList.Add(ArticleDimensionZ(article.DimensionZ));                    
-                    structureLineEGIList.Add(ArticleDimensionY(article, article.DimensionY));
+                    structureLineEGIList.Add(ArticlePositionX(posX));
+                    structureLineEGIList.Add(ArticlePositionY(posY));                    
+                    structureLineEGIList.Add(ArticlePositionZ(posZ));
+                    structureLineEGIList.Add(ArticleDimensionX(dimX));
+                    structureLineEGIList.Add(ArticleDimensionZ(dimZ));                    
+                    structureLineEGIList.Add(ArticleDimensionY(article, dimY));
 
                     string shape = this.GetShapeNumberByType(article.KeyRef);
-                    if (!shape.Equals(KD.StringTools.Const.Zero))
+                    if (!shape.Equals(KD.StringTools.Const.Zero) && !segmentClassification.HasArticleCoinParent())
                     {
                         structureLineEGIList.AddRange(ArticleMeasureShapeList(article.KeyRef));                       
+                    }
+                    else if (!shape.Equals(KD.StringTools.Const.Zero) && segmentClassification.HasArticleCoinParent())
+                    {
+                        structureLineEGIList.Add(ArticleAngleDimensionX(dimX - article.DimensionX));
+                        structureLineEGIList.Add(ArticleAngleDimensionXE(0.0));
+                        structureLineEGIList.Add(ArticleAngleDimensionY(dimY - article.DimensionY));                        
+                        structureLineEGIList.Add(ArticleAngleDimensionYE(0.0));
                     }
 
                     structureLineEGIList.Add(ArticleAngle(a));
@@ -1700,15 +1715,14 @@ namespace Ord_Eancom
                     {
                         structureLineEGIList.Add(ArticleShape(shape));
                     }
-
-                    int polyType = this.GetArticlePolyType(article);
-                    if (polyType != KD.Const.UnknownId)
+  
+                    if (hasPolytype)
                     {
                         structureLineEGIList.Add(ArticlePolyType(polyType));
+
                         int polyCounter = this.GetArticlePolyCounter(article);
                         structureLineEGIList.Add(ArticlePolyCounter(polyCounter));
-
-                        string[] polyPoints = this.GetArticlePolyPoint(article, polyType);
+                        
                         if (polyPoints.Length > 1)
                         {
                             int counter = 1;
@@ -1838,9 +1852,14 @@ namespace Ord_Eancom
             string data = ItemKey.Measure_B + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
-        private string ArticleAngleFilerDimensionX(double value)
+        private string ArticleAngleDimensionX(double value)
         {
             string data = ItemKey.Measure_B1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string ArticleAngleDimensionXE(double value)
+        {
+            string data = ItemKey.Measure_BE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionZ(double value)
@@ -1855,7 +1874,7 @@ namespace Ord_Eancom
             {
                 value -= OrderConstants.FrontDepth;
             }
-           
+           // this for shape 27 with filer
             Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
             if (childs != null && childs.Count > 0)
             {
@@ -1876,6 +1895,11 @@ namespace Ord_Eancom
         private string ArticleAngleDimensionY(double value)
         {
             string data = ItemKey.Measure_T1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string ArticleAngleDimensionYE(double value)
+        {
+            string data = ItemKey.Measure_TE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleConstructionType(string keyRef)
@@ -1956,6 +1980,67 @@ namespace Ord_Eancom
             }
             return KD.StringTools.Const.Zero;
         }        
+
+        private void SetAllPositionsAndDimensions(SegmentClassification segmentClassification, Article article)
+        {
+            posZ = this.GetRealPositionZByPosedOnOrUnder(article);
+
+            if (!segmentClassification.HasArticleCoinParent())
+            {
+                if (!segmentClassification.IsArticleCornerFilerWithoutCoin())
+                {
+                    this.MoveArticlePerRepere(article);
+                    this.SetDimensions(article);
+                }
+                else if (segmentClassification.IsArticleCornerFilerWithoutCoin())
+                {
+                    this.SetFilerPositions(article);
+                    this.SetDimensions(article);
+                }
+            }
+            else if (segmentClassification.HasArticleCoinParent())
+            {
+                this.SetFilerWithCoinPositionsAndDimensions(article);
+            }
+
+            if (segmentClassification.IsArticleLinear())
+            {
+                if (segmentClassification.IsArticlePlinth() || segmentClassification.IsArticleLightPelmet())
+                {
+                    posZ += dimZ;
+                }
+                
+                //posX = 0;
+                //posY = 0;
+            }
+        }
+        private void SetFilerPositions(Article article)
+        {
+            posX = article.PositionX + CatalogConstante.FrontDepth;
+            posY = article.PositionY + CatalogConstante.FrontDepth;
+            posZ = article.PositionZ;
+            a = article.AngleOXY + 90;
+        }
+        private void SetDimensions(Article article)
+        {
+            dimX = article.DimensionX;
+            dimY = article.DimensionY;
+            dimZ = article.DimensionZ;
+        }
+        private void SetFilerWithCoinPositionsAndDimensions(Article article)
+        {
+            if (article.HasParent() && article.Parent.IsValid)
+            {
+                posX = article.Parent.PositionX;
+                posY = article.Parent.PositionY;
+                posZ = article.Parent.PositionZ;
+                a = article.Parent.AngleOXY + 90;
+
+                dimX = article.Parent.DimensionX + article.DimensionX;
+                dimY = article.Parent.DimensionY + article.DimensionY;
+                dimZ = article.DimensionZ;
+            }
+        }
         #endregion
     }
 }

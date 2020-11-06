@@ -78,7 +78,7 @@
       <Link>src\Analysis\Constraint.cs</Link>
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\Analysis\SceneAnalysis.cs">
-      <Link>src\Analysis\SceneAnalysis.cs</Link>
+      <Link>Nub\Analysis\SceneAnalysis.cs</Link>
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\Analysis\Tolerance.cs">
       <Link>src\Analysis\Tolerance.cs</Link>
@@ -147,7 +147,6 @@
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\SDK\CatalogProperties.cs">
       <Link>src\SDK\CatalogProperties.cs</Link>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\SDK\DicoHelper.cs">
       <Link>src\SDK\DicoHelper.cs</Link>
@@ -194,8 +193,11 @@
     <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
       <Link>src\System\StringsHelper.cs</Link>
     </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\FilterArticle.cs">
+      <Link>Nub\Analysis\FilterArticle.cs</Link>
+    </Compile>
     <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SortedArticle.cs">
-      <Link>src\Model\SortedArticle.cs</Link>
+      <Link>Nub\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Segment\ArticleSegment.cs" />

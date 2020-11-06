@@ -25,6 +25,8 @@ namespace TT.Import.EGI
             }
         }
 
+        public string catalogCode = String.Empty;
+
         KD.SDKComponent.AppliComponent _currentAppli = null;
         KD.SDKComponent.AppliComponent CurrentAppli
         {
@@ -106,6 +108,7 @@ namespace TT.Import.EGI
                 {
                     lastDate = date;
                     lastCatalog = catalogPath;
+                    catalogCode = this.CurrentAppli.CatalogGetCode(catalogPath);
                 }
             }
             return lastCatalog;

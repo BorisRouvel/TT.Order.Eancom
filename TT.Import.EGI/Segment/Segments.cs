@@ -114,6 +114,10 @@ namespace TT.Import.EGI
         public const int Polytype_Hindrance = 99;
 
         private int _polytype = 0;
+        private string _meaning;
+        private string _z_Coordinate;
+        private string _polyline;
+
         public int Polytype
         {
             get
@@ -124,9 +128,7 @@ namespace TT.Import.EGI
             {
                 _polytype = value;
             }
-        }
-
-        private string _meaning;
+        }      
         public string Meaning
         {
             get
@@ -137,10 +139,7 @@ namespace TT.Import.EGI
             {
                 _meaning = value;
             }
-        }
-
-
-        private string _z_Coordinate;
+        }       
         public string Z_Coordinate
         {
             get
@@ -151,9 +150,7 @@ namespace TT.Import.EGI
             {
                 _z_Coordinate = value;
             }
-        }
-
-        private string _polyline;
+        }       
         public string Polyline
         {
             get
@@ -171,9 +168,17 @@ namespace TT.Import.EGI
         {
             _polytype = polytype;
 
+            this.InitMembers();
             this.SetMembers();
         }
 
+        private void InitMembers()
+        {
+            _polytype = 0;
+            _meaning = String.Empty;
+            _z_Coordinate = String.Empty;
+            _polyline = String.Empty;
+        }
         public int Number()
         {
             return this.Polytype;
@@ -257,7 +262,7 @@ namespace TT.Import.EGI
             }
         }
 
-        private string _section;
+        private readonly string _section;
         private IniFile _currentFileEGI = null;
 
         public SegmentClassification(Article article)
@@ -324,6 +329,34 @@ namespace TT.Import.EGI
             }
             return false;
         }
+        public bool HasSectionCoin()
+        {
+            string value = _currentFileEGI.GetStringValue(_section, ItemKey.Measure_B1);
+            if (!String.IsNullOrEmpty(value))
+            {
+                if (KD.StringTools.Convert.ToDouble(value) > 300.0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasArticleCoinParent()
+        {
+            if (this.Article.HasParent())
+            {
+                Article parent = this.Article.Parent;
+                if (parent != null && parent.IsValid)
+                {
+                    if (parent.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         public bool IsArticleFiler()
         {
             if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
@@ -333,12 +366,24 @@ namespace TT.Import.EGI
             }
             return false;
         }
-        public bool IsArticleCornerFiler()
+        public bool IsArticleCornerFilerWithoutCoin()
         {
             if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
                 this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
             {
-                if (this.Article.Name.ToUpper().Contains("90".ToUpper()) || this.Article.Name.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
+                if (this.Article.Name.ToUpper().Contains("90".ToUpper()) && !this.Article.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleCornerFilerWithCoin()
+        {
+            if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
+                this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
+            {
+                if (this.Article.Name.ToUpper().Contains("90".ToUpper()) && this.Article.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
                 {
                     return true;
                 }
@@ -347,7 +392,7 @@ namespace TT.Import.EGI
         }
         public bool IsArticleUnit()
         {
-            if (this.Article.HighUnitic == 0)
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
                 if (this.Article.Layer == 3 || this.Article.Layer == 4 || this.Article.Layer == 9 || this.Article.Layer == 10)
                 {
@@ -359,6 +404,81 @@ namespace TT.Import.EGI
             }
             return false;
         }
+        public bool IsArticleUnitFloor()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 3 || (this.Article.Layer == 4))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleWorkTop()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 5)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticlePlinth()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 2)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleMoulure()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 16)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleLightPelmet()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 8)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleCornice()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 11)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleLinear()
+        {
+            if (IsArticlePlinth() || IsArticleMoulure() || IsArticleLightPelmet() || IsArticleCornice())
+            {
+                return true;
+            }
+            return false;
+        }
+     
     }
 }
 

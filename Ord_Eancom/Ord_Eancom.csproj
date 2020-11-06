@@ -58,7 +58,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="KD.Plugin.Word">
+    <Reference Include="KD.Plugin.Word, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Ic90dev\Plugins\Standard\Word\KD.Plugin.Word.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -91,9 +92,6 @@
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\Analysis\Constraint.cs">
       <Link>src\Analysis\Constraint.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\SceneAnalysis.cs">
-      <Link>src\Analysis\SceneAnalysis.cs</Link>
     </Compile>
     <Compile Include="..\..\Plugins.Core\src\Analysis\Tolerance.cs">
       <Link>src\Analysis\Tolerance.cs</Link>
@@ -150,10 +148,6 @@
     <Compile Include="..\..\Plugins.Core\src\SDK\CatalogHelper.cs">
       <Link>src\SDK\CatalogHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\CatalogProperties.cs">
-      <Link>src\SDK\CatalogProperties.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="..\..\Plugins.Core\src\SDK\DicoHelper.cs">
       <Link>src\SDK\DicoHelper.cs</Link>
     </Compile>
@@ -181,8 +175,18 @@
     <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
       <Link>src\System\StringsHelper.cs</Link>
     </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\CatalogProperties.cs">
+      <Link>Nub\Model\CatalogProperties.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\FilterArticle.cs">
+      <Link>Nub\Analysis\FilterArticle.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SceneAnalysis.cs">
+      <Link>Nub\Analysis\SceneAnalysis.cs</Link>
+    </Compile>
     <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SortedArticle.cs">
-      <Link>src\Model\SortedArticle.cs</Link>
+      <Link>Nub\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="..\TT.Import.EGI\Segment\Segments.cs">

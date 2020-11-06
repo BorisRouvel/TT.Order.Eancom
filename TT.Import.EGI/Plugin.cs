@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 // ---------------------------------------
 
 using KD.Plugin;
+using KD.Model;
 
 
 namespace TT.Import.EGI
@@ -134,7 +135,7 @@ namespace TT.Import.EGI
                 //this.PlaceRecessInScene();
                 //this.PlaceHindrancesInScene();
                 this.PlaceArticlesInScene();
-
+                this.EnableUnitFloorDetails();
                 this.ResetReference();
                 this.TerminateMessage();
             }
@@ -272,23 +273,47 @@ namespace TT.Import.EGI
               
                 if (segmentClassification.HasSectionPolytype())
                 {
-                    articleSegment.AddLinear(articleSection, catalogsList);                    
+                    articleSegment.AddLinear(articleSection, catalogsList);                   
                 }
                 else
                 {
-                    articleSegment.Add(articleSection, catalogsList);
+                    articleSegment.Add(articleSection, catalogsList);                   
                 }
 
                 this.ResetReference();
-                this.CurrentAppli.Scene.ViewRefresh();
+                //this.CurrentAppli.Scene.ViewRefresh();
             }
 
             if (articleSegment != null)
             {
                 articleSegment.NoPlacedArticleMessage();
-            }
+            }           
         }      
-  
+
+        //Method to enable feet of unit whose on floor
+        private void EnableUnitFloorDetails()
+        {
+            Articles articles = this.CurrentAppli.GetArticleList(KD.Analysis.FilterArticle.filterToGetArticleByCodeValidPlaced(manageCatalog.catalogCode));
+            foreach (Article article in articles)
+            {
+                SegmentClassification segmentClassification = new SegmentClassification(article);
+                if ((article.Type == (int)KD.SDK.SceneEnum.ObjectType.LINEAR) && segmentClassification.IsArticlePlinth())
+                {
+                    string articleOverlapping = this.CurrentAppli.SceneComponent.ObjectGetOverlappingObjectsList(article.ObjectId, false);
+                    string[] articleOverlappingIDs = articleOverlapping.Split(KD.CharTools.Const.Comma);
+                    foreach (string id in articleOverlappingIDs)
+                    {
+                        Article articleToDelDetails = new Article(this.CurrentAppli, id);
+                        segmentClassification = new SegmentClassification(articleToDelDetails);
+                        if (segmentClassification.IsArticleUnitFloor())
+                        {
+                            this.CurrentAppli.Scene.ObjectSetInfo(Convert.ToInt32(id), KD.StringTools.Const.Zero, KD.SDK.SceneEnum.ObjectInfo.HASVISIBLEDETAILS);
+                        }
+                    }
+                }
+            }
+        }
+
         private void TerminateMessage()
         {
             MessageBox.Show("Import EGI terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);

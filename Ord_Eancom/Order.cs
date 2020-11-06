@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using KD.Model;
 
 using Eancom;
+using TT.Import.EGI;
 
 
 namespace Ord_Eancom
@@ -152,6 +153,22 @@ namespace Ord_Eancom
                     if (article.IsValid && article.Type != 17)
                     {
                         articles.Add(article);
+                    }
+                }
+                //add linear articles cause not in heading and need to all real object in the scene
+                string linearIDs = this.CurrentAppli.SceneComponent.SceneGetObjectIdList(null, KD.Analysis.FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+                Articles supplierLinearArticles = new Articles(CurrentAppli, linearIDs);
+
+                foreach (Article article in supplierLinearArticles)
+                {
+                    SegmentClassification segmentClassification = new SegmentClassification(article);
+
+                    if (segmentClassification.IsArticleLinear() && !article.HasParent() && article.IsValid)
+                    {
+                        if (!articles.Contains(article))
+                        {
+                            articles.Add(article);
+                        }
                     }
                 }
             }
