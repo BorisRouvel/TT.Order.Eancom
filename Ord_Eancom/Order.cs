@@ -146,31 +146,22 @@ namespace Ord_Eancom
                     IDs += objId + KD.StringTools.Const.Comma;
                 }
 
+                //Get all supplier articles of all heading except linears
                 Articles supplierArticles = new Articles(CurrentAppli, IDs);
-
                 foreach (Article article in supplierArticles)
                 {
-                    if (article.IsValid && article.Type != 17)
+                    SegmentClassification segmentClassification = new SegmentClassification(article);
+                    if (article.IsValid  && article.Type != 17)//&& !segmentClassification.IsArticleLinear()) //
                     {
                         articles.Add(article);
                     }
                 }
+
+                //Must relist the articles, del linears and add graphic linear
+                articles = this.DelLinearsArticles(articles);
                 //add linear articles cause not in heading and need to all real object in the scene
-                string linearIDs = this.CurrentAppli.SceneComponent.SceneGetObjectIdList(null, KD.Analysis.FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
-                Articles supplierLinearArticles = new Articles(CurrentAppli, linearIDs);
+                articles = this.AddLinearsGraphikArticles(articles);
 
-                foreach (Article article in supplierLinearArticles)
-                {
-                    SegmentClassification segmentClassification = new SegmentClassification(article);
-
-                    if (segmentClassification.IsArticleLinear() && !article.HasParent() && article.IsValid)
-                    {
-                        if (!articles.Contains(article))
-                        {
-                            articles.Add(article);
-                        }
-                    }
-                }
             }
             return articles;
         }
@@ -316,6 +307,38 @@ namespace Ord_Eancom
                 }
             }
             return true;
+        }
+
+        private Articles DelLinearsArticles(Articles articles)
+        {
+            Articles articlesReturn = new Articles(articles);
+
+            foreach (Article article in articles)
+            {
+                SegmentClassification segmentClassification = new SegmentClassification(article);
+                if (segmentClassification.IsArticleLinear())
+                {
+                    articlesReturn.Remove(article);
+                }
+            }
+            return articlesReturn;
+        }
+        private Articles AddLinearsGraphikArticles(Articles articles)
+        {
+            string IDs = this.CurrentAppli.SceneComponent.SceneGetObjectIdList(null, KD.Analysis.FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+            Articles articlesList = new Articles(CurrentAppli, IDs);
+            foreach (Article article in articlesList)
+            {
+                SegmentClassification segmentClassification = new SegmentClassification(article);
+                if (segmentClassification.IsArticleLinear() && !article.HasParent() && article.IsValid)
+                {
+                    if (!articles.Contains(article))
+                    {
+                        articles.Add(article);
+                    }
+                }
+            }
+            return articles;
         }
     }
 

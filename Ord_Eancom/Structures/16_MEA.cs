@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using KD.Model;
 
 using Ord_Eancom;
+using TT.Import.EGI;
 
 namespace Eancom
 {
@@ -80,12 +81,15 @@ namespace Eancom
 
         public string Add(Article article)
         {
-            OrderInformations articleInformations = new OrderInformations(article);
+            SegmentClassification segmentClassification = new SegmentClassification(article);
+            OrderInformations articleInformations = new OrderInformations(article, segmentClassification);            
             string dataLine = null;
 
             if (articleInformations.IsOption_MEA())
-            {                
-                List<double> dimensionList = new List<double>() { article.DimensionX, article.DimensionY, article.DimensionZ };
+            {
+                double dimX = this.DimensionX(article, segmentClassification);                        
+
+                List<double> dimensionList = new List<double>() { dimX, article.DimensionY, article.DimensionZ };
                 List<string> measureCodeList = new List<string>() { Width, Depth, Height };
                 int index = 0;
 
@@ -98,9 +102,37 @@ namespace Eancom
                     }
                     index += 1;
                 }
-            }
+            }           
             return dataLine;
         }
-    }
+
+        private double DimensionX(Article article, SegmentClassification segmentClassification)
+        {
+            if (segmentClassification.IsArticleLinear())
+            {
+                string[] shapeList = segmentClassification.GetShapePointsList();
+                if (shapeList.Length > 1)
+                {
+                    double saveValue = 0.0;
+                    for (int i = 0; i <= shapeList.Length - 2; i++)
+                    {
+                        string[] points1 = shapeList[i].Split(KD.CharTools.Const.Comma);
+                        string[] points2 = shapeList[i + 1].Split(KD.CharTools.Const.Comma);
+
+                        for (int j = 0; j <= points1.Length - 2; j++)
+                        {
+                            double value = KD.StringTools.Convert.ToDouble(points1[j]) - KD.StringTools.Convert.ToDouble(points2[j]);
+                            if (value > saveValue)
+                            {
+                                saveValue = value;
+                            }
+                        }
+                    }
+                    return saveValue;
+                }
+            }
+            return article.DimensionX;
+        }
+    }    
 }
 

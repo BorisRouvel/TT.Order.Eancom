@@ -136,6 +136,30 @@ namespace Eancom
             return null;
         }
 
+        public string Add_LinearPlanningSystemItemNumber(Article article)
+        {
+            //if (article.IsValid)
+            //{
+            //    c506.E1153 = C506.E1153_ON;
+            //    int childLevel = 1;
+
+            //    Article parent = this.GetParent(article);
+            //    string parentChildLevel = this.GetChildLevel(parent, childLevel);
+
+            //    childLevelList.Add(parentChildLevel);
+            //    c506.E1154 = parentChildLevel;
+
+            //    if (c506.E1154.StartsWith(KD.Const.UnknownId.ToString()))
+            //    {
+            //        return null;
+            //    }
+
+            //    OrderWrite.segmentNumberBetweenUNHandUNT += 1;
+            //    return this.BuildLine();
+            //}
+            return null;
+        }
+
         private string SetLineNumber(string number, string level)
         {
             return number + KD.StringTools.Const.Dot + level;

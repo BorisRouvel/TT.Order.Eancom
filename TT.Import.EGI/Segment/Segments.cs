@@ -78,6 +78,7 @@ namespace TT.Import.EGI
         public const string V1_51 = "V1.51"; //FBD //BAUFORMAT
         public const string Left_Hinge = "L";
         public const string Right_Hinge = "R";
+        public const string None_Hinge = "N";
         public const string InWards = "I";
         public const string OutWard = "O";
         public const string Slide = "S";
@@ -166,9 +167,9 @@ namespace TT.Import.EGI
 
         public PolytypeValue(int polytype)
         {
-            _polytype = polytype;
-
             this.InitMembers();
+
+            _polytype = polytype;            
             this.SetMembers();
         }
 
@@ -407,11 +408,11 @@ namespace TT.Import.EGI
         public bool IsArticleUnitFloor()
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
-            {
-                if (this.Article.Layer == 3 || (this.Article.Layer == 4))
+            {               
+                if (this.Article.Type == 0 && (this.Article.Layer == 3 || (this.Article.Layer == 4)))
                 {
                     return true;
-                }
+                }               
             }
             return false;
         }
@@ -419,7 +420,7 @@ namespace TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 5)
+                if (this.Article.Layer == 5)//for instead don't test the type 5 because must be test type 0 also (this.Article.Type == 5 && )
                 {
                     return true;
                 }
@@ -430,7 +431,7 @@ namespace TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 2)
+                if (this.Article.Layer == 2) //for instead don't test the type 6 because must be test type 0 also (this.Article.Type == 6 && )
                 {
                     return true;
                 }
@@ -441,7 +442,7 @@ namespace TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 16)
+                if (this.Article.Layer == 16)//for instead don't test the type 6 because must be test type 0 also (this.Article.Type == 6 && )
                 {
                     return true;
                 }
@@ -452,7 +453,7 @@ namespace TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 8)
+                if (this.Article.Layer == 8)//for instead don't test the type 6 because must be test type 0 also (this.Article.Type == 6 && )
                 {
                     return true;
                 }
@@ -463,7 +464,7 @@ namespace TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 11)
+                if (this.Article.Layer == 11)//for instead don't test the type 6 because must be test type 0 also (this.Article.Type == 6 && )
                 {
                     return true;
                 }
@@ -478,7 +479,27 @@ namespace TT.Import.EGI
             }
             return false;
         }
-     
+        public bool IsArticleShape()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Type == 5)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public string GetShape()
+        {
+            return this.Article.CurrentAppli.Scene.ObjectGetShape(this.Article.ObjectId);
+        }
+        public string[] GetShapePointsList()
+        {
+            string shapePointList = this.GetShape();
+            return shapePointList.Split(KD.CharTools.Const.SemiColon);
+        }
     }
 }
 

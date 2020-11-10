@@ -135,6 +135,10 @@ namespace Ord_Eancom
     public class OrderInformations
     {
         private AppliComponent _currentAppli;
+        private int _callParamsBlock;
+        private readonly Articles _articles;
+        private readonly Article _article;       
+
         public AppliComponent CurrentAppli
         {
             get
@@ -146,9 +150,7 @@ namespace Ord_Eancom
                 _currentAppli = value;
 
             }
-        }
-
-        private int _callParamsBlock;
+        }   
         public int CallParamsBlock
         {
             get
@@ -160,18 +162,14 @@ namespace Ord_Eancom
                 _callParamsBlock = value;
 
             }
-        }
-
-        private readonly Articles _articles;
+        }    
         public Articles Articles
         {
             get
             {
                 return _articles;
             }
-        }
-
-        private readonly Article _article;
+        }      
         public Article Article
         {
             get
@@ -180,7 +178,8 @@ namespace Ord_Eancom
             }
         }
 
-        private SceneAnalysis sceneAnalysis = null;
+        private SceneAnalysis _sceneAnalysis = null;
+        private SegmentClassification _segmentClassification = null;
 
         public static string deliveryDate = String.Empty;
         public static string installationDate = String.Empty;
@@ -195,19 +194,24 @@ namespace Ord_Eancom
 
         public OrderInformations(AppliComponent appli, int callParamsBlock)
         {
-            this._currentAppli = appli;
-            this._callParamsBlock = callParamsBlock;
+            _currentAppli = appli;
+            _callParamsBlock = callParamsBlock;
         }
         public OrderInformations(AppliComponent appli, int callParamsBlock, Articles articles)
         {
-            this._currentAppli = appli;
-            this._callParamsBlock = callParamsBlock;
-            this._articles = articles;
-            sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
+            _currentAppli = appli;
+            _callParamsBlock = callParamsBlock;
+            _articles = articles;
+            _sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
         }
         public OrderInformations(Article article)
         {
-            this._article = article;            
+            _article = article;            
+        }
+        public OrderInformations(Article article, SegmentClassification segmentClassification)
+        {
+            _article = article;
+            _segmentClassification = segmentClassification;
         }
 
         public string ReleaseChar(string text)
@@ -560,29 +564,29 @@ namespace Ord_Eancom
         }
         public string GetCatalogModelCodeAndName()
         {
-            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
+            bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
             if (IsGenerik)
             {
                 int.TryParse(generikFinishTypes[0], out int generikFinishType);
                 int.TryParse(generikFinishes[0], out int generikFinish);
-                return sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish);
+                return _sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish);
             }
             return null;
         }
         public List<string> GetGenericCatalogFinishCodeAndName()
         {
             List<string> finishesList = new List<string>();
-            sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
+            _sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
 
-            bool IsGenerik = sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
+            bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < generikFinishTypes.Length; fin++)
                 {
                     int.TryParse(generikFinishTypes[fin], out int generikFinishType);
                     int.TryParse(generikFinishes[fin], out int generikFinish);
-                    int type = sceneAnalysis.GetFinishTypeNumber(generikFinishType);
-                    finishesList.Add(sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
+                    int type = _sceneAnalysis.GetFinishTypeNumber(generikFinishType);
+                    finishesList.Add(_sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
                 return finishesList;
@@ -592,17 +596,17 @@ namespace Ord_Eancom
         public List<string> GetCatalogFinishCodeAndName()//Article article)
         {
             List<string> finishesList = new List<string>();
-            sceneAnalysis = new SceneAnalysis(this.Article);
+            _sceneAnalysis = new SceneAnalysis(this.Article);
 
-            bool IsGenerik = sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
+            bool IsGenerik = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
                 {
                     int.TryParse(finishTypes[fin], out int finishType);
                     int.TryParse(finishes[fin], out int finish);
-                    int type = sceneAnalysis.GetFinishTypeNumber(finishType);
-                    finishesList.Add(sceneAnalysis.GetCatalogFinishCodeAndName(finishType, finish) +
+                    int type = _sceneAnalysis.GetFinishTypeNumber(finishType);
+                    finishesList.Add(_sceneAnalysis.GetCatalogFinishCodeAndName(finishType, finish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
                 return finishesList;
@@ -612,17 +616,17 @@ namespace Ord_Eancom
         public List<string> GetFinishCodeAndName()//Article article)
         {
             List<string> finishesList = new List<string>();
-            sceneAnalysis = new SceneAnalysis(this.Article);
+            _sceneAnalysis = new SceneAnalysis(this.Article);
 
-            bool IsGenerik = sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
+            bool IsGenerik = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
             if (IsGenerik)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
                 {
                     int.TryParse(finishTypes[fin], out int finishType);
                     int.TryParse(finishes[fin], out int finish);
-                    int type = sceneAnalysis.GetFinishTypeNumber(finishType);
-                    finishesList.Add(sceneAnalysis.GetFinishCodeAndName(finishType, finish) +
+                    int type = _sceneAnalysis.GetFinishTypeNumber(finishType);
+                    finishesList.Add(_sceneAnalysis.GetFinishCodeAndName(finishType, finish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
                 return finishesList;
@@ -644,7 +648,7 @@ namespace Ord_Eancom
 
         private bool IsPlinthFinishType(int generikFinishType)
         {
-            int type = sceneAnalysis.GetFinishTypeNumber(generikFinishType);
+            int type = _sceneAnalysis.GetFinishTypeNumber(generikFinishType);
             if (type.ToString() == OrderConstants.PlinthFinishType)
             {
                 return true;
@@ -687,66 +691,66 @@ namespace Ord_Eancom
             }
             return false;
         }
-        public bool IsWorktop()
-        {
-            if (this.Article.Type == 5 && this.Article.Layer == 5)
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsPlinth()
-        {
-            if (this.Article.Type == 6 && this.Article.Layer == 2)
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsLightpelmet()
-        {
-            if (this.Article.Type == 6 && this.Article.Layer == 8)
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsCornice()
-        {
-            if (this.Article.Type == 6 && this.Article.Layer == 11)
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsShape()
-        {
-            if (this.Article.Type == 5)
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool IsLinear()
-        {
-            if (this.Article.Type == 6)
-            {
-                return true;
-            }
-            return false;
-        }
+        //public bool IsWorktop()
+        //{
+        //    if (this.Article.Type == 5 && this.Article.Layer == 5)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //public bool IsPlinth()
+        //{
+        //    if (this.Article.Type == 6 && this.Article.Layer == 2)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //public bool IsLightpelmet()
+        //{
+        //    if (this.Article.Type == 6 && this.Article.Layer == 8)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //public bool IsCornice()
+        //{
+        //    if (this.Article.Type == 6 && this.Article.Layer == 11)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //public bool IsShape()
+        //{
+        //    if (this.Article.Type == 5)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        //public bool IsLinear()
+        //{
+        //    if (this.Article.Type == 6)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
         public bool IsOption_MEA()
         {
-            if (this.IsWorktop() || this.IsPlinth() || this.IsLightpelmet() || this.IsCornice() || this.IsShape() || this.IsLinear())
+            if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear())
             {
                 return true;
             }
             return false;
-        }
+        }       
 
         public List<string> GetAssemblyWorktopCodeAndNameList()
         {
-            if (IsWorktop())
+            if (_segmentClassification.IsArticleWorkTop())
             {
                 List<string> codeList = new List<string>();
                 List<string> codeAndNameList = new List<string>();
@@ -773,7 +777,6 @@ namespace Ord_Eancom
             }
             return null;
         }
-
 
     }
 
@@ -1049,9 +1052,10 @@ namespace Ord_Eancom
                         SetLineEDIList(rFF_A.Add_ReferenceNumber(article));
                         SetLineEDIList(rFF_A.Add_PlanningSystemItemNumber(article));
 
-                        OrderInformations articleInformations = new OrderInformations(article);
-                        if (articleInformations.IsWorktop())
+                        SegmentClassification segmentClassification = new SegmentClassification(article);
+                        if (segmentClassification.IsArticleWorkTop())
                         {
+                            OrderInformations articleInformations = new OrderInformations(article, segmentClassification);
                             List<string> assemblyCodeAndNameList = articleInformations.GetAssemblyWorktopCodeAndNameList();
 
                             if (assemblyCodeAndNameList != null && assemblyCodeAndNameList.Count > 0)
@@ -1083,11 +1087,16 @@ namespace Ord_Eancom
 
                                         SetLineEDIList(iMD.Add_WorktopAssemblyNumber(assemblyName));
                                         SetLineEDIList(qTY.Add_WorktopAssemblyNumber(article));
-                                        SetLineEDIList(rFF_A.Add_WorktopAssemblyReferenceNumber(article)); //we must find a solution for unique ref cause it s a finish not a artciel objectId
+                                        SetLineEDIList(rFF_A.Add_WorktopAssemblyReferenceNumber(article)); //we must find a solution for unique ref cause it s a finish not a article objectId
                                         SetLineEDIList(rFF_A.Add_WorktopAssemblyPlanningSystemItemNumber(article, assemblyCode));
                                     }
                                 }
                             }
+                        }
+                        else if (segmentClassification.IsArticleLinear())
+                        {
+                            //For instead i have no idea to add number for a linear
+                            SetLineEDIList(rFF_A.Add_LinearPlanningSystemItemNumber(article));
                         }
                     }
                 }
@@ -1199,22 +1208,22 @@ namespace Ord_Eancom
         }
         private int GetArticlePolyCounter(Article article)
         {
-            string shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
-            string[] shapeList = shapePointList.Split(KD.CharTools.Const.SemiColon);
+            SegmentClassification segmentClassification = new SegmentClassification(article);
+            string[] shapeList = segmentClassification.GetShapePointsList();
             if (shapeList.Length > 0)
             {
                 return shapeList.Length;
             }
             return 0;
         }
-        private string[] GetArticlePolyPoint(Article article)
+        public string[] GetArticlePolyPoint(Article article)
         {
             SegmentClassification segmentClassification = new SegmentClassification(article);
             string shapePointList = String.Empty;
             string newShapePointList = string.Empty;
 
             SetSceneReference(version);
-            shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.ObjectId);
+            shapePointList = segmentClassification.GetShape();
 
             if (String.IsNullOrEmpty(shapePointList))
             {
@@ -1225,7 +1234,7 @@ namespace Ord_Eancom
                         SegmentClassification segmentParentClassification = new SegmentClassification(article.Parent);
                         if (segmentParentClassification.IsArticlePlinth())
                         {
-                            shapePointList = this.CurrentAppli.Scene.ObjectGetShape(article.Parent.ObjectId);                            
+                            shapePointList = segmentParentClassification.GetShape();                            
                         }
                     }
                     else
@@ -1238,7 +1247,7 @@ namespace Ord_Eancom
                                 SegmentClassification segmentChildClassification = new SegmentClassification(child);
                                 if (segmentChildClassification.IsArticlePlinth())
                                 {
-                                    shapePointList = this.CurrentAppli.Scene.ObjectGetShape(child.ObjectId);                                   
+                                    shapePointList = segmentChildClassification.GetShape();                                   
                                 }
                             }
                         }
@@ -1451,7 +1460,7 @@ namespace Ord_Eancom
         {
             this.HeaderEGI();
             this.SetWallInformations(this.GetWallsList());
-            //this.SetDoorInformations();
+            this.SetDoorInformations(this.GetDoorsList());
             //this.SetWindowInformations();
             //this.SetRecessInformations();
             //this.SetHindranceInformations();
@@ -1466,8 +1475,7 @@ namespace Ord_Eancom
             return value;
         }
         public List<Wall> GetWallsList()
-        {
-            //Get wall number           
+        {             
             List<Wall> wallList = new List<Wall>(0);
             int objectNumber = this.CurrentAppli.Scene.SceneGetObjectsNb();
             for (int objectRank = 0; objectRank < objectNumber; objectRank++)
@@ -1482,7 +1490,23 @@ namespace Ord_Eancom
             }
             return wallList;
         }
-
+        public List<Article> GetDoorsList()
+        {                 
+            List<Article> doorList = new List<Article>(0);
+            int objectNumber = this.CurrentAppli.Scene.SceneGetObjectsNb();
+            for (int objectRank = 0; objectRank < objectNumber; objectRank++)
+            {
+                int objectID = this.CurrentAppli.Scene.SceneGetObjectId(objectRank);
+                string objectType = this.CurrentAppli.Scene.ObjectGetInfo(objectID, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+                if (Convert.ToInt16(objectType) == (int)KD.SDK.SceneEnum.ObjectType.DOOR)
+                {
+                    Article door = new Article(this.CurrentAppli, objectID);
+                    doorList.Add(door);
+                }
+            }
+            return doorList;
+        }
+        //Header
         public void HeaderEGI()
         {
             #region // INFO
@@ -1548,6 +1572,7 @@ namespace Ord_Eancom
             }
 
         }
+        //Wall
         public void SetWallInformations(List<Wall> wallList)
         {
             this.SetSceneReference(version);
@@ -1557,57 +1582,127 @@ namespace Ord_Eancom
             {
                 this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
 
-                structureLineEGIList.Add(WallIndexation(index));
-                structureLineEGIList.Add(WallPositionX(wall.PositionX));
-                structureLineEGIList.Add(WallPositionY(wall.PositionY));
-                structureLineEGIList.Add(WallPositionZ(wall.PositionZ));
-                structureLineEGIList.Add(WallDimensionX(wall.DimensionX));
-                structureLineEGIList.Add(WallDimensionZ(wall.DimensionZ));
-                structureLineEGIList.Add(WallDimensionY(wall.DimensionY));
-                structureLineEGIList.Add(WallAngle(wall.AngleOXY));
+                structureLineEGIList.Add(Indexation(SegmentName.Wall_, index));
+                structureLineEGIList.Add(PositionX(wall.PositionX));
+                structureLineEGIList.Add(PositionY(wall.PositionY));
+                structureLineEGIList.Add(PositionZ(wall.PositionZ));
+                structureLineEGIList.Add(DimensionX(wall.DimensionX));
+                structureLineEGIList.Add(DimensionZ(wall.DimensionZ));
+                structureLineEGIList.Add(DimensionY(wall.DimensionY));
+                structureLineEGIList.Add(Angle(wall.AngleOXY));
                 index += 1;
             }
         }
-        private string WallIndexation(int wallIndex)
+  
+        //Door
+        public void SetDoorInformations(List<Article> doorList)
         {
-            return KD.StringTools.Format.Bracketed(SegmentName.Wall_ + wallIndex.ToString(SegmentFormat.FourZero)) + Separator.NewLine;
+            this.SetSceneReference(version);
+
+            int index = 1;
+            foreach (Article door in doorList)
+            {
+                this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
+
+                structureLineEGIList.Add(Indexation(SegmentName.Door_, index));
+                structureLineEGIList.Add(PositionX(door.PositionX));
+                structureLineEGIList.Add(PositionY(door.PositionY));
+                structureLineEGIList.Add(PositionZ(door.PositionZ));
+                structureLineEGIList.Add(DimensionX(door.DimensionX));
+                structureLineEGIList.Add(DimensionZ(door.DimensionZ));
+                structureLineEGIList.Add(DimensionY(door.DimensionY));//
+                structureLineEGIList.Add(Angle(door.AngleOXY));
+
+                structureLineEGIList.Add(DoorHinge(door));
+                structureLineEGIList.Add(DoorOpening(door));
+                structureLineEGIList.Add(DoorWallRefNo(door));
+                structureLineEGIList.Add(DoorRefPntXRel(door));
+                structureLineEGIList.Add(DoorRefPntYRel(door));
+                structureLineEGIList.Add(DoorRefPntZRel(door));
+
+                index += 1;
+            }
         }
-        private string WallPositionX(double value)
+        private string DoorHinge(Article article)
         {
-            string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            string hinge = String.Empty;
+            string hingeType = article.GetStringInfo(KD.SDK.SceneEnum.ObjectInfo.HANDINGTYPE);
+            switch (hingeType)
+            {
+                case "0":
+                    hinge = ItemValue.None_Hinge;
+                    break;
+                case "1":
+                    hinge = ItemValue.Left_Hinge;
+                    break;
+                case "2":
+                    hinge = ItemValue.Right_Hinge;
+                    break;
+                default:
+                    return null;
+            }
+            return ItemKey.Hinge + KD.StringTools.Const.EqualSign + hinge + Separator.NewLine;
         }
-        private string WallPositionY(double value)
+        private string DoorOpening(Article article)
         {
-            string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            string opening = String.Empty;
+            if (article.Host != null)
+            {
+                string objectType = this.CurrentAppli.Scene.ObjectGetInfo(article.Host.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+                if (Convert.ToInt16(objectType) == Wall.Const.TypeWall)
+                {
+                    if (article.AngleOXY == article.Host.AngleOXY)
+                    {
+                        opening = ItemValue.InWards;
+                    }
+                    else
+                    {
+                        opening = ItemValue.OutWard;
+                    }
+                }
+                
+            }
+            return ItemKey.Opening + KD.StringTools.Const.EqualSign + opening + Separator.NewLine;
         }
-        private string WallPositionZ(double value)
+        private string DoorWallRefNo(Article article)
         {
-            string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            string refNo = String.Empty;
+            if (article.Host != null)
+            {
+                string objectType = this.CurrentAppli.Scene.ObjectGetInfo(article.Host.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+                if (Convert.ToInt16(objectType) == Wall.Const.TypeWall)
+                {
+                    refNo = article.Host.Number.ToString();
+                }                    
+            }
+            return ItemKey.WallRefNo + KD.StringTools.Const.EqualSign + refNo + Separator.NewLine;
         }
-        private string WallDimensionX(double value)
+        private string DoorRefPntXRel(Article article)
         {
-            string data = ItemKey.Width + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            string refPntXRel = String.Empty;
+            if (article.Host != null)
+            {
+                string objectType = this.CurrentAppli.Scene.ObjectGetInfo(article.Host.ObjectId, KD.SDK.SceneEnum.ObjectInfo.TYPE);
+                if (Convert.ToInt16(objectType) == Wall.Const.TypeWall)
+                {
+                    //double value = this.CurrentAppli.Scene.ObjectGetDistanceFromObject(article.ObjectId, false, article.Host.ObjectId, false, KD.SDK.SceneEnum.ViewType.TOP, 0);
+                    double unit = KD.StringTools.Convert.ToDouble(this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.UNITVALUE));
+                    double value = article.GetObjectInfo(KD.SDK.SceneEnum.ObjectInfo.DISTLEFTWALL, unit);
+                    refPntXRel = value.ToString();
+                }
+            }
+            return ItemKey.RefPntXRel + KD.StringTools.Const.EqualSign + refPntXRel + Separator.NewLine;
         }
-        private string WallDimensionY(double value)
+        private string DoorRefPntYRel(Article article)
         {
-            string data = ItemKey.Depth + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return ItemKey.RefPntYRel + KD.StringTools.Const.EqualSign + "0" + Separator.NewLine;
         }
-        private string WallDimensionZ(double value)
+        private string DoorRefPntZRel(Article article)
         {
-            string data = ItemKey.Height + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
-        }
-        private string WallAngle(double angle)
-        {
-            string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + angle.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return ItemKey.RefPntZRel + KD.StringTools.Const.EqualSign + "0" + Separator.NewLine;
         }
 
+        //Article
         private void MoveArticlePerRepere(Article article)
         {
             posX = article.PositionX;
@@ -1637,7 +1732,7 @@ namespace Ord_Eancom
                     break;
             }
         }
-
+        
         public void SetArticleInformations(Articles articles)
         {
             #region //INFO
@@ -1657,6 +1752,11 @@ namespace Ord_Eancom
             //ConstructionType=N
             #endregion
 
+            ////Must relist the articles, del linears and add graphic linear
+            //articles = this.DelLinearsArticles(articles);
+            ////add linear articles cause not in heading and need to all real object in the scene
+            //articles = this.AddLinearsGraphikArticles(articles);
+
             this.SetSceneReference(version);
 
             int index = 1;
@@ -1669,25 +1769,25 @@ namespace Ord_Eancom
                 {                    
                     this.CurrentAppli.Scene.SceneSetReference((int)sceneDimX, (int)sceneDimY, (int)sceneDimZ, angleScene);
                     //_orderInformations.ReleaseChar
-                    structureLineEGIList.Add(ArticleIndexation(index));
+                    structureLineEGIList.Add(Indexation(SegmentName.Article_, index));
                     structureLineEGIList.Add(ArticleManufacturer(article.KeyRef));                    
                     structureLineEGIList.Add(ArticleRefNo(article.ObjectId.ToString())); //RFF.LI  
                     structureLineEGIList.Add(ArticleRefPos(article.ObjectId.ToString())); // RFF.ON
 
-                    this.SetAllPositionsAndDimensions(segmentClassification, article);
+                    int polyType = this.GetArticlePolyType(article);
+                    this.SetAllPositionsAndDimensions(segmentClassification, article, polyType);
 
                     bool hasPolytype = false;
-                    string[] polyPoints = { };
-                    int polyType = this.GetArticlePolyType(article);
+                    string[] polyPoints = { };                    
                     if (polyType != KD.Const.UnknownId)
                     {
                         polyPoints = this.GetArticlePolyPoint(article);                       
                         hasPolytype = true;
                     }                                      
 
-                    structureLineEGIList.Add(ArticlePositionX(posX));
-                    structureLineEGIList.Add(ArticlePositionY(posY));                    
-                    structureLineEGIList.Add(ArticlePositionZ(posZ));
+                    structureLineEGIList.Add(PositionX(posX));
+                    structureLineEGIList.Add(PositionY(posY));                    
+                    structureLineEGIList.Add(PositionZ(posZ));
                     structureLineEGIList.Add(ArticleDimensionX(dimX));
                     structureLineEGIList.Add(ArticleDimensionZ(dimZ));                    
                     structureLineEGIList.Add(ArticleDimensionY(article, dimY));
@@ -1705,7 +1805,7 @@ namespace Ord_Eancom
                         structureLineEGIList.Add(ArticleAngleDimensionYE(0.0));
                     }
 
-                    structureLineEGIList.Add(ArticleAngle(a));
+                    structureLineEGIList.Add(Angle(a));
                     structureLineEGIList.Add(ArticleReference(article.KeyRef));
                     //structureLineEGIList.Add(ArticleKeyReference(article.KeyRef));
                     structureLineEGIList.Add(ArticleConstructionType(article.KeyRef));
@@ -1717,7 +1817,7 @@ namespace Ord_Eancom
                     }
   
                     if (hasPolytype)
-                    {
+                    {                       
                         structureLineEGIList.Add(ArticlePolyType(polyType));
 
                         int polyCounter = this.GetArticlePolyCounter(article);
@@ -1746,10 +1846,6 @@ namespace Ord_Eancom
             }
         }       
 
-        private string ArticleIndexation(int articleIndex)
-        {
-            return KD.StringTools.Format.Bracketed(SegmentName.Article_ + articleIndex.ToString(SegmentFormat.FourZero)) + Separator.NewLine;
-        }
         private string ArticleManufacturer(string keyRef)
         {
             if (!String.IsNullOrEmpty(keyRef))
@@ -1805,26 +1901,7 @@ namespace Ord_Eancom
             }
             return null;
         }
-        private string ArticlePositionX(double value)
-        {
-            string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
-        }
-        private string ArticlePositionY(double value)
-        {
-            string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
-        }
-        private string ArticlePositionZ(double value)
-        {
-            string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
-        }
-        private string ArticleAngle(double value)
-        {
-            string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
-        }
+
         private string ArticleShape(string str)
         {
             return ItemKey.Shape + KD.StringTools.Const.EqualSign + str.ToString() + Separator.NewLine;
@@ -1952,7 +2029,7 @@ namespace Ord_Eancom
         {
             return ItemKey.PolyPntZ + KD.StringTools.Const.Underscore + counter.ToString(SegmentFormat.FourZero) + KD.StringTools.Const.EqualSign + value.ToString() + Separator.NewLine;
         }
-
+        //Others
         public void EGIOrderFile()
         {
             using (FileStream fs = new FileStream(Path.Combine(Order.orderDir, OrderTransmission.OrderEGIFileName), FileMode.Create))
@@ -1981,7 +2058,7 @@ namespace Ord_Eancom
             return KD.StringTools.Const.Zero;
         }        
 
-        private void SetAllPositionsAndDimensions(SegmentClassification segmentClassification, Article article)
+        private void SetAllPositionsAndDimensions(SegmentClassification segmentClassification, Article article, int polytype)
         {
             posZ = this.GetRealPositionZByPosedOnOrUnder(article);
 
@@ -2003,15 +2080,10 @@ namespace Ord_Eancom
                 this.SetFilerWithCoinPositionsAndDimensions(article);
             }
 
-            if (segmentClassification.IsArticleLinear())
-            {
-                if (segmentClassification.IsArticlePlinth() || segmentClassification.IsArticleLightPelmet())
-                {
-                    posZ += dimZ;
-                }
-                
-                //posX = 0;
-                //posY = 0;
+            PolytypeValue polytypeValue = new PolytypeValue(polytype);
+            if (polytypeValue.Z_Coordinate == PolytypeValue.Z_Coordinate_Top)
+            {               
+                 posZ = dimZ;
             }
         }
         private void SetFilerPositions(Article article)
@@ -2040,6 +2112,46 @@ namespace Ord_Eancom
                 dimY = article.Parent.DimensionY + article.DimensionY;
                 dimZ = article.DimensionZ;
             }
+        }
+
+        private string Indexation(string sectionName, int index)
+        {
+            return KD.StringTools.Format.Bracketed(sectionName + index.ToString(SegmentFormat.FourZero)) + Separator.NewLine;
+        }
+        private string PositionX(double value)
+        {
+            string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string PositionY(double value)
+        {
+            string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string PositionZ(double value)
+        {
+            string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string DimensionX(double value)
+        {
+            string data = ItemKey.Width + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string DimensionY(double value)
+        {
+            string data = ItemKey.Depth + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }
+        private string DimensionZ(double value)
+        {
+            string data = ItemKey.Height + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
+        }     
+        private string Angle(double value)
+        {
+            string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
+            return this.ConvertCommaToDot(data) + Separator.NewLine;
         }
         #endregion
     }

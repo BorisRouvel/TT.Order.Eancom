@@ -328,7 +328,7 @@ namespace TT.Import.EGI
 
         private void Place()
         {
-            _plugin.SetReference();
+            _plugin.SetReference(); //
             int id = _plugin.CurrentAppli.Scene.EditPlaceObject(ManageCatalog.ConstraintCatalogName, this.Reference, this.HingeType, (int)this.Width, (int)this.Depth, (int)this.Height,
                                                                     (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ, 0, this.AngleZ, false, false, false);
             _door = new Article(_plugin.CurrentAppli, id);
