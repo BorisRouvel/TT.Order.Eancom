@@ -698,6 +698,7 @@ namespace TT.Import.EGI
 
         private Article PlaceObject()
         {
+
             _plugin.SetReference();           
 
             int objectID = _plugin.CurrentAppli.Scene.EditPlaceObject(this.CatalogManufacturer, this.Name, this.HingeType, (int)this.Measure_B, 

@@ -6,21 +6,9 @@ namespace TT.Import.EGI
 {
     public class FileEGI
     {
-        KD.SDKComponent.AppliComponent _currentAppli = null;
-        KD.SDKComponent.AppliComponent CurrentAppli
-        {
-            get
-            {
-                return _currentAppli;
-            }
-            set
-            {
-                _currentAppli = value;
-            }
-        }
-
-        private const string Dir = "orders";
-        //private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
+        private KD.SDKComponent.AppliComponent _currentAppli = null;
+       
+        private const string Dir = "orders";        
         private const string FilterEGIFile = "Fichiers egi (*.egi)|*.egi";
         
         public static string orderDir = String.Empty;
@@ -29,15 +17,14 @@ namespace TT.Import.EGI
         public FileEGI(KD.SDKComponent.AppliComponent currentAppli)
         {
             _currentAppli = currentAppli;
-            orderDir = Path.Combine(this.CurrentAppli.ExeDir, Dir);
+            orderDir = Path.Combine(_currentAppli.ExeDir, Dir);
         }
 
         public bool Open()
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Filter = FileEGI.FilterEGIFile;
-            openFile.RestoreDirectory = true;
-            //openFile.InitialDirectory = orderDir;
+            openFile.RestoreDirectory = true;           
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {

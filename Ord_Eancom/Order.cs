@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
-using System.Net.Mail;
 
 // ---------------------------------------
 // for KD self registration via RegAsm
@@ -21,6 +20,7 @@ namespace Ord_Eancom
         OrderInformations orderInformations = null;
         OrderInformations orderInformationsFromArticles = null;
         OrderWrite orderWrite = null;
+        BuildCommon buildCommon = null;
         FileEDI fileEDI = null;
         MainForm mainForm = null;
 
@@ -205,9 +205,32 @@ namespace Ord_Eancom
                     return;
                 }
 
-                orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, orderInformationsFromArticles, articles, fileEDI);
+                buildCommon = new BuildCommon(this.CurrentAppli);
+                orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, buildCommon, orderInformationsFromArticles, articles, fileEDI);
 
-                // put method at the end for ??
+                // the order of the choice is important cause BuilEdi need jpg file and EGI need EDI number's article like 21 and 21.1
+                if (MainForm.IsChoiceExportPlan)
+                {
+                    BuildPlan buildPlan = new BuildPlan(this.CurrentAppli, buildCommon);
+                    buildPlan.Generate();
+                }
+                if (MainForm.IsChoiceExportElevation)
+                {
+                    BuildElevation buildElevation = new BuildElevation(this.CurrentAppli, buildCommon);
+                    buildElevation.Generate();
+                }
+                if (MainForm.IsChoiceExportPerspective)
+                {
+                    BuildPerspective buildPerspective = new BuildPerspective(this.CurrentAppli, buildCommon);
+                    buildPerspective.Generate();
+                }
+                if (MainForm.IsChoiceExportOrder)
+                {
+                    BuildOrder buildOrder = new BuildOrder(this.CurrentAppli, orderInformations);
+                    buildOrder.Generate();
+                }
+
+                // put method after for take generate file information (*.jpg...)
                 // control this if miss some infos in EDI file
                 orderWrite.BuildEDI(articles);
                 orderWrite.EDIOrderFileStream();
@@ -217,29 +240,14 @@ namespace Ord_Eancom
                     orderWrite.BuildEGI(articles);
                     orderWrite.EGIOrderFile();
                 }
-                if (MainForm.IsChoiceExportPlan)
-                {
-                    orderWrite.BuildPlan();
-                }
-                if (MainForm.IsChoiceExportElevation)
-                {
-                    orderWrite.BuildElevation();
-                }
-                if (MainForm.IsChoiceExportPerspective)
-                {
-                    orderWrite.BuildPerspective();
-                }
-                if (MainForm.IsChoiceExportOrder)
-                {
-                    orderWrite.BuildOrder();
-                }
-
+  
                 // put method ahead for list RFF_A object refpos number
                 // control this if miss some infos in EDI file
                 //orderWrite.BuildEDI(articles);
                 //orderWrite.EDIOrderFileStream();
 
-                orderWrite.ZIPOrderFile();
+                OrderZip orderZip = new OrderZip();
+                orderZip.ZIPFile();
             }
         }
       

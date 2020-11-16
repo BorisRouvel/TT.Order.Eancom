@@ -314,10 +314,10 @@ namespace TT.Import.EGI
 
             if (this.Door != null && this.Door.IsValid)
             {
-                this.SetDimensions();
-                this.SetPositions();
-                this.SetAngle();
                 this.InWardsOrOutWard();
+                //this.SetDimensions();
+                //this.SetPositions();
+                //this.SetAngle();                
 
                 if (!this.IsWallRefValid())
                 {
@@ -331,28 +331,35 @@ namespace TT.Import.EGI
             _plugin.SetReference(); //
             int id = _plugin.CurrentAppli.Scene.EditPlaceObject(ManageCatalog.ConstraintCatalogName, this.Reference, this.HingeType, (int)this.Width, (int)this.Depth, (int)this.Height,
                                                                     (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ, 0, this.AngleZ, false, false, false);
-            _door = new Article(_plugin.CurrentAppli, id);
+            if (id != KD.Const.UnknownId)
+            {
+                _door = new Article(_plugin.CurrentAppli, id);
+            }
+            else
+            {
+                _door = null;
+            }
         }
-        private void SetDimensions()
-        {
-            _door.DimensionX = this.Width;
-            _door.DimensionY = this.Depth;
-            _door.DimensionZ = this.Height;
-        }
-        private void SetPositions()
-        {
-            _plugin.SetReference();
+        //private void SetDimensions()
+        //{
+        //    _door.DimensionX = this.Width;
+        //    _door.DimensionY = this.Depth;
+        //    _door.DimensionZ = this.Height;
+        //}
+        //private void SetPositions()
+        //{
+        //    _plugin.SetReference();
 
-            _door.PositionX = this.RefPntX;
-            _door.PositionY = this.RefPntY;
-            _door.PositionZ = this.RefPntZ;
-        }
-        private void SetAngle()
-        {
-            _plugin.SetReference();
+        //    _door.PositionX = this.RefPntX;
+        //    _door.PositionY = this.RefPntY;
+        //    _door.PositionZ = this.RefPntZ;
+        //}
+        //private void SetAngle()
+        //{
+        //    _plugin.SetReference();
 
-            _door.AngleOXY = this.AngleZ;
-        }
+        //    _door.AngleOXY = this.AngleZ;
+        //}
         private void InWardsOrOutWard()
         {
             if (!String.IsNullOrEmpty(this.Opening))
@@ -367,7 +374,9 @@ namespace TT.Import.EGI
             }
         }
         private void Reverse()
-        {         
+        {
+            this.Door.Select(false);
+            this.Door.IsActive = true;
             bool ok = _plugin.CurrentAppli.ExecuteMenuItem(KD.Const.UnknownId, (int)KD.SDK.AppliEnum.SelectionMenuItemsId.REVERSE);
         }
         private bool IsWallRefValid()

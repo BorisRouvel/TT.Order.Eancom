@@ -45,7 +45,7 @@ namespace Eancom
                         _e6060 = parent.Quantity.ToString();
                     }
                 }
-                if (utility.IsLinearPlanType(article.Type))
+                if (utility.IsLinearPlanType(article.Type) && this.E6060 == KD.StringTools.Const.Zero)
                 {
                     _e6060 = utility.GetQuantityByOccurrence(article.CurrentAppli, article.ObjectId);
                 }

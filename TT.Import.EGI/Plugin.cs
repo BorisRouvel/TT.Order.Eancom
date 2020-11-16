@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 // ---------------------------------------
 // for KD self registration via RegAsm
@@ -14,22 +15,24 @@ using KD.Model;
 
 namespace TT.Import.EGI
 {
-    public class Plugin : KD.Plugin.PluginBase
+    public class Plugin : PluginBase
     {
         private string _language = string.Empty;
 
+        private MainForm mainForm = null;
+
         private Translate translate = null;
-        private KD.Plugin.MainAppMenuItem InSituMenuItem = null;
+        private MainAppMenuItem InSituMenuItem = null;
         private KD.Config.IniFile CurrentFileEGI = null;
         private ManageCatalog manageCatalog = null;
         private GlobalSegment globalSegment = null;
         private WallSegment wallSegment = null;
         private DoorSegment doorSegment = null;
         public WindowSegment windowSegment = null;
-        //private RecessSegment recessSegment = null;
+        private RecessSegment recessSegment = null;
         //private HindranceSegment hindranceSegment = null;
         private ArticleSegment articleSegment = null;
-
+   
         public static double sceneDimX = 0.0;
         public static double sceneDimY = 0.0;
         public static string strSceneDimZ = String.Empty;
@@ -38,6 +41,13 @@ namespace TT.Import.EGI
 
         public static List<String> notPlacedArticleList = new List<string>(0);
         public static Dictionary<int, string> articleAlreadyPlacedDict = new Dictionary<int, string>();
+
+        List<string> wallSectionList = new List<string>();
+        List<string> doorSectionList = new List<string>();
+        List<string> windowSectionList = new List<string>();
+        List<string> recessSectionList = new List<string>();
+        List<string> articleSectionList = new List<string>();
+        private int allSectionsCount = 0;
 
         int CallParamsBlock = KD.Const.UnknownId;
 
@@ -109,45 +119,66 @@ namespace TT.Import.EGI
             return true;
         }
         
+        private void Initialize()
+        {
+            FileEGI fileEGI = new FileEGI(this.CurrentAppli);
+            this.CurrentFileEGI = fileEGI.Initialize();           
+
+            this.SetSceneDimensions();
+
+            if (manageCatalog == null)
+            {
+                manageCatalog = new ManageCatalog(this.CurrentAppli);
+            }
+
+            if (globalSegment == null)
+            {
+                globalSegment = new GlobalSegment(this.CurrentFileEGI);
+            }
+
+            string version = globalSegment.GetVersion();
+            SetSceneReference(version);
+
+            this.ClearAllSectionsList();
+            this.SetAllSectionsList();           
+        }
 
         public void Main(int iCallParamsBlock)
         {
-            ScnDimX = this.CurrentAppli.SceneDimX;
-            ScnDimY = this.CurrentAppli.SceneDimY;
-            ScnDimZ = 0;
+            this.Initialize();
+            if (mainForm == null)
+            {
+                mainForm = new MainForm(this);
+            }
+            mainForm.ShowDialog(this.CurrentAppli.GetNativeIWin32Window());
 
-            manageCatalog = new ManageCatalog(this.CurrentAppli);
-            FileEGI fileEGI = new FileEGI(this.CurrentAppli);
-           
-            this.CurrentFileEGI = fileEGI.Initialize();            
-
+        }
+        public long Execute(BackgroundWorker worker, DoWorkEventArgs e)
+        {
             if (this.CurrentFileEGI != null)
             {
-                Cursor.Current = Cursors.WaitCursor;
-
-                globalSegment = new GlobalSegment(this.CurrentFileEGI);
-                string version = globalSegment.GetVersion();
-                SetSceneReference(version);
+                Cursor.Current = Cursors.WaitCursor;                
 
                 this.PlaceWallsInScene();
                 this.PlaceDoorsInScene();
                 this.PlaceWindowsInScene();
-                //this.PlaceRecessInScene();
+                this.PlaceRecessInScene();
                 //this.PlaceHindrancesInScene();
                 this.PlaceArticlesInScene();
                 this.EnableUnitFloorDetails();
                 this.ResetReference();
-                this.TerminateMessage();
+               
+                //this.TerminateMessage();
             }
             else
             {
                 this.NoValidMessage();
             }
-           
-            
-            Cursor.Current = Cursors.Arrow;
-        }
 
+            Cursor.Current = Cursors.Arrow;
+
+            return 100;
+        }
   
         private string TemporisNumber()
         {
@@ -157,6 +188,24 @@ namespace TT.Import.EGI
                 return accountNumber;
             }
             return String.Empty;
+        }
+        private void ClearAllSectionsList()
+        {
+            wallSectionList.Clear();
+            doorSectionList.Clear();
+            windowSectionList.Clear();
+            recessSectionList.Clear();
+            articleSectionList.Clear();
+        }
+        private void SetAllSectionsList()
+        {
+            wallSectionList.AddRange(this.TypeSectionsList(SegmentName.Wall_));
+            doorSectionList.AddRange(this.TypeSectionsList(SegmentName.Door_));
+            windowSectionList.AddRange(this.TypeSectionsList(SegmentName.Window_));
+            recessSectionList.AddRange(this.TypeSectionsList(SegmentName.Recess_));
+            articleSectionList.AddRange(this.TypeSectionsList(SegmentName.Article_));
+
+            allSectionsCount = wallSectionList.Count + doorSectionList.Count + windowSectionList.Count + recessSectionList.Count + articleSectionList.Count;
         }
 
         private List<string> TypeSectionsList(string type)
@@ -174,6 +223,12 @@ namespace TT.Import.EGI
             return list;
         }
 
+        private void SetSceneDimensions()
+        {
+            ScnDimX = this.CurrentAppli.SceneDimX;
+            ScnDimY = this.CurrentAppli.SceneDimY;
+            ScnDimZ = 0;
+        }
         public static void SetSceneReference(string version)
         {
             switch (version.ToUpper())
@@ -207,43 +262,50 @@ namespace TT.Import.EGI
         private void ResetReference()
         {
             this.CurrentAppli.SceneComponent.ResetSceneReference();
-        }
- 
-        private void PlaceWallsInScene()
-        {
-            foreach (string wallSection in this.TypeSectionsList(SegmentName.Wall_))
-            {
-                wallSegment = new WallSegment(this, this.CurrentFileEGI, wallSection);               
+        }     
+
+        public void PlaceWallsInScene()
+        { 
+            foreach (string wallSection in wallSectionList)
+            {              
+
+                wallSegment = new WallSegment(this, this.CurrentFileEGI, wallSection);
                 wallSegment.Add();
-                this.CurrentAppli.Scene.ViewRefresh();
+
+                mainForm.SetProgressBar(wallSection,  allSectionsCount);
+               
             }
         }
         private void PlaceDoorsInScene()
         {
-            foreach (string doorSection in this.TypeSectionsList(SegmentName.Door_))
+            foreach (string doorSection in doorSectionList)
             {
                 doorSegment = new DoorSegment(this, this.CurrentFileEGI, doorSection);
                 doorSegment.Add();
-                this.CurrentAppli.Scene.ViewRefresh();
+
+                mainForm.SetProgressBar(doorSection, allSectionsCount);
             }
         }
         private void PlaceWindowsInScene()
         {
-            foreach (string windowSection in this.TypeSectionsList(SegmentName.Window_))
+            foreach (string windowSection in windowSectionList)
             {
                 windowSegment = new WindowSegment(this, this.CurrentFileEGI, windowSection);
                 windowSegment.Add();
-                this.CurrentAppli.Scene.ViewRefresh();
+
+                mainForm.SetProgressBar(windowSection, allSectionsCount);
             }
         }
-        //private void PlaceRecessInScene()
-        //{
-        //    foreach (string recessSection in this.TypeSectionsList(SegmentName.Recess_))
-        //    {
-        //        recessSegment = new DoorSegment(this, this.CurrentFileEGI, recessSection);
-        //        recessSegment.Add();
-        //    }
-        //}
+        private void PlaceRecessInScene()
+        {
+            foreach (string recessSection in recessSectionList)
+            {
+                recessSegment = new RecessSegment(this, this.CurrentFileEGI, recessSection);
+                recessSegment.Add();
+
+                mainForm.SetProgressBar(recessSection, allSectionsCount);
+            }
+        }
         //private void PlaceHindranceInScene()
         //{
         //    foreach (string hindranceSection in this.TypeSectionsList(SegmentName.Hindrance_))
@@ -265,30 +327,31 @@ namespace TT.Import.EGI
             Plugin.notPlacedArticleList.Clear();
             Plugin.articleAlreadyPlacedDict.Clear();
 
-            foreach (string articleSection in this.TypeSectionsList(SegmentName.Article_))
-            {              
+            foreach (string articleSection in articleSectionList)
+            {
                 articleSegment = new ArticleSegment(this, this.CurrentFileEGI, articleSection, manageCatalog);
                 SegmentClassification segmentClassification = new SegmentClassification(articleSection, this.CurrentFileEGI);
                 List<string> catalogsList = manageCatalog.CatalogsByManufacturerList(articleSegment.Manufacturer);
-              
+
                 if (segmentClassification.HasSectionPolytype())
                 {
-                    articleSegment.AddLinear(articleSection, catalogsList);                   
+                    articleSegment.AddLinear(articleSection, catalogsList);
                 }
                 else
                 {
-                    articleSegment.Add(articleSection, catalogsList);                   
+                    articleSegment.Add(articleSection, catalogsList);
                 }
 
                 this.ResetReference();
-                //this.CurrentAppli.Scene.ViewRefresh();
+
+                mainForm.SetProgressBar(articleSection, allSectionsCount);
             }
 
             if (articleSegment != null)
             {
                 articleSegment.NoPlacedArticleMessage();
-            }           
-        }      
+            }
+        }
 
         //Method to enable feet of unit whose on floor
         private void EnableUnitFloorDetails()
@@ -314,10 +377,10 @@ namespace TT.Import.EGI
             }
         }
 
-        private void TerminateMessage()
-        {
-            MessageBox.Show("Import EGI terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        //private void TerminateMessage()
+        //{
+        //    MessageBox.Show("Import EGI terminé", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //}
         private void NoValidMessage()
         {
             MessageBox.Show("Import EGI non effectué.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);

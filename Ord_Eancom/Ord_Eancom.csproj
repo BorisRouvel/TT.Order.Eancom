@@ -192,6 +192,10 @@
     <Compile Include="..\TT.Import.EGI\Segment\Segments.cs">
       <Link>Segment\Segments.cs</Link>
     </Compile>
+    <Compile Include="BuildFile\BuildElevation.cs" />
+    <Compile Include="BuildFile\BuildOrder.cs" />
+    <Compile Include="BuildFile\BuildPerspective.cs" />
+    <Compile Include="BuildFile\BuildPlan.cs" />
     <Compile Include="Eancom.cs" />
     <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>
@@ -200,7 +204,12 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Order.cs" />
-    <Compile Include="OrderManager.cs" />
+    <Compile Include="Constantes\OrderConst.cs" />
+    <Compile Include="Constantes\OrderEnum.cs" />
+    <Compile Include="BuildFile\BuildCommon.cs" />
+    <Compile Include="Order\OrderInformations.cs" />
+    <Compile Include="Order\OrderWrite.cs" />
+    <Compile Include="Order\OrderZip.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -229,7 +238,7 @@
     <Compile Include="Structures\22_UNZ.cs" />
     <Compile Include="Structures\02_UNB.cs" />
     <Compile Include="Structures\03_UNH.cs" />
-    <Compile Include="CountryTable.cs" />
+    <Compile Include="Order\CountryTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form\MainForm.resx">

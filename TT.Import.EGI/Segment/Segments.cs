@@ -79,6 +79,8 @@ namespace TT.Import.EGI
         public const string Left_Hinge = "L";
         public const string Right_Hinge = "R";
         public const string None_Hinge = "N";
+        public const string Top_Hinge = "T";
+        public const string Bottom_Hinge = "B";
         public const string InWards = "I";
         public const string OutWard = "O";
         public const string Slide = "S";
@@ -239,12 +241,15 @@ namespace TT.Import.EGI
     {
         public const string Filer = "Fileur";
         public const string FilerCode = "@F";
-        public const string Coin = "_COIN";        
+        public const string Coin = "_COIN";
+        public const string Angle = "angle";
     }
 
     public class CatalogConstante
     {
         public const double FrontDepth = 20.0;
+        public const string Slide = "coulissant";
+        public const string Leaf = "vantail";
     }
 
     public class SegmentClassification
@@ -387,6 +392,20 @@ namespace TT.Import.EGI
                 if (this.Article.Name.ToUpper().Contains("90".ToUpper()) && this.Article.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
                 {
                     return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleCornerOrAngleUnit()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 3 || this.Article.Layer == 4 || this.Article.Layer == 9 || this.Article.Layer == 10)
+                {
+                    if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Angle.ToUpper())))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
