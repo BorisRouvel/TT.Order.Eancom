@@ -266,6 +266,7 @@ namespace Ord_Eancom
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.ClientNom()"));
             return this.ReleaseChar(text);
         }
+
         public string GetSupplierGLN()
         {
             return (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.Code(" + supplierID + ")"));
@@ -319,6 +320,13 @@ namespace Ord_Eancom
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Fournisseur.Email(" + supplierID + ")"));
             return this.ReleaseChar(text);
         }
+        public bool SetSupplierEmail(string value)
+        {
+            int rank = this.CurrentAppli.GetSupplierRankFromIdent(supplierID);
+            bool ok = this.CurrentAppli.SupplierSetInfo(rank, value, KD.SDK.AppliEnum.SupplierInfo.EMAIL);
+            return ok;
+        }
+
         public string GetRetailerID()
         {
             string text = (this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteIdentifiant(" + supplierID + ")"));
@@ -382,6 +390,7 @@ namespace Ord_Eancom
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteEmail()")));
         }
+
         public string GetDeliveryName1()
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.SiteLivraisonNom(" + supplierID + ")")));
@@ -408,6 +417,7 @@ namespace Ord_Eancom
 
             return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
+
         public string GetCustomerDeliveryName1()
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.LivraisonNom(" + supplierID + ")")));
@@ -434,6 +444,7 @@ namespace Ord_Eancom
 
             return this.ReleaseChar(SupplierCountryTwoLetterISOName);
         }
+
         public string GetSellerID()
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.VendeurId()")));
@@ -442,6 +453,7 @@ namespace Ord_Eancom
         {
             return this.ReleaseChar((this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.VendeurNom()") + KD.StringTools.Const.SemiColon + this.CurrentAppli.Scene.SceneGetKeywordInfo("@Base.VendeurPrénom()")));
         }
+
         public string GetCatalogModelCodeAndName()
         {
             bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);

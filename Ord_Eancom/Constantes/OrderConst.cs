@@ -22,13 +22,15 @@ namespace Ord_Eancom
     {
         public const string ChoiceRetaillerDelivery = "IsChoiceRetaillerDelivery";
         public const string ChoiceCustomerDelivery = "IsChoiceCustomerDelivery";
-        public const string MandatoryDeliveryInformation = "MandatoryDeliveryInformation";
+        public const string MandatoryDeliveryCustomerInformation = "MandatoryDeliveryCustomerInformation";
+        public const string MandatoryDeliveryRetailerInformation = "MandatoryDeliveryRetailerInformation";
         public const string ChoiceExportEGI = "IsChoiceExportEGI";
         public const string ChoiceExportPlan = "IsChoiceExportPlan";
         public const string ChoiceExportElevation = "IsChoiceExportElevation";
         public const string ChoiceExportPerspective = "IsChoiceExportPerspective";
         public const string ChoiceExportOrder = "IsChoiceExportOrder";
         public const string GenerateOrder = "IsGenerateOrder";
+        public const string SupplierEmail = "SupplierEmail";
     }
 
     public class OrderConstants

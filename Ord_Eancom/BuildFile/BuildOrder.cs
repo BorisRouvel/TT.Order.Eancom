@@ -13,19 +13,7 @@ namespace Ord_Eancom
         OrderInformations _orderInformations = null;
 
         AppliComponent _currentAppli = null;
-        AppliComponent CurrentAppli
-        {
-            get
-            {
-                return _currentAppli;
-            }
-            set
-            {
-                _currentAppli = value;
-            }
-        }
-
-
+    
         public BuildOrder(AppliComponent currentAppli, OrderInformations orderInformations)
         {
             _currentAppli = currentAppli;
@@ -34,12 +22,12 @@ namespace Ord_Eancom
 
         public void Generate()
         {
-            int supplierRank = this.CurrentAppli.GetSupplierRankFromIdent(_orderInformations.GetSupplierName());
+            int supplierRank = _currentAppli.GetSupplierRankFromIdent(_orderInformations.GetSupplierName());
 
             if (supplierRank != KD.Const.UnknownId)
             {
                 this.ManagePdfFile(supplierRank);
-            }
+            }         
         }
         private string GetSupplierFilePath()
         {
@@ -47,15 +35,14 @@ namespace Ord_Eancom
             string sceneDocDir = Order._pluginWord.DocEngine.SceneDocDir;
             return Path.Combine(sceneDocDir, KD.Plugin.Word.Config.Const.SupplierOrderDirName, supplierId + KD.IO.File.Extension.Pdf);
         }
-        private void ManagePdfFile(int supplierRank)
+        private bool ManagePdfFile(int supplierRank)
         {
-            string pdfFlagState = this.CurrentAppli.SupplierGetInfo(supplierRank, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
-
+            string pdfFlagState = _currentAppli.SupplierGetInfo(supplierRank, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
+            
             if (pdfFlagState == KD.StringTools.Const.One)
             {
-                //    bool bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, KD.StringTools.Const.One, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
                 string supplierFilePath = this.GetSupplierFilePath();
-                this.CopySupplierFile(supplierFilePath);
+                this.CopySupplierFile(supplierFilePath);               
             }
             else
             {
@@ -63,18 +50,27 @@ namespace Ord_Eancom
                     "Veuillez sélectionner 'Fichier PDF joint' dans votre fournisseurs", "Information");
             }
             //bPdfFlag = this.CurrentAppli.SupplierSetInfo(supplierRank, pdfFlagState, KD.SDK.AppliEnum.SupplierInfo.ATTACHED_PDFFILE);
+            return false;
         }
         private void CopySupplierFile(string supplierFilePath)
         {
             if (File.Exists(supplierFilePath))
             {
-                File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);
+                try
+                {
+                    File.Copy(supplierFilePath, Path.Combine(Order.orderDir, OrderTransmission.OrderName + OrderTransmission.ExtensionPDF), true);                 
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" +
+                    " n'a pas pu être copié." + Environment.NewLine + ex.Message, "Information");                  
+                }               
             }
             else
             {
                 System.Windows.Forms.MessageBox.Show("Le fichier de '" + OrderTransmission.OrderName + OrderTransmission.ExtensionPDF + "'" +
                     " n'a pas pu être généré.", "Information");
-            }
+            }         
         }
     }
 }

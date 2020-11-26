@@ -77,16 +77,16 @@ namespace Ord_Eancom
             }
         }
 
-        private static bool _isChoiceRetaillerDelivery;
-        public static bool IsChoiceRetaillerDelivery
+        private static bool _isChoiceRetailerDelivery;
+        public static bool IsChoiceRetailerDelivery
         {
             get
             {
-                return _isChoiceRetaillerDelivery;
+                return _isChoiceRetailerDelivery;
             }
             set
             {
-                _isChoiceRetaillerDelivery = value;
+                _isChoiceRetailerDelivery = value;
             }
         }
 
@@ -157,7 +157,7 @@ namespace Ord_Eancom
 
         OrderInformations _orderInformations = null;
         string _supplierName = null;
-        string _retaillerNumber = null;
+        string _retailerNumber = null;
 
         public MainForm(OrderInformations orderInformations)
         {
@@ -175,11 +175,11 @@ namespace Ord_Eancom
             _isChoiceExportElevation = this.ChoiceElevation_CHB.Checked;
             _isChoiceExportPerspective = this.ChoicePerspective_CHB.Checked;
             _isChoiceExportOrder = this.ChoiceOrder_CHB.Checked;
-            _isChoiceRetaillerDelivery = this.RetaillerDelivery_RBN.Checked;
+            _isChoiceRetailerDelivery = this.RetaillerDelivery_RBN.Checked;
             _isChoiceCustomerDelivery = this.CustomerDelivery_RBN.Checked;
             _mandatoryDeliveryInformation = String.Empty;
             _supplierName = _orderInformations.GetSupplierName();
-            _retaillerNumber = _orderInformations.GetRetailerNumber();
+            _retailerNumber = _orderInformations.GetRetailerNumber();
             _cancel = false;
         }
         private bool IsChecked(Control control)
@@ -224,10 +224,23 @@ namespace Ord_Eancom
                 
             }
         }
+        private void SetMandatoryDeliveryTextBox()
+        {
+            if (MainForm.IsChoiceCustomerDelivery)
+            {
+                _mandatoryDeliveryInformation = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.MandatoryDeliveryCustomerInformation);
+                this.MandatoryDeliveryInformation_TBX.Text = MandatoryDeliveryInformation;
+            }
+            if (MainForm.IsChoiceRetailerDelivery)
+            {
+                _mandatoryDeliveryInformation = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber);
+                this.MandatoryDeliveryInformation_TBX.Text = MandatoryDeliveryInformation;
+            }
+        }
         private void LoadCustomInfo()
         {
             string choiceRetaillerDelivery = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceRetaillerDelivery);
-            string choiceCustomerDelivery = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceCustomerDelivery);            
+            string choiceCustomerDelivery = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceCustomerDelivery);
             string choiceExportEGI = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportEGI);
             string choiceExportPlan = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportPlan);
             string choiceExportElevation = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportElevation);
@@ -235,22 +248,29 @@ namespace Ord_Eancom
             string choiceExportOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.ChoiceExportOrder);
 
             this.SetCheckedControl(this.RetaillerDelivery_RBN, choiceRetaillerDelivery);
-            this.SetCheckedControl(this.CustomerDelivery_RBN, choiceCustomerDelivery);           
+            this.SetCheckedControl(this.CustomerDelivery_RBN, choiceCustomerDelivery);
             this.SetCheckedControl(this.ChoiceEGI_CHB, choiceExportEGI);
             this.SetCheckedControl(this.ChoicePlan_CHB, choiceExportPlan);
             this.SetCheckedControl(this.ChoiceElevation_CHB, choiceExportElevation);
             this.SetCheckedControl(this.ChoicePerspective_CHB, choiceExportPerspective);
-            this.SetCheckedControl(this.ChoiceOrder_CHB, choiceExportOrder);            
+            this.SetCheckedControl(this.ChoiceOrder_CHB, choiceExportOrder);
+
+            this.SetMandatoryDeliveryTextBox();
         }
         private void SaveCustomInfo()
         {
-            Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceRetaillerDelivery), OrderKey.ChoiceRetaillerDelivery);
+            Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceRetailerDelivery), OrderKey.ChoiceRetaillerDelivery);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceCustomerDelivery), OrderKey.ChoiceCustomerDelivery);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportEGI), OrderKey.ChoiceExportEGI);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportPlan), OrderKey.ChoiceExportPlan);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportElevation), OrderKey.ChoiceExportElevation);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportPerspective), OrderKey.ChoiceExportPerspective);
             Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(Convert.ToString(MainForm.IsChoiceExportOrder), OrderKey.ChoiceExportOrder);
+
+            if (MainForm.IsChoiceCustomerDelivery)
+            {
+                Order._pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(MandatoryDeliveryInformation, OrderKey.MandatoryDeliveryCustomerInformation);
+            }
         }
         private void LoadInfoFromIni()
         {
@@ -260,14 +280,17 @@ namespace Ord_Eancom
             _emailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName);
             this.EmailCc_TBX.Text = EmailCc;
 
-            _mandatoryDeliveryInformation = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.mandatoryDeliveryInformation + _retaillerNumber);
-            this.MandatoryDeliveryInformation_TBX.Text = MandatoryDeliveryInformation;
+            this.SetMandatoryDeliveryTextBox();
         }
         private void SaveInfoToIni()
         {            
             Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + _supplierName, EmailTo);
             Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName, EmailCc);
-            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.mandatoryDeliveryInformation + _retaillerNumber, MandatoryDeliveryInformation);
+
+            if (MainForm.IsChoiceRetailerDelivery)
+            {
+                Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber, MandatoryDeliveryInformation);
+            }
         }      
         private void UpdateForm()
         {
@@ -331,12 +354,14 @@ namespace Ord_Eancom
 
         private void RetaillerDelivery_CHB_CheckedChanged(object sender, EventArgs e)
         {
-            _isChoiceRetaillerDelivery = this.IsChecked(RetaillerDelivery_RBN);
+            _isChoiceRetailerDelivery = this.IsChecked(RetaillerDelivery_RBN);
+            this.SetMandatoryDeliveryTextBox();
         }
 
         private void CustomerDelivery_CHB_CheckedChanged(object sender, EventArgs e)
         {
             _isChoiceCustomerDelivery = this.IsChecked(CustomerDelivery_RBN);
+            this.SetMandatoryDeliveryTextBox();
         }
 
         private void version_LNK_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

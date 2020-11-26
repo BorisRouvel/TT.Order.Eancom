@@ -43,22 +43,28 @@ namespace Ord_Eancom
             _pluginWord = new KD.Plugin.Word.Plugin();
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
 
+            string supplierName = orderInformations.GetSupplierName();
             string generateOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.GenerateOrder);
+            string supplierEmail = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.SupplierEmail);
+
+            if (!String.IsNullOrEmpty(supplierEmail))
+            {
+                orderInformations.SetSupplierEmail(supplierEmail);
+            }
 
             if (!String.IsNullOrEmpty(generateOrder))
             {
                 bool.TryParse(generateOrder, out bool isGenerateOrder);
                
                 if (isGenerateOrder)
-                {
-                    string supplierName = orderInformations.GetSupplierName();
-                    string retaillerNumber = orderInformations.GetRetailerNumber();
+                {                    
+                    string retailerNumber = orderInformations.GetRetailerNumber();
                     Order.orderDir = orderInformations.GetOrderDir();                   
                     KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
 
                     MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + supplierName);
                     MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + supplierName);
-                    MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.mandatoryDeliveryInformation + retaillerNumber);
+                    MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + retailerNumber);
 
                     string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr;commandes@discac.fr;ETL@discac.fr";
                     string ccAdress = MainForm.EmailCc;
@@ -75,20 +81,35 @@ namespace Ord_Eancom
             return true;
         }
 
-        private void SendMail(string recipientAddresses, string ccAdress)
-        {            
+        private string GetCustomerNumber()
+        {
             string customerNumber = orderInformations.GetRetailerGLN();
+            if (String.IsNullOrEmpty(customerNumber))
+            {
+                customerNumber = orderInformations.GetRetailerNumber();
+            }
+            return customerNumber;
+        }
+        private void SendMail(string recipientAddresses, string ccAdress)
+        {
+            string customerNumber = this.GetCustomerNumber();
             string commissiontNumber = orderInformations.GetCommissionNumber();
             string softWareVersion = orderInformations.GetNameAndVersionSoftware();
-            string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);           
-            
+            string attachedFilesPathsList = Path.Combine(Order.orderDir, OrderTransmission.OrderZipFileName);            
 
             DialogResult dialogResult = MessageBox.Show("Voulez-vous envoyer la commande ?", "InSitu", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (dialogResult == DialogResult.Yes)
             {
-               
-                    bool bSend = this.CurrentAppli.EmailSend("", //Contact name if exist
+                if (String.IsNullOrEmpty(customerNumber))
+                {
+                    MessageBox.Show("Vous devez renseigner le 'Numéro client'." , "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.NoSendMailMessage();
+
+                    return;
+                }               
+
+                bool bSend = this.CurrentAppli.EmailSend("", //Contact name if exist
                                                              recipientAddresses,
                                                              ccAdress, //cc
                                                              OrderTransmission.HeaderSubject + "<" + customerNumber + "><" + commissiontNumber + "><" + softWareVersion + ">",
@@ -96,9 +117,26 @@ namespace Ord_Eancom
                                                              attachedFilesPathsList, //AttachedFilesPathsList
                                                              String.Empty, //AttachedFilesNamesList
                                                              true); // show dialog
+
+                if (bSend)
+                {
+                    this.SendMailMessage();
+                }
+                else
+                {
+                    this.NoSendMailMessage();
+                }
             }           
         }
-       
+
+        private void SendMailMessage()
+        {
+            MessageBox.Show("Commande envoyée !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void NoSendMailMessage()
+        {
+            MessageBox.Show("Commande non envoyée !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
 
         /// <summary>
@@ -112,8 +150,8 @@ namespace Ord_Eancom
         public bool GenerateOrder(int callParamsBlock)
         {
             _pluginWord = new KD.Plugin.Word.Plugin();
-            _pluginWord.InitializeAll(callParamsBlock);
-            
+            _pluginWord.InitializeAll(callParamsBlock);          
+
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
             Order.orderDir = orderInformations.GetOrderDir();
 
@@ -122,7 +160,7 @@ namespace Ord_Eancom
             if (this.IsGenerateOrders(articles))
             {
                 this.mainForm = new MainForm(orderInformations);
-                this.Main(callParamsBlock, articles);
+                this.Main(callParamsBlock, articles);    
               
                 Cursor.Current = Cursors.Arrow;
                 return true;
@@ -174,13 +212,32 @@ namespace Ord_Eancom
                 _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);                
                 return false;
             }
+
+            string supplierEmail = orderInformations.GetSupplierEmail();            
+            //if (!String.IsNullOrEmpty(supplierEmail))
+            //{
+            //    string supplierName = orderInformations.GetSupplierName();
+            //    MessageBox.Show("Veuillez supprimer l'adresse email dans le fournisseur '" + supplierName + "'", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(supplierEmail, OrderKey.SupplierEmail);
+
+            //    orderInformations.SetSupplierEmail(String.Empty);
+            //    //supplierEmail = orderInformations.GetSupplierEmail();
+                
+            //    return false;
+            //}
+            //else
+            //{
+            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(null, OrderKey.SupplierEmail);
+            //}
+
             _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.TrueLowerCase, OrderKey.GenerateOrder);
             return true;
         }
 
         private void Main(int callParamsBlock, Articles articles)
         {
-            this.mainForm.ShowDialog();
+            this.mainForm.ShowDialog();         
 
             if (!String.IsNullOrEmpty(MainForm.EmailTo))
             {
@@ -208,7 +265,7 @@ namespace Ord_Eancom
                 buildCommon = new BuildCommon(this.CurrentAppli);
                 orderWrite = new OrderWrite(this.CurrentAppli, orderInformations, buildCommon, orderInformationsFromArticles, articles, fileEDI);
 
-                // the order of the choice is important cause BuilEdi need jpg file and EGI need EDI number's article like 21 and 21.1
+                // the order of the choice is important cause BuildEdi need jpg file and EGI need EDI number's article like 21 and 21.1
                 if (MainForm.IsChoiceExportPlan)
                 {
                     BuildPlan buildPlan = new BuildPlan(this.CurrentAppli, buildCommon);

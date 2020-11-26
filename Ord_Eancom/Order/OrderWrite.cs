@@ -184,7 +184,7 @@ namespace Ord_Eancom
         }
         private void SetLine_NAD_Delivery()
         {
-            if (MainForm.IsChoiceRetaillerDelivery)
+            if (MainForm.IsChoiceRetailerDelivery)
             {
                 if (!nAD.IsBYequalDDP())
                 {

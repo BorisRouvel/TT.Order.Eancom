@@ -122,6 +122,8 @@
             // ChoiceEGI_CHB
             // 
             this.ChoiceEGI_CHB.AutoSize = true;
+            this.ChoiceEGI_CHB.Checked = true;
+            this.ChoiceEGI_CHB.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ChoiceEGI_CHB.Location = new System.Drawing.Point(6, 19);
             this.ChoiceEGI_CHB.Name = "ChoiceEGI_CHB";
             this.ChoiceEGI_CHB.Size = new System.Drawing.Size(44, 17);
