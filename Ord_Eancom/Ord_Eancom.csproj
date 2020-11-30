@@ -175,17 +175,17 @@
     <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
       <Link>src\System\StringsHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\CatalogProperties.cs">
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Analysis\FilterArticle.cs">
+      <Link>Nub\Analysis\FilterArticle.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Analysis\SceneAnalysis.cs">
+      <Link>Nub\Analysis\SceneAnalysis.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Model\CatalogProperties.cs">
       <Link>Nub\Model\CatalogProperties.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\FilterArticle.cs">
-      <Link>Nub\Analysis\FilterArticle.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SceneAnalysis.cs">
-      <Link>Nub\Analysis\SceneAnalysis.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\SortedArticle.cs">
+    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Model\SortedArticle.cs">
       <Link>Nub\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>

@@ -11,9 +11,8 @@ namespace Ord_Eancom
     public class BuildOrder
     {
         OrderInformations _orderInformations = null;
-
         AppliComponent _currentAppli = null;
-    
+       
         public BuildOrder(AppliComponent currentAppli, OrderInformations orderInformations)
         {
             _currentAppli = currentAppli;
@@ -41,7 +40,7 @@ namespace Ord_Eancom
             
             if (pdfFlagState == KD.StringTools.Const.One)
             {
-                string supplierFilePath = this.GetSupplierFilePath();
+                string supplierFilePath = this.GetSupplierFilePath();               
                 this.CopySupplierFile(supplierFilePath);               
             }
             else

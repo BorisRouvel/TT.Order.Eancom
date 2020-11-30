@@ -116,7 +116,7 @@ namespace Ord_Eancom
                                                              String.Empty, //Body message
                                                              attachedFilesPathsList, //AttachedFilesPathsList
                                                              String.Empty, //AttachedFilesNamesList
-                                                             true); // show dialog
+                                                             false); // show dialog
 
                 if (bSend)
                 {
