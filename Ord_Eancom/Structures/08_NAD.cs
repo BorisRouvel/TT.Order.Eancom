@@ -311,11 +311,15 @@ namespace Eancom
         public bool IsBYequalDDP() 
         {
             nadBYCompare = this.Add_BY(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_BY + Separator.DataGroup, String.Empty);
-            nadDPCompare = this.Add_Delivery_DP(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_DP + Separator.DataGroup, String.Empty);
 
-            if (nadBYCompare.Equals(nadDPCompare))
+            if (this.Add_Delivery_DP(0) != null)
             {
-                return true;
+                nadDPCompare = this.Add_Delivery_DP(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_DP + Separator.DataGroup, String.Empty);
+
+                if (nadBYCompare.Equals(nadDPCompare))
+                {
+                    return true;
+                }
             }
             return false;
         }

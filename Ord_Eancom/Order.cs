@@ -41,7 +41,7 @@ namespace Ord_Eancom
         public bool ProcessOrder(int callParamsBlock)
         {
             _pluginWord = new KD.Plugin.Word.Plugin();
-            orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+            orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);            
 
             string supplierName = orderInformations.GetSupplierName();
             string generateOrder = Order._pluginWord.CurrentAppli.Scene.SceneGetCustomInfo(OrderKey.GenerateOrder);
@@ -135,7 +135,12 @@ namespace Ord_Eancom
         }
         private void NoSendMailMessage()
         {
-            MessageBox.Show("Commande non envoyée !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //using (new DrawMessageBox(new Form()))
+            //{
+            //    MessageBox.Show("Commande non envoyée !" + Environment.NewLine + "Vérifier la configuration d'Email !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+            //}
+            MessageBox.Show("Vérifier la configuration d'Email." + Environment.NewLine + "Commande non envoyée !" , "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
