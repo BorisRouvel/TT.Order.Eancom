@@ -196,7 +196,6 @@
     <Compile Include="BuildFile\BuildOrder.cs" />
     <Compile Include="BuildFile\BuildPerspective.cs" />
     <Compile Include="BuildFile\BuildPlan.cs" />
-    <Compile Include="DrawMessageBox.cs" />
     <Compile Include="Eancom.cs" />
     <Compile Include="Form\MainForm.cs">
       <SubType>Form</SubType>

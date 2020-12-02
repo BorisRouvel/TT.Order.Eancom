@@ -134,13 +134,8 @@ namespace Ord_Eancom
             MessageBox.Show("Commande envoyée !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void NoSendMailMessage()
-        {
-            //using (new DrawMessageBox(new Form()))
-            //{
-            //    MessageBox.Show("Commande non envoyée !" + Environment.NewLine + "Vérifier la configuration d'Email !", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-            //}
-            MessageBox.Show("Vérifier la configuration d'Email." + Environment.NewLine + "Commande non envoyée !" , "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        {          
+            MessageBox.Show("Vérifier la configuration d'envoi d'email." + Environment.NewLine + "Commande non envoyée !" , "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
 
@@ -218,23 +213,23 @@ namespace Ord_Eancom
                 return false;
             }
 
-            string supplierEmail = orderInformations.GetSupplierEmail();            
-            //if (!String.IsNullOrEmpty(supplierEmail))
-            //{
-            //    string supplierName = orderInformations.GetSupplierName();
-            //    MessageBox.Show("Veuillez supprimer l'adresse email dans le fournisseur '" + supplierName + "'", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
-            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(supplierEmail, OrderKey.SupplierEmail);
+            string supplierEmail = orderInformations.GetSupplierEmail();
+            if (!String.IsNullOrEmpty(supplierEmail))
+            {
+                string supplierName = orderInformations.GetSupplierName();
+                MessageBox.Show("Veuillez supprimer l'adresse email dans le fournisseur '" + supplierName + "'", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(supplierEmail, OrderKey.SupplierEmail);
 
-            //    orderInformations.SetSupplierEmail(String.Empty);
-            //    //supplierEmail = orderInformations.GetSupplierEmail();
-                
-            //    return false;
-            //}
-            //else
-            //{
-            //    _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(null, OrderKey.SupplierEmail);
-            //}
+                orderInformations.SetSupplierEmail(String.Empty);
+                //supplierEmail = orderInformations.GetSupplierEmail();
+
+                return false;
+            }
+            else
+            {
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(null, OrderKey.SupplierEmail);
+            }
 
             _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.TrueLowerCase, OrderKey.GenerateOrder);
             return true;

@@ -307,7 +307,7 @@ namespace Eancom
         }
 
         //If delivery adress is different of buyer adress
-        //Be careful to don't add a segement line number (0)
+        //Be careful to don't add a segment line number (0)
         public bool IsBYequalDDP() 
         {
             nadBYCompare = this.Add_BY(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_BY + Separator.DataGroup, String.Empty);
