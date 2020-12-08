@@ -212,6 +212,18 @@ namespace Ord_Eancom
                 _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);                
                 return false;
             }
+            // '
+            string name1 = orderInformations.GetRetailerName1();
+            string address = orderInformations.GetRetailerAddress();
+            string postCode = orderInformations.GetRetailerPostCode();
+            string city = orderInformations.GetRetailerCity();
+            string addressEmpty = KD.StringTools.Format.Spaced(KD.StringTools.Const.MinusSign) + KD.StringTools.Format.Spaced(KD.StringTools.Const.MinusSign);
+            if (String.IsNullOrEmpty(name1) || address == addressEmpty || String.IsNullOrEmpty(postCode) || String.IsNullOrEmpty(city))
+            {
+                MessageBox.Show("Veuillez renseigner l'adresse de votre point de vente (site)." + Environment.NewLine + "La commande est annulée.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                return false;
+            }
 
             string supplierEmail = orderInformations.GetSupplierEmail();
             if (!String.IsNullOrEmpty(supplierEmail))

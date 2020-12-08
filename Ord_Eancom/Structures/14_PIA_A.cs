@@ -384,11 +384,15 @@ namespace Eancom
                             {
                                 string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
                                 code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                                code = _orderInformationsFromArticles.ReleaseChar(code);
+
                                 if (utility.IsAssemblyWorktop(codeAndName[3]))
                                 {
                                     continue;
                                 }
                                 string name = codeAndName[2];
+                                name = _orderInformationsFromArticles.ReleaseChar(name);
+
                                 int nameCharStart = 0;
 
                                 for (int c = 0; c < 2; c++)
@@ -470,7 +474,7 @@ namespace Eancom
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             _e4347 = PIA_A.E4347_5;           
-            c212.E7140 = assemblyReference;
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(assemblyReference);
             c212.E7143 = C212.E7143_SA;
             c212.E3055 = C212.E3055_91;
 
@@ -483,7 +487,7 @@ namespace Eancom
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             _e4347 = PIA_A.E4347_5;
-            c212.E7140 = this.GetEDPNumber(assemblyReference);
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetEDPNumber(assemblyReference));
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {
@@ -500,7 +504,7 @@ namespace Eancom
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
-            c212.E7140 = this.GetIDMHinge(assemblyReference);
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetIDMHinge(assemblyReference));
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {
@@ -518,7 +522,7 @@ namespace Eancom
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
             assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
-            c212.E7140 = this.GetIDMConstructionID(assemblyReference);
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetIDMConstructionID(assemblyReference));
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {

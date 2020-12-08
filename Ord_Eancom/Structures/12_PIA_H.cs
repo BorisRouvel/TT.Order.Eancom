@@ -72,7 +72,7 @@ namespace Eancom
 
             public string Add(OrderInformations orderInformationsFromArticles)
             {
-                return orderInformationsFromArticles.ReleaseChar(this.E7140) + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + E3055;
+                return this.E7140 + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + E3055;
             }
 
         }
@@ -91,7 +91,7 @@ namespace Eancom
 
         public string Add_ManufacturerID()
         {
-            c212.E7140 = _fileEDI.ManufacturerID();
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(_fileEDI.ManufacturerID());
             c212.E7143 = C212.E7143_36;
             c212.E3055 = C212.E3055_91;
 
@@ -101,7 +101,7 @@ namespace Eancom
         public string Add_SerieNo()
         {
             KD.Model.Article article = _orderInformationsFromArticles.GetArticleWithModel();           
-            c212.E7140 = _orderInformationsFromArticles.CurrentAppli.CatalogGetCustomInfo(article.CatalogFileName, "SERIENO"); // 
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(_orderInformationsFromArticles.CurrentAppli.CatalogGetCustomInfo(article.CatalogFileName, "SERIENO")); // 
             c212.E7143 = C212.E7143_18;
             c212.E3055 = C212.E3055_91;
 
@@ -110,7 +110,7 @@ namespace Eancom
         }
         public string Add_CatalogID()
         {
-            c212.E7140 = _fileEDI.CatalogID();
+            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(_fileEDI.CatalogID());
             c212.E7143 = C212.E7143_AA;
             c212.E3055 = C212.E3055_91;
 
@@ -126,6 +126,7 @@ namespace Eancom
             {
                 string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
                 code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                code = _orderInformationsFromArticles.ReleaseChar(code);
 
                 string name = codeAndName[2];
                 name = _orderInformationsFromArticles.ReleaseChar(name);
@@ -170,13 +171,14 @@ namespace Eancom
                     {
                         string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
                         code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                        code = _orderInformationsFromArticles.ReleaseChar(code);
 
                         if (utility.IsPlinth(codeAndName[3]))//Cause exept plinth height 402 //KD.StringTools.Const.TrueCamelCase
                         {
                             continue;
                         } 
                         string name = codeAndName[2];
-                        //name = _orderInformationsFromArticles.ReleaseChar(name);
+                        name = _orderInformationsFromArticles.ReleaseChar(name);
 
                         int nameCharStart = 0;
                         for (int c = 0; c < Utility.finishLineMaxNb; c++)
@@ -229,8 +231,9 @@ namespace Eancom
                             continue;
                         } 
                         string name = codeAndName[2];
+                        name = _orderInformationsFromArticles.ReleaseChar(name);
 
-                        c212.E7140 = code;
+                        c212.E7140 = _orderInformationsFromArticles.ReleaseChar(code);
                         c212.E7143 = PIA_H.plinthHeightFeature;
                         c212.E3055 = C212.E3055_92;
 

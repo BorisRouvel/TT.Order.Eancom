@@ -70,7 +70,7 @@ namespace Ord_Eancom
                                                             KD.StringTools.Const.Colon, //":",
                                                             KD.StringTools.Const.PlusSign, //"+",
                                                             KD.StringTools.Const.SimpleQuote, //"'",
-                                                            "’" };
+                                                            "’"};
 
         public OrderInformations(AppliComponent appli, int callParamsBlock)
         {
