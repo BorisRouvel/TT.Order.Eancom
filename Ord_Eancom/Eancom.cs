@@ -111,18 +111,39 @@ namespace Eancom
         }
 
         private readonly OrderInformations _orderInformationsFromArticles = null;
+        //public string appairingFirstCatalogFileName = String.Empty;
         public string appairingCatalogFileName = String.Empty;
 
         public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
         public KD.CsvHelper.CsvFileReader csvPairingFileReader = null;
         private KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
 
+        public FileEDI(AppliComponent appli, string supplierName, OrderInformations orderInformationsFromArticles)
+        {
+            _currentAppli = appli;
+            _supplierName = supplierName;
+            _orderInformationsFromArticles = orderInformationsFromArticles;
+            this.appairingCatalogFileName = _orderInformationsFromArticles.GetFirstPairingCatalogFileName(this.RootCsvPairingFileName());            
+            rowList.Clear();
+
+            this.OpenCsvPairingFile();
+        }
+        public FileEDI(AppliComponent appli, OrderInformations orderInformationsFromArticles, string keyRef)
+        {
+            _currentAppli = appli;            
+            _orderInformationsFromArticles = orderInformationsFromArticles;           
+            this.appairingCatalogFileName = _orderInformationsFromArticles.GetEachPairingCatalogFileName(this.RootCsvPairingFileName(), keyRef);
+            rowList.Clear();
+
+            this.OpenCsvPairingFile();
+        }
+
         private bool OpenCsvPairingFile()
         {
             try
             {
-                bool ok = this.CurrentAppli.Catalog.FileExportResourceFromName(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()), true);
-                csvPairingFileReader = new KD.CsvHelper.CsvFileReader(Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()));
+                bool ok = this.CurrentAppli.Catalog.FileExportResourceFromName(Path.Combine(this.CurrentAppli.CatalogDir, this.CatalogFileNameCsvPairingFileName()), true);
+                csvPairingFileReader = new KD.CsvHelper.CsvFileReader(Path.Combine(this.CurrentAppli.CatalogDir, this.CatalogFileNameCsvPairingFileName()));
 
                 while (!csvPairingFileReader.EndOfStream)
                 {
@@ -131,21 +152,11 @@ namespace Eancom
             }
             catch (Exception)
             {
-                MessageBox.Show("Fichier introuvable: " + Path.Combine(this.CurrentAppli.CatalogDir, this.CsvPairingFileName()), "Informations", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Fichier introuvable: " + Path.Combine(this.CurrentAppli.CatalogDir, this.CatalogFileNameCsvPairingFileName()), "Informations", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
-        }
-        public FileEDI(AppliComponent appli, string supplierName, OrderInformations orderInformationsFromArticles)
-        {
-            this._currentAppli = appli;
-            this._supplierName = supplierName;
-            this._orderInformationsFromArticles = orderInformationsFromArticles;
-            this.appairingCatalogFileName = this._orderInformationsFromArticles.GetPairingCatalogFileName(this.CsvPairingFileName());
-            rowList.Clear();
-
-            this.OpenCsvPairingFile();            
-        }        
+        }     
 
         public string GetNextOrdersNumberHex()
         {
@@ -160,9 +171,24 @@ namespace Eancom
             return valueHexa + valueHex;
         }
 
-        public string CsvPairingFileName()
+        public string RootCsvPairingFileName()
+        {
+            return (FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
+        }
+        public string SupplierNameCsvPairingFileName()
         {
             return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
+        }
+        public string CatalogFileNameCsvPairingFileName()
+        {
+            int charLen = 6;
+            string sixFirstCharCatalogFileName = String.Empty;
+            if (!String.IsNullOrEmpty(this.appairingCatalogFileName) && this.appairingCatalogFileName.Length > charLen)
+            {
+                sixFirstCharCatalogFileName = this.appairingCatalogFileName.Substring(0, charLen);
+            }
+
+            return (sixFirstCharCatalogFileName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
         }
         public string GetCsvValue(string value, int position = 1)
         {            

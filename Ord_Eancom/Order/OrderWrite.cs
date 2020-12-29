@@ -25,7 +25,7 @@ namespace Ord_Eancom
         readonly OrderInformations _orderInformations = null;
         readonly OrderInformations _orderInformationsFromArticles = null;
         readonly BuildCommon _buildCommon = null;
-        readonly FileEDI _fileEDI = null;
+        FileEDI _fileEDI = null;
         readonly Eancom.Utility _utility = null;
 
         private int consecutiveNumbering = 1;
@@ -270,6 +270,14 @@ namespace Ord_Eancom
                 {
                     if (!article.KeyRef.EndsWith(OrderConstants.HandleName))
                     {
+                        _fileEDI = new FileEDI(this.CurrentAppli, _orderInformationsFromArticles, article.KeyRef);
+                        if (_fileEDI.csvPairingFileReader == null)
+                        {
+                            article.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                            return;
+                        }
+
+
                         SetLineEDIList(lIN_A.Add_EN(article));
                         //SetLineEDIList(lIN_A.Add_SG(article));
 

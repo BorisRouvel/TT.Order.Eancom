@@ -267,6 +267,7 @@ namespace Ord_Eancom
 
                 orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
+                //Test to give access fileEDI each article
                 fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
                 if (fileEDI.csvPairingFileReader == null)
                 {

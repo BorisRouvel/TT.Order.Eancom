@@ -120,7 +120,7 @@ namespace Ord_Eancom
             string catalogFileName = this.Articles[index].CatalogFileName;
             return catalogFileName;
         }
-        public string GetPairingCatalogFileName(string csvFileName)
+        public string GetFirstPairingCatalogFileName(string csvFileName)
         {
             for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
             {
@@ -131,6 +131,26 @@ namespace Ord_Eancom
                     if (reference.Resource_Name(indexRes).Contains(csvFileName))
                     {
                         return catalogFileName;
+                    }
+                }
+            }
+            return String.Empty;
+        }
+        public string GetEachPairingCatalogFileName(string csvFileName, string keyRef)
+        {
+            for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
+            {
+                string currentKeyRef = this.Articles[indexCat].KeyRef;
+                if (currentKeyRef == keyRef)
+                {
+                    string catalogFileName = this.GetCatalogFileName(indexCat);
+                    Reference reference = new Reference(this.CurrentAppli, catalogFileName);
+                    for (int indexRes = 0; indexRes < reference.RessourcesLinesNb; indexRes++)
+                    {
+                        if (reference.Resource_Name(indexRes).Contains(csvFileName))
+                        {
+                            return catalogFileName;
+                        }
                     }
                 }
             }
