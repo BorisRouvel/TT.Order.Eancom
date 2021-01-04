@@ -270,7 +270,8 @@ namespace Ord_Eancom
                 {
                     if (!article.KeyRef.EndsWith(OrderConstants.HandleName))
                     {
-                        _fileEDI = new FileEDI(this.CurrentAppli, _orderInformationsFromArticles, article.KeyRef);
+                        //Test to give access fileEDI each article
+                        _fileEDI = new FileEDI(this.CurrentAppli, _orderInformationsFromArticles, article.Ref);
                         if (_fileEDI.csvPairingFileReader == null)
                         {
                             article.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);

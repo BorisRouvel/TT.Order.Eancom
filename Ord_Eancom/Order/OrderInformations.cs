@@ -65,6 +65,8 @@ namespace Ord_Eancom
         public static string installationDate = String.Empty;
         private readonly CultureInfo provider = CultureInfo.InvariantCulture;
 
+        private const int furnitureHeadingMaxNb = 19; // meuble 0 à 19 = 20 rubriques meubles
+
         private string supplierID = String.Empty;
         private readonly List<string> releaseList = new List<string>() { KD.StringTools.Const.QuestionMark, //"?",
                                                             KD.StringTools.Const.Colon, //":",
@@ -120,7 +122,43 @@ namespace Ord_Eancom
             string catalogFileName = this.Articles[index].CatalogFileName;
             return catalogFileName;
         }
-        public string GetFirstPairingCatalogFileName(string csvFileName)
+        //public string GetFirstPairingCatalogFileName(string csvFileName)
+        //{
+        //    for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
+        //    {
+        //        string catalogFileName = this.GetCatalogFileName(indexCat);
+        //        Reference reference = new Reference(this.CurrentAppli, catalogFileName);
+        //        for (int indexRes = 0; indexRes < reference.RessourcesLinesNb; indexRes++)
+        //        {
+        //            if (reference.Resource_Name(indexRes).Contains(csvFileName))
+        //            {
+        //                return catalogFileName;
+        //            }
+        //        }
+        //    }
+        //    return String.Empty;
+        //}
+        //public string GetEachPairingCatalogFileName(string csvFileName, string keyRef)
+        //{
+        //    for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
+        //    {
+        //        string currentKeyRef = this.Articles[indexCat].KeyRef;
+        //        if (currentKeyRef == keyRef)
+        //        {
+        //            string catalogFileName = this.GetCatalogFileName(indexCat);
+        //            Reference reference = new Reference(this.CurrentAppli, catalogFileName);
+        //            for (int indexRes = 0; indexRes < reference.RessourcesLinesNb; indexRes++)
+        //            {
+        //                if (reference.Resource_Name(indexRes).Contains(csvFileName))
+        //                {
+        //                    return catalogFileName;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return String.Empty;
+        //}
+        public string GetFirstPairingCSVFileName(string csvFileName)
         {
             for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
             {
@@ -130,18 +168,18 @@ namespace Ord_Eancom
                 {
                     if (reference.Resource_Name(indexRes).Contains(csvFileName))
                     {
-                        return catalogFileName;
+                        return reference.Resource_Name(indexRes);
                     }
                 }
             }
             return String.Empty;
         }
-        public string GetEachPairingCatalogFileName(string csvFileName, string keyRef)
+        public string GetEachPairingCSVFileName(string csvFileName, string articleRef)
         {
             for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
             {
-                string currentKeyRef = this.Articles[indexCat].KeyRef;
-                if (currentKeyRef == keyRef)
+                string currentRef = this.Articles[indexCat].Ref;
+                if (currentRef == articleRef)
                 {
                     string catalogFileName = this.GetCatalogFileName(indexCat);
                     Reference reference = new Reference(this.CurrentAppli, catalogFileName);
@@ -149,18 +187,18 @@ namespace Ord_Eancom
                     {
                         if (reference.Resource_Name(indexRes).Contains(csvFileName))
                         {
-                            return catalogFileName;
+                            return reference.Resource_Name(indexRes);
                         }
                     }
                 }
             }
-            return String.Empty;
+            return csvFileName;
         }
         public Article GetArticleWithModel()
         {
             foreach (Article article in this.Articles)
             {
-                if (article.HeadingRank <= 19)
+                if (article.HeadingRank <= OrderInformations.furnitureHeadingMaxNb)
                 {
                     return article;
                 }

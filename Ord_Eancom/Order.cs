@@ -31,6 +31,7 @@ namespace Ord_Eancom
         private const string ManufacturerCustomFromCatalog = "MANUFACTURER";
 
         private string referenceNoValid = String.Empty;
+        private string numberNoValid = String.Empty;
 
         public Order()
         {
@@ -156,11 +157,12 @@ namespace Ord_Eancom
             Order.orderDir = orderInformations.GetOrderDir();
 
             Articles articles = SupplierArticleValidInScene();
+            orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
             if (this.IsGenerateOrders(articles))
             {
                 this.mainForm = new MainForm(orderInformations);
-                this.Main(callParamsBlock, articles);    
+                this.Main(articles); //callParamsBlock   
               
                 Cursor.Current = Cursors.Arrow;
                 return true;
@@ -189,7 +191,7 @@ namespace Ord_Eancom
                 foreach (Article article in supplierArticles)
                 {
                     SegmentClassification segmentClassification = new SegmentClassification(article);
-                    if (article.IsValid  && article.Type != 17)//&& !segmentClassification.IsArticleLinear()) //
+                    if (article.IsValid  && article.Type != 17 && !String.IsNullOrEmpty(article.Ref))//&& !segmentClassification.IsArticleLinear()) //
                     {
                         articles.Add(article);
                     }
@@ -206,9 +208,12 @@ namespace Ord_Eancom
         private bool IsGenerateOrders(Articles articles)
         {
             referenceNoValid = String.Empty;
+            numberNoValid = String.Empty;
             if (articles == null | articles.Count <= 0 | !this.IsSceneComplete(articles))
             {
-                MessageBox.Show("L'article '" + referenceNoValid + "' de la commande n'est pas valide." + Environment.NewLine + "La commande est annulée.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (numberNoValid == KD.Const.UnknownId.ToString()) { numberNoValid = "Aucun"; }
+                MessageBox.Show("L'article: '" + referenceNoValid + "', numéro: '" + numberNoValid + "' n'est pas valide." + Environment.NewLine + 
+                                "La commande est annulée.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);                
                 return false;
             }
@@ -247,7 +252,7 @@ namespace Ord_Eancom
             return true;
         }
 
-        private void Main(int callParamsBlock, Articles articles)
+        private void Main(Articles articles)//int callParamsBlock
         {
             this.mainForm.ShowDialog();         
 
@@ -256,7 +261,7 @@ namespace Ord_Eancom
                 if (!this.IsMailAddressValid(MainForm.EmailTo) || !this.IsMailAddressValid(MainForm.EmailCc))
                 {
                     MessageBox.Show("Adresse mail non valide.", "InSitu", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Main(callParamsBlock, articles);                 
+                    this.Main(articles);    //callParamsBlock             
                 }               
             }        
 
@@ -265,9 +270,8 @@ namespace Ord_Eancom
                 OrderWrite.segmentNumberBetweenUNHandUNT = 0;
                 RFF_A.refPosList.Clear();
 
-                orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
-
-                //Test to give access fileEDI each article
+                //orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
+                
                 fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
                 if (fileEDI.csvPairingFileReader == null)
                 {
@@ -332,11 +336,23 @@ namespace Ord_Eancom
 
             foreach(Article article in articles)
             {
-                string catalogFileName = article.CatalogFileName.ToUpper();
+                string catalogFileName = article.CatalogFileName.ToUpper();                
+
                 if (!catalogsList.Contains(catalogFileName))
                 {
                     referenceNoValid = article.Ref;
+                    numberNoValid = article.Number.ToString();
                     return false;
+                }
+                else if(catalogsList.Contains(catalogFileName))
+                {
+                    FileEDI currentFileEDI = new FileEDI(this.CurrentAppli, orderInformationsFromArticles, article.Ref);
+                    if (!String.IsNullOrEmpty(article.Ref) && currentFileEDI.csvPairingFileReader == null)
+                    {
+                        referenceNoValid = article.Ref;
+                        numberNoValid = article.Number.ToString();
+                        return false;
+                    }
                 }
             }            
             return true;
