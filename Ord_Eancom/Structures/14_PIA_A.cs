@@ -125,9 +125,9 @@ namespace Eancom
             }
             return false;
         }
-        private string GetEDPNumber(string keyRef)
+        private string GetEDPNumber(string artRef)
         {
-            string articleReferenceKey = _fileEDI.ArticleReferenceKey(keyRef, 1);
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(artRef, 1);
 
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
@@ -140,9 +140,9 @@ namespace Eancom
             return String.Empty;
         }
         // Do not use IDMHinge
-        private string GetIDMHinge(string keyRef)
+        private string GetIDMHinge(string artRef)
         {          
-            string articleReferenceKey = _fileEDI.ArticleReferenceKey(keyRef, 1);
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(artRef, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -161,7 +161,7 @@ namespace Eancom
         private string GetHinge(Article article)
         {
             string hinge = String.Empty;
-            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -187,9 +187,9 @@ namespace Eancom
             }           
             return String.Empty;
         }
-        private string GetIDMConstructionID(string keyRef)
+        private string GetIDMConstructionID(string artRef)
         {
-            string articleReferenceKey = _fileEDI.ArticleReferenceKey(keyRef, 1);
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(artRef, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -242,7 +242,7 @@ namespace Eancom
             if (IsImportantCorrectCompletion(article))
             {
                 _e4347 = PIA_A.E4347_5;
-                string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);
+                string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
                 if (!String.IsNullOrEmpty(articleReferenceKey))
                 {
                     string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -264,7 +264,7 @@ namespace Eancom
             if (IsImportantCorrectCompletion(article) || IsExternalSerieNo(article))
             {
                 _e4347 = PIA_A.E4347_5;
-                string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);
+                string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
                 if (!String.IsNullOrEmpty(articleReferenceKey))
                 {
                     string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -296,7 +296,7 @@ namespace Eancom
             _e4347 = PIA_A.E4347_5;           
             c212.E7140 = String.Empty;//utility.DelCharAndAllAfter(article.CodeNoDoublons, KD.StringTools.Const.Underscore);
 
-            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.KeyRef, 1);            
+            string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);            
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
@@ -333,7 +333,7 @@ namespace Eancom
         }
         public string Add_ConstructionID(Article article)
         {
-            c212.E7140 = this.GetIDMConstructionID(article.KeyRef);
+            c212.E7140 = this.GetIDMConstructionID(article.Ref);
 
             if (!String.IsNullOrEmpty(c212.E7140))
             {

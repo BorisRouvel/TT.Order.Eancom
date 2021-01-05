@@ -113,7 +113,7 @@ namespace Eancom
         private readonly OrderInformations _orderInformationsFromArticles = null;        
         public string appairingCSVFileName = String.Empty;
 
-        public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
+        public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.rootOrderDir, FileEDI.IniOrderFileName));
         public KD.CsvHelper.CsvFileReader csvPairingFileReader = null;
         private KD.CsvHelper.CsvRow rowList = new KD.CsvHelper.CsvRow() { };
 

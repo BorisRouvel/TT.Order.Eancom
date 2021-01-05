@@ -205,9 +205,28 @@ namespace Ord_Eancom
             }
             return null;
         }
+        public string GetRootOrderDir()
+        {
+            string dir = this.CurrentAppli.GetCallParamsInfoDirect(CallParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);           
+            return dir;
+        }
         public string GetOrderDir()
         {
-            return this.CurrentAppli.GetCallParamsInfoDirect(CallParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+            string dir = this.CurrentAppli.GetCallParamsInfoDirect(CallParamsBlock, KD.SDK.AppliEnum.CallParamId.ORDERDIRECTORY);
+            string dirEnd = System.IO.Path.Combine(dir, CurrentAppli.SceneName);
+
+            if (!System.IO.Directory.Exists(dirEnd))
+            {
+                try
+                {
+                    System.IO.Directory.CreateDirectory(dirEnd);
+                }
+                catch (Exception)
+                {
+                    return dir;   
+                }                
+            }
+            return dirEnd;
         }
         public string GetSupplierName()
         {
@@ -514,32 +533,38 @@ namespace Ord_Eancom
 
         public string GetCatalogModelCodeAndName()
         {
-            bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
-            if (IsGenerik)
+            if (_sceneAnalysis.Article != null)
             {
-                int.TryParse(generikFinishTypes[0], out int generikFinishType);
-                int.TryParse(generikFinishes[0], out int generikFinish);
-                return _sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish);
+                bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
+                if (IsGenerik)
+                {
+                    int.TryParse(generikFinishTypes[0], out int generikFinishType);
+                    int.TryParse(generikFinishes[0], out int generikFinish);
+                    return _sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish);
+                }
             }
-            return null;
+            return String.Empty;
         }
         public List<string> GetGenericCatalogFinishCodeAndName()
         {
             List<string> finishesList = new List<string>();
             _sceneAnalysis = new SceneAnalysis(this.GetArticleWithModel());
 
-            bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
-            if (IsGenerik)
+            if (_sceneAnalysis.Article != null)
             {
-                for (int fin = 0; fin < generikFinishTypes.Length; fin++)
+                bool IsGenerik = _sceneAnalysis.GetGenericFinishes(out string[] generikFinishTypes, out string[] generikFinishes);
+                if (IsGenerik)
                 {
-                    int.TryParse(generikFinishTypes[fin], out int generikFinishType);
-                    int.TryParse(generikFinishes[fin], out int generikFinish);
-                    int type = _sceneAnalysis.GetFinishTypeNumber(generikFinishType);
-                    finishesList.Add(_sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
-                        KD.StringTools.Const.SemiColon + type);
+                    for (int fin = 0; fin < generikFinishTypes.Length; fin++)
+                    {
+                        int.TryParse(generikFinishTypes[fin], out int generikFinishType);
+                        int.TryParse(generikFinishes[fin], out int generikFinish);
+                        int type = _sceneAnalysis.GetFinishTypeNumber(generikFinishType);
+                        finishesList.Add(_sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
+                            KD.StringTools.Const.SemiColon + type);
+                    }
+                    return finishesList;
                 }
-                return finishesList;
             }
             return null;
         }

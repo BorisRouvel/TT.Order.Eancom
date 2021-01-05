@@ -25,6 +25,7 @@ namespace Ord_Eancom
         MainForm mainForm = null;
 
         public static KD.Plugin.Word.Plugin _pluginWord = null;
+        public static string rootOrderDir = String.Empty;
         public static string orderDir = String.Empty;
         public static string orderFile = String.Empty;
 
@@ -60,8 +61,9 @@ namespace Ord_Eancom
                 if (isGenerateOrder)
                 {                    
                     string retailerNumber = orderInformations.GetRetailerNumber();
-                    Order.orderDir = orderInformations.GetOrderDir();                   
-                    KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.orderDir, FileEDI.IniOrderFileName));
+                    Order.orderDir = orderInformations.GetOrderDir();
+                    Order.rootOrderDir = orderInformations.GetRootOrderDir();
+                    KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.rootOrderDir, FileEDI.IniOrderFileName));
 
                     MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + supplierName);
                     MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + supplierName);
@@ -154,6 +156,7 @@ namespace Ord_Eancom
             _pluginWord.InitializeAll(callParamsBlock);          
 
             orderInformations = new OrderInformations(this.CurrentAppli, callParamsBlock);
+            Order.rootOrderDir = orderInformations.GetRootOrderDir();
             Order.orderDir = orderInformations.GetOrderDir();
 
             Articles articles = SupplierArticleValidInScene();

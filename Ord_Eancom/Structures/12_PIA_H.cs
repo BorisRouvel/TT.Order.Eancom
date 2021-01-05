@@ -100,10 +100,20 @@ namespace Eancom
         }
         public string Add_SerieNo()
         {
-            KD.Model.Article article = _orderInformationsFromArticles.GetArticleWithModel();           
-            c212.E7140 = _orderInformationsFromArticles.ReleaseChar(_orderInformationsFromArticles.CurrentAppli.CatalogGetCustomInfo(article.CatalogFileName, "SERIENO")); // 
-            c212.E7143 = C212.E7143_18;
-            c212.E3055 = C212.E3055_91;
+            KD.Model.Article article = _orderInformationsFromArticles.GetArticleWithModel();
+
+            if (article != null)
+            {
+                c212.E7140 = _orderInformationsFromArticles.ReleaseChar(_orderInformationsFromArticles.CurrentAppli.CatalogGetCustomInfo(article.CatalogFileName, "SERIENO")); // 
+                c212.E7143 = C212.E7143_18;
+                c212.E3055 = C212.E3055_91;
+            }
+            else
+            {
+                c212.E7140 = String.Empty;
+                c212.E7143 = String.Empty;
+                c212.E3055 = String.Empty;
+            }           
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
             return BuildLine();
@@ -159,11 +169,12 @@ namespace Eancom
         public string Add_FinishCodeAndName()
         {
             string dataLine = null;
-            codeAndNameList = _orderInformationsFromArticles.GetGenericCatalogFinishCodeAndName();
-            codeAndNameList.RemoveAt(0); //Del the index 0 cause we don't need model here
+            codeAndNameList = _orderInformationsFromArticles.GetGenericCatalogFinishCodeAndName();            
 
             if (codeAndNameList != null && codeAndNameList.Count > 0)
             {
+                codeAndNameList.RemoveAt(0); //Del the index 0 cause we don't need model here
+
                 foreach (string codeAndNameLine in codeAndNameList)
                 {
                     string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
@@ -218,7 +229,7 @@ namespace Eancom
         {
             string dataLine = null;           
 
-            if (codeAndNameList.Count > 1)
+            if (codeAndNameList != null && codeAndNameList.Count > 1)
             {
                 foreach (string codeAndNameFinishLine in codeAndNameList)
                 {
