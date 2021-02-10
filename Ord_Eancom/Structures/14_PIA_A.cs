@@ -11,7 +11,23 @@ namespace Eancom
 {
     public class PIA_A
     {
-        OrderInformations _orderInformationsFromArticles = null;
+        #region //Table: les valeurs 1 à 99 sont conforment avec EDIGRAPH        
+        //1 Plinth                                                  Socle
+        //2 Worktop                                                 Plan de travail
+        //3 Wall seal profile                                       Crédence
+        //4 Light pelmet                                            Cache lumière
+        //5 Cornice                                                 Corniche
+        //6 Projecting cornice panel                                Panneau de corniche en saillie
+        //7 Railing                                                 Garde-corps
+        //8 Ceiling infill panel                                    Panneau de remplissage de plafond(faux plafond)
+        //99 Obstacle                                               Obstacle
+        //100 Block                                                 Bloc
+        //101 Block credit note                                     Note de crédit du bloc
+        //102 Surcharge at item level                               Supplément au niveau des articles
+        //103 Surcharge added up for entire kitchen plan            Supplément ajouté pour le plan de cuisine entier
+        #endregion
+
+   OrderInformations _orderInformationsFromArticles = null;
         FileEDI _fileEDI = null;
         C212 c212 = null;
         Utility utility = null;
@@ -34,6 +50,20 @@ namespace Eancom
 
         public class C212
         {
+            public const string E7140_1 = "1";
+            public const string E7140_2 = "2";
+            public const string E7140_3 = "3";
+            public const string E7140_4 = "4";
+            public const string E7140_5 = "5";
+            public const string E7140_6 = "6";
+            public const string E7140_7 = "7";
+            public const string E7140_8 = "8";
+            public const string E7140_99 = "99";
+            public const string E7140_100 = "100";
+            public const string E7140_101 = "101";
+            public const string E7140_102 = "102";
+            public const string E7140_103 = "103";
+
             public const string E7143_36 = "36";
             public const string E7143_18 = "18";
             public const string E7143_SA = "SA";
@@ -93,6 +123,10 @@ namespace Eancom
             {
                 return this.E7140 + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + this.E3055;
             }
+            //public string AddBlock()
+            //{
+            //    return this.E7140 + Separator.DataElement + this.E7143 + Separator.DataElement + Separator.DataElement + this.E3055;
+            //}
 
         }  
         
@@ -236,7 +270,7 @@ namespace Eancom
             }
             return visibleSide;
         }
-
+        
         public string Add_ExternalManufacturerID(Article article) //How to put this ID in catalog ?
         {
             if (IsImportantCorrectCompletion(article))
@@ -283,8 +317,15 @@ namespace Eancom
         }
         public string Add_TypeNo(Article article)
         {
+            string reference = article.KeyRef;
+                       
+            if (utility.HasBlockSet(article))
+            {
+                reference = article.Ref;
+            }
+           
             _e4347 = PIA_A.E4347_5;
-            c212.E7140 = utility.DelCharAndAllAfter(article.KeyRef, KD.StringTools.Const.Underscore);
+            c212.E7140 = utility.DelCharAndAllAfter(reference, KD.StringTools.Const.Underscore);
             c212.E7143 = C212.E7143_SA;
             c212.E3055 = C212.E3055_91;
 
@@ -440,27 +481,40 @@ namespace Eancom
             return dataLine;
         }
         public string Add_LongPartType(Article article)
-        {
-            OrderInformations articleInformations = new OrderInformations(article);
-            List<string> codeAndNameList = new List<string>();
-
-            codeAndNameList = articleInformations.GetFinishCodeAndName();// article);
-            if (codeAndNameList != null && codeAndNameList.Count > 0)
+        {           
+            if (utility.HasBlockSet(article))
             {
-                foreach (string codeAndNameLine in codeAndNameList)
-                {
-                    string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
-                    if (codeAndName.Length == 4)
-                    {
-                        _e4347 = PIA_A.E4347_1;
-                        c212.E7140 = utility.GetLongPartType(codeAndName[3]);
-                        c212.E7143 = C212.E7143_BK;
-                        c212.E3055 = C212.E3055_91;
+                _e4347 = PIA_A.E4347_1;
+                c212.E7140 = C212.E7140_100;
+                c212.E7143 = C212.E7143_BK;
+                c212.E3055 = C212.E3055_91;
+               
+                OrderWrite.segmentNumberBetweenUNHandUNT += 1;
+                return this.BuildLine();               
+            }
+            else
+            {
+                OrderInformations articleInformations = new OrderInformations(article);
+                List<string> codeAndNameList = new List<string>();
 
-                        if (!String.IsNullOrEmpty(c212.E7140))
+                codeAndNameList = articleInformations.GetFinishCodeAndName();// article);
+                if (codeAndNameList != null && codeAndNameList.Count > 0)
+                {
+                    foreach (string codeAndNameLine in codeAndNameList)
+                    {
+                        string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
+                        if (codeAndName.Length == 4)
                         {
-                            OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                            return this.BuildLine();
+                            _e4347 = PIA_A.E4347_1;
+                            c212.E7140 = utility.GetLongPartType(codeAndName[3]);
+                            c212.E7143 = C212.E7143_BK;
+                            c212.E3055 = C212.E3055_91;
+
+                            if (!String.IsNullOrEmpty(c212.E7140))
+                            {
+                                OrderWrite.segmentNumberBetweenUNHandUNT += 1;
+                                return this.BuildLine();
+                            }
                         }
                     }
                 }

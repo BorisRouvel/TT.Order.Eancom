@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using KD.SDKComponent;
+using KD.Model;
 
 using Ord_Eancom;
 
@@ -426,6 +427,16 @@ namespace Eancom
         public bool IsLinearPlanType(int type)
         {
             if (type == 5 || type == 6)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool HasBlockSet(Article article)
+        {
+            string blockSet = article.CurrentAppli.Scene.ObjectGetCustomInfo(article.ObjectId, OrderWrite.Key_SetCode);
+            if (blockSet == OrderWrite.BlockSetCustomInfo)
             {
                 return true;
             }

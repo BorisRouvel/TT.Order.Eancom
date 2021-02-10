@@ -15,6 +15,10 @@ namespace Ord_Eancom
 {
     public class OrderWrite
     {
+        public const string Key_SetCode = "KeySetCode";
+        public const string Key_SetPrice = "KeySetPrice";
+        public const string BlockSetCustomInfo = "BlockSet";
+
         private AppliComponent _currentAppli;
         private int _callParamsBlock;
 
@@ -264,6 +268,23 @@ namespace Ord_Eancom
         }
         private void LineData(Articles articles)
         {
+            bool hasBlockSet = false;
+            Article blockSetArticle = null;
+            //string blockSetReference = CurrentAppli.Scene.ObjectGetCustomInfo(articles[0].ObjectId, OrderWrite.Key_SetCode);
+            string blockSetReference = CurrentAppli.Scene.SceneGetCustomInfo(OrderWrite.Key_SetCode);           
+
+            if (!hasBlockSet && !String.IsNullOrEmpty(blockSetReference))
+            {
+                hasBlockSet = true;
+                int blockSetId = CurrentAppli.Scene.EditPlaceOpenObject(String.Empty, blockSetReference, 0, String.Empty, String.Empty, 0.0, 0.0, 0, 1.0, -1);
+                if (blockSetId != KD.Const.UnknownId)
+                {
+                    blockSetArticle = new Article(CurrentAppli, blockSetId);                  
+                    bool binfo = CurrentAppli.Scene.ObjectSetCustomInfo(blockSetId, OrderWrite.BlockSetCustomInfo, OrderWrite.Key_SetCode);
+                    articles.Insert(0, blockSetArticle);
+                }
+            }
+
             foreach (Article article in articles)
             {
                 if (!article.KeyRef.StartsWith(KD.StringTools.Const.Underscore))
@@ -271,13 +292,15 @@ namespace Ord_Eancom
                     if (!article.KeyRef.EndsWith(OrderConstants.HandleName))
                     {
                         //Test to give access fileEDI each article
-                        _fileEDI = new FileEDI(this.CurrentAppli, _orderInformationsFromArticles, article.Ref);
-                        if (_fileEDI.csvPairingFileReader == null)
+                        if (!hasBlockSet)
                         {
-                            article.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
-                            return;
-                        }
-
+                            _fileEDI = new FileEDI(this.CurrentAppli, _orderInformationsFromArticles, article.Ref);
+                            if (_fileEDI.csvPairingFileReader == null)
+                            {
+                                article.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                                return;
+                            }
+                        }                       
 
                         SetLineEDIList(lIN_A.Add_EN(article));
                         //SetLineEDIList(lIN_A.Add_SG(article));
@@ -295,8 +318,11 @@ namespace Ord_Eancom
                         consecutiveNumbering += 1;
                         Eancom.LIN_A._consecutiveNumbering = consecutiveNumbering.ToString();
 
-                        SetLineEDIList(iMD.Add(article));
-                        SetLineEDIList(mEA.Add(article));
+                        if (!hasBlockSet)
+                        {
+                            SetLineEDIList(iMD.Add(article));
+                            SetLineEDIList(mEA.Add(article));
+                        }
                         SetLineEDIList(qTY.Add(article));
                         SetLineEDIList(fTX_A.Add(article));
                         SetLineEDIList(rFF_A.Add_ReferenceNumber(article));
@@ -348,8 +374,19 @@ namespace Ord_Eancom
                             //For instead i have no idea to add number for a linear
                             SetLineEDIList(rFF_A.Add_LinearPlanningSystemItemNumber(article));
                         }
+
+                        if (hasBlockSet)
+                        {
+                            hasBlockSet = false;
+                        }
                     }
                 }
+            }
+
+            if (blockSetArticle != null)
+            {
+                hasBlockSet = false;
+                blockSetArticle.DeleteFromScene();
             }
         }
         private void EndEDI()
@@ -760,6 +797,14 @@ namespace Ord_Eancom
                     structureLineEGIList.Add(PositionY(posY));                    
                     structureLineEGIList.Add(PositionZ(posZ));
                     structureLineEGIList.Add(ArticleDimensionX(dimX));
+
+                    if (segmentClassification.IsArticleSplashbackPanelShape())
+                    {
+                        double dimT = dimY;
+                        dimY = dimZ;
+                        dimZ = dimT;
+                    }
+
                     structureLineEGIList.Add(ArticleDimensionZ(dimZ));                    
                     structureLineEGIList.Add(ArticleDimensionY(article, dimY));
 
@@ -778,7 +823,18 @@ namespace Ord_Eancom
 
                     structureLineEGIList.Add(Angle(a));
                     structureLineEGIList.Add(ArticleReference(article.KeyRef));
-                    //structureLineEGIList.Add(ArticleKeyReference(article.KeyRef));
+
+                    string keyRef = article.KeyRef;
+                    // here for test filer with coin cause dim b,b1,t,t1 on Nobilia (UPE) and Bauformat (UPE78C) it's different , 
+                    //if (article.HasParent())
+                    //{
+                    //    segmentClassification = new SegmentClassification(article.Parent);
+                    //    if (segmentClassification.IsArticleCornerFilerWithCoin())
+                    //    {
+                    //        keyRef = article.Parent.KeyRef;
+                    //    }
+                    //}
+                    structureLineEGIList.Add(ArticleKeyReference(keyRef));
                     structureLineEGIList.Add(ArticleConstructionType(article.KeyRef));
                     structureLineEGIList.Add(ArticleHinge(article));
 
@@ -918,7 +974,7 @@ namespace Ord_Eancom
         private string ArticleDimensionY(Article article, double value)
         {
             SegmentClassification segmentClassification = new SegmentClassification(article);
-            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit())
+            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && !segmentClassification.IsArticleSplashbackPanel())
             {
                 value -= OrderConstants.FrontDepth;
             }

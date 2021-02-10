@@ -716,7 +716,8 @@ namespace Ord_Eancom
         //}
         public bool IsOption_MEA()
         {
-            if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear())
+            if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear() ||
+                (_segmentClassification.IsArticleSplashbackPanel() && _segmentClassification.IsMeasurementsChange()))
             {
                 return true;
             }

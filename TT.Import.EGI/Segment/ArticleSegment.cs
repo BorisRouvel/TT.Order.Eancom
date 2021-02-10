@@ -32,6 +32,7 @@ namespace TT.Import.EGI
 
         private string _manufacturer = String.Empty;
         private string _name = String.Empty;
+        private string _commentName = String.Empty;
         private string _constructionType = String.Empty;
         private string _hinge = String.Empty;
         private int _hingeType = 0;
@@ -263,6 +264,17 @@ namespace TT.Import.EGI
                 _name = value;
             }
         }
+        public string CommentName
+        {
+            get
+            {
+                return _commentName;
+            }
+            set
+            {
+                _commentName = value;
+            }
+        }
         public string ConstructionType
         {
             get
@@ -369,7 +381,7 @@ namespace TT.Import.EGI
         public ArticleSegment(Plugin plugin, KD.Config.IniFile fileEGI, string section, ManageCatalog manageCatalog)//, string catalogManufacturer
         {
             _plugin = plugin;            
-            this._currentFileEGI = fileEGI;            
+            _currentFileEGI = fileEGI;            
             //_catalogManufacturer = catalogManufacturer;
             _section = section;
             _manageCatalog = manageCatalog;
@@ -407,6 +419,7 @@ namespace TT.Import.EGI
         {
             _manufacturer = this._currentFileEGI.GetStringValue(_section, ItemKey.Manufacturer);
             _name = this._currentFileEGI.GetStringValue(_section, ItemKey.Name);
+            _commentName = this._currentFileEGI.GetStringValue(_section, SegmentFormat.CommentChar + ItemKey.Name);
             _constructionType = this._currentFileEGI.GetStringValue(_section, ItemKey.ConstructionType);
             _hinge = this._currentFileEGI.GetStringValue(_section, ItemKey.Hinge);
 
@@ -482,9 +495,13 @@ namespace TT.Import.EGI
                             if (segmentClassification.HasSectionCoin())
                             {
                                 _name += CatalogBlockName.Coin;
+                                _commentName += CatalogBlockName.Coin;
                                 _article = this.ReplaceObject();
+                                if (this.Article != null)
+                                { 
                                 this.ChangeFilerDimensions();
                                 this.ChangeFilerChildDimensions();
+                                }
                             }
                             else
                             {
@@ -493,7 +510,8 @@ namespace TT.Import.EGI
                         }
                         else
                         {
-                            this.MoveArticlePerRepere();                           
+                            this.MoveArticlePerRepere();
+                            this.MoveArticlePositionZPlinth();
 
                             if (segmentClassification.IsArticleUnit())
                             {
@@ -650,7 +668,8 @@ namespace TT.Import.EGI
                         }
                         else
                         {
-
+                            _article = _plugin.CurrentAppli.ActiveArticle;
+                            this.MoveArticlePositionZPlinth();
                             //KD.FilterBuilder.FilterClauseDict filterBuilder = new KD.FilterBuilder.FilterClauseDict();
                             //filterBuilder.Clear();
                             //filterBuilder.Add(KD.SDK.SceneEnum.ObjectInfo.REF, linearRef);
@@ -699,24 +718,28 @@ namespace TT.Import.EGI
         private Article PlaceObject()
         {
 
-            _plugin.SetReference();           
+            _plugin.SetReference();
 
-            int objectID = _plugin.CurrentAppli.Scene.EditPlaceObject(this.CatalogManufacturer, this.Name, this.HingeType, (int)this.Measure_B, 
-                (int)this.Measure_T, (int)this.Measure_H, (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ, 
-                0, this.AngleZ, false, false, false);
-
-            if (objectID.Equals(KD.Const.UnknownId))
+            //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+            if (!String.IsNullOrEmpty(_commentName))
             {
-                _plugin.SetReference();               
+                int objectID = _plugin.CurrentAppli.Scene.EditPlaceObject(this.CatalogManufacturer, this.CommentName, this.HingeType, (int)this.Measure_B,
+                    (int)this.Measure_T, (int)this.Measure_H, (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ,
+                    0, this.AngleZ, false, false, false);
 
-                objectID = _plugin.CurrentAppli.Scene.EditPlaceObject(this.CatalogManufacturer, this.Name, 0, (int)this.Measure_B,
-                (int)this.Measure_T, (int)this.Measure_H, (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ,
-                0, this.AngleZ, false, false, false);
-            }
+                if (objectID.Equals(KD.Const.UnknownId))
+                {
+                    _plugin.SetReference();
+                    //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+                    objectID = _plugin.CurrentAppli.Scene.EditPlaceObject(this.CatalogManufacturer, this.CommentName, 0, (int)this.Measure_B,
+                    (int)this.Measure_T, (int)this.Measure_H, (int)this.RefPntX, (int)this.RefPntY, (int)this.RefPntZ,
+                    0, this.AngleZ, false, false, false);
+                }
 
-            if (!objectID.Equals(KD.Const.UnknownId))
-            {
-                return new Article(_plugin.CurrentAppli, objectID);
+                if (!objectID.Equals(KD.Const.UnknownId))
+                {
+                    return new Article(_plugin.CurrentAppli, objectID);
+                }
             }
             return null;
         }
@@ -734,7 +757,8 @@ namespace TT.Import.EGI
                         Articles childs = parent.GetChildren(FilterArticle.strFilterToGetValidNotPlacedHostedAndChildren());
                         foreach (Article child in childs)
                         {
-                            if (child.IsValid && child.Ref.Equals(this.Name))
+                            //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+                            if (child.IsValid && child.KeyRef.Equals(this.CommentName))
                             {
                                 bool find = false;  //Test with Bauformat Side panel maybe don't work for another
                                 if (this.RefPntX == 0.0 && child.Handing == _plugin.CurrentAppli.GetTranslatedText("G"))
@@ -771,23 +795,25 @@ namespace TT.Import.EGI
         private Article ReplaceObject()
         {
             _plugin.SetReference();
-
-            bool bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.Name, this.HingeType, (int)this.Measure_B,
+            //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+            if (!String.IsNullOrEmpty(_commentName))
+            {
+                bool bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.CommentName, this.HingeType, (int)this.Measure_B,
                 (int)this.Measure_T, (int)this.Measure_H, false);
 
-            if (!bReplace)
-            {
-                _plugin.SetReference();
-
-                bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.Name, 0, (int)this.Measure_B,
-                 (int)this.Measure_T, (int)this.Measure_H, false);
+                if (!bReplace)
+                {
+                    _plugin.SetReference();
+                    //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+                    bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.CommentName, 0, (int)this.Measure_B,
+                     (int)this.Measure_T, (int)this.Measure_H, false);
+                }
             }
-
-            if (bReplace)
-            {
+            //if (bReplace)
+            //{
                 return _plugin.CurrentAppli.ActiveArticle;
-            }
-            return null;
+            //}
+            //return null;
         }
         private void MoveArticlePerRepere()
         {
@@ -808,6 +834,18 @@ namespace TT.Import.EGI
                     _article.PositionX += this.Measure_B; 
                     _article.AngleOXY += 180;
                     break;
+            }
+        }
+        private void MoveArticlePositionZPlinth()
+        {
+            SegmentClassification segmentClassification = new SegmentClassification(this.Article);
+            if (!segmentClassification.IsArticlePlinth())
+            {
+                if (this.Article.PositionZ != (double)this.RefPntZ)
+                {
+                    double gap = this.Article.PositionZ - (double)this.RefPntZ;
+                    _article.PositionZ -= gap;
+                }
             }
         }
         private void ChangeCarcasseDimY()
@@ -912,7 +950,7 @@ namespace TT.Import.EGI
                 {
                     listString += notPlacedArticle + Environment.NewLine;
                 }
-                //MessageBox.Show(listString, "Import EGI : Réf. non trouvé");
+                System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Réf. non trouvé");
             }
 
             if (Plugin.articleAlreadyPlacedDict.Count > 0)
@@ -922,7 +960,7 @@ namespace TT.Import.EGI
                 {
                     listString += articleAlreadyPlaced.Key.ToString() + " : " + articleAlreadyPlaced.Value.ToString() + Environment.NewLine;
                 }
-                //MessageBox.Show(listString, "Import EGI : Réf. posé");
+                //System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Réf. posé");
             }
 
         }

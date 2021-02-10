@@ -16,6 +16,8 @@ namespace Eancom
 
         List<string> childLevelList = new List<string>() { };
         public static List<string> refPosList = new List<string>(0);
+        private const string BlockSetNumber_LI = "0.1";
+        private const string BlockSetNumber_ON = "1";
 
         public class C506
         {
@@ -51,10 +53,18 @@ namespace Eancom
         }
 
         public string Add_ReferenceNumber(Article article)
-        {            
+        {
             c506.E1153 = C506.E1153_LI;
-            c506.E1154 = article.ObjectId.ToString();
 
+            if (utility.HasBlockSet(article))
+            {
+                c506.E1154 = RFF_A.BlockSetNumber_LI;
+            }
+            else
+            {
+                c506.E1154 = article.ObjectId.ToString();
+            }          
+            
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
             return this.BuildLine();
         }
@@ -65,27 +75,34 @@ namespace Eancom
                 OrderInformations articleInformations = new OrderInformations(article);
 
                 c506.E1153 = C506.E1153_ON;
-                int itemLevel = articleInformations.GetComponentLevel();// article);
-                int childLevel = 1;
-
-                if (_orderInformationsFromArticles.IsParent(itemLevel))
-                {                    
-                    c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                if (utility.HasBlockSet(article))
+                {
+                    c506.E1154 = RFF_A.BlockSetNumber_ON;
                 }
                 else
                 {
-                    //case of a filer is a component of a Coin, set the number yet
-                    if (article.Name.ToUpper().Contains(article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                    int itemLevel = articleInformations.GetComponentLevel();// article);
+                    int childLevel = 1;
+
+                    if (_orderInformationsFromArticles.IsParent(itemLevel))
                     {
                         c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
                     }
                     else
                     {
-                        Article parent = this.GetParent(article);
-                        string parentChildLevel = this.GetChildLevel(parent, childLevel);
+                        //case of a filer is a component of a Coin, set the number yet
+                        if (article.Name.ToUpper().Contains(article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                        {
+                            c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                        }
+                        else
+                        {
+                            Article parent = this.GetParent(article);
+                            string parentChildLevel = this.GetChildLevel(parent, childLevel);
 
-                        childLevelList.Add(parentChildLevel);
-                        c506.E1154 = parentChildLevel;
+                            childLevelList.Add(parentChildLevel);
+                            c506.E1154 = parentChildLevel;
+                        }
                     }
                 }
 
@@ -202,5 +219,6 @@ namespace Eancom
             }
             return childLevel;
         }
+       
     }
 }

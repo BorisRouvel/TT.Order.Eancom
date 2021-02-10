@@ -87,10 +87,24 @@ namespace Eancom
 
             if (articleInformations.IsOption_MEA())
             {
-                double dimX = this.DimensionX(article, segmentClassification);                        
+                double dimX = this.DimensionX(article, segmentClassification);
+                double dimY = article.DimensionY;
+                double dimZ = article.DimensionZ;
 
-                List<double> dimensionList = new List<double>() { dimX, article.DimensionY, article.DimensionZ };
-                List<string> measureCodeList = new List<string>() { Width, Depth, Height };
+                if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleSplashbackPanel())
+                {
+                    dimY -= (OrderConstants.FrontDepth - 1);
+                }
+
+                if (segmentClassification.IsArticleSplashbackPanelShape())
+                {
+                    double dimT = dimY;
+                    dimY = dimZ;
+                    dimZ = dimT;
+                }
+
+                List<double> dimensionList = new List<double>() { dimX, dimY, dimZ };
+                List<string> measureCodeList = new List<string>() { MEA.Width, MEA.Depth, MEA.Height };
                 int index = 0;
 
                 foreach (double dimension in dimensionList)

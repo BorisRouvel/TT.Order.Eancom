@@ -17,7 +17,7 @@ namespace TT.Import.EGI
         private string _roomHeight = String.Empty;
         private string _manufacturer = String.Empty;
 
-        private KD.Config.IniFile CurrentFileEGI = null;   
+        private readonly KD.Config.IniFile CurrentFileEGI = null;   
        
         public string Version
         {

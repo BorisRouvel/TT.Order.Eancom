@@ -101,8 +101,7 @@ namespace Eancom
                         OrderWrite.segmentNumberBetweenUNHandUNT += 1;
                         return dataLine;
                     }
-                }
-               // return dataLine;
+                }              
             }
             return dataLine;
         }

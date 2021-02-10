@@ -22,7 +22,7 @@ namespace TT.Import.EGI
         private MainForm mainForm = null;
 
         private Translate translate = null;
-        private MainAppMenuItem InSituMenuItem = null;
+        private readonly MainAppMenuItem InSituMenuItem = null;
         private KD.Config.IniFile CurrentFileEGI = null;
         private ManageCatalog manageCatalog = null;
         private GlobalSegment globalSegment = null;
@@ -68,8 +68,7 @@ namespace TT.Import.EGI
         }
       
 
-        public Plugin()
-           : base(true)
+        public Plugin() : base(true)
         {            
             this._language = this.CurrentAppli.GetLanguage();
             this.translate = new Translate(this.Language);
@@ -122,35 +121,42 @@ namespace TT.Import.EGI
         private void Initialize()
         {
             FileEGI fileEGI = new FileEGI(this.CurrentAppli);
-            this.CurrentFileEGI = fileEGI.Initialize();           
+            this.CurrentFileEGI = fileEGI.Initialize();
 
-            this.SetSceneDimensions();
-
-            if (manageCatalog == null)
+            if (this.CurrentFileEGI != null)
             {
-                manageCatalog = new ManageCatalog(this.CurrentAppli);
+                this.SetSceneDimensions();
+
+                if (manageCatalog == null)
+                {
+                    manageCatalog = new ManageCatalog(this.CurrentAppli);
+                }
+
+                if (globalSegment == null)
+                {
+                    globalSegment = new GlobalSegment(this.CurrentFileEGI);
+                }
+
+                string version = globalSegment.GetVersion();
+                SetSceneReference(version);
+
+                this.ClearAllSectionsList();
+                this.SetAllSectionsList();
             }
-
-            if (globalSegment == null)
-            {
-                globalSegment = new GlobalSegment(this.CurrentFileEGI);
-            }
-
-            string version = globalSegment.GetVersion();
-            SetSceneReference(version);
-
-            this.ClearAllSectionsList();
-            this.SetAllSectionsList();           
         }
 
         public void Main(int iCallParamsBlock)
         {
             this.Initialize();
-            if (mainForm == null)
+
+            if (this.CurrentFileEGI != null)
             {
-                mainForm = new MainForm(this);
+                if (mainForm == null)
+                {
+                    mainForm = new MainForm(this);
+                }
+                mainForm.ShowDialog(this.CurrentAppli.GetNativeIWin32Window());
             }
-            mainForm.ShowDialog(this.CurrentAppli.GetNativeIWin32Window());
 
         }
         public long Execute(BackgroundWorker worker, DoWorkEventArgs e)
@@ -329,6 +335,8 @@ namespace TT.Import.EGI
 
             foreach (string articleSection in articleSectionList)
             {
+                mainForm.SetProgressBar(articleSection, allSectionsCount);
+
                 articleSegment = new ArticleSegment(this, this.CurrentFileEGI, articleSection, manageCatalog);
                 SegmentClassification segmentClassification = new SegmentClassification(articleSection, this.CurrentFileEGI);
                 List<string> catalogsList = manageCatalog.CatalogsByManufacturerList(articleSegment.Manufacturer);
@@ -343,8 +351,7 @@ namespace TT.Import.EGI
                 }
 
                 this.ResetReference();
-
-                mainForm.SetProgressBar(articleSection, allSectionsCount);
+                //mainForm.SetProgressBar(articleSection, allSectionsCount);
             }
 
             if (articleSegment != null)

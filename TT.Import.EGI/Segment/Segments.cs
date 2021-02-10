@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using KD.Model;
 using KD.Config;
+using KD.CatalogProperties;
 
 namespace TT.Import.EGI
 {
@@ -252,6 +254,16 @@ namespace TT.Import.EGI
         public const string Leaf = "vantail";
     }
 
+    public class BlockScriptCode
+    {
+        public const string PDH = "PDH";
+        public const string PDVFH = "PDVFH";
+        public const string PDVFV = "PDVFV";
+        public const string PDG = "PDG";
+        public const string PC = "PC";
+        public const string PCM = "PCM";
+    }
+
     public class SegmentClassification
     {
         private Article _article;
@@ -271,9 +283,17 @@ namespace TT.Import.EGI
         private readonly string _section;
         private IniFile _currentFileEGI = null;
 
+        private Reference reference = null;
+
+        private readonly List<string> splashbackPanelScriptCodeList = new List<string> { BlockScriptCode.PDH, BlockScriptCode.PDVFH,
+                                                                                         BlockScriptCode.PDVFV, BlockScriptCode.PDG,
+                                                                                         BlockScriptCode.PC, BlockScriptCode.PCM };
+
         public SegmentClassification(Article article)
         {
             _article = article;
+
+            this.SetMembers();
         }
         public SegmentClassification(string section, IniFile currentFileEGI)
         {           
@@ -285,6 +305,13 @@ namespace TT.Import.EGI
             _article = article;
             _section = section;
             _currentFileEGI = currentFileEGI;
+
+            this.SetMembers();
+        }
+        public void SetMembers()
+        {
+            string catalogFilePath = System.IO.Path.Combine(this.Article.CurrentAppli.CatalogDir, this.Article.CatalogFileName + KD.CatalogProperties.Const.CatalogExtension);
+            reference = new Reference(this.Article.CurrentAppli, catalogFilePath);
         }
 
         public bool HasSectionPolytype()
@@ -387,7 +414,7 @@ namespace TT.Import.EGI
         public bool IsArticleCornerFilerWithCoin()
         {
             if (this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())) ||
-                this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()))
+                this.Article.Name.ToUpper().StartsWith(CatalogBlockName.FilerCode.ToUpper()) || this.Article.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
             {
                 if (this.Article.Name.ToUpper().Contains("90".ToUpper()) && this.Article.KeyRef.ToUpper().EndsWith(CatalogBlockName.Coin.ToUpper()))
                 {
@@ -412,14 +439,21 @@ namespace TT.Import.EGI
         }
         public bool IsArticleUnit()
         {
-            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            if (this.Article.CurrentAppli.Scene.ObjectGetInfo(this.Article.ObjectId, KD.SDK.SceneEnum.ObjectInfo.ISGRAPHIC) == KD.StringTools.Const.One)// the 08-02-21 //add this control cause many component have same layer below
             {
-                if (this.Article.Layer == 3 || this.Article.Layer == 4 || this.Article.Layer == 9 || this.Article.Layer == 10)
+                if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
                 {
-                    if (!this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                    //Level1 = Meubles bas, 3
+                    //Level2 = Armoires, 4
+                    //Level3 = Meubles hauts, 9
+                    //Level4 = Sur - meubles, 10
+                    if (this.Article.Layer == 3 || this.Article.Layer == 4 || this.Article.Layer == 9 || this.Article.Layer == 10)
                     {
-                        return true;
-                    }                    
+                        if (!this.Article.Name.ToUpper().Contains(this.Article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
             return false;
@@ -509,6 +543,39 @@ namespace TT.Import.EGI
             }
             return false;
         }
+        public bool IsArticleSplashbackPanel()
+        {
+            foreach (string scriptCode in splashbackPanelScriptCodeList)
+            {
+                if (this.Article.Script.StartsWith(scriptCode + KD.StringTools.Const.BraceOpen))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleSplashbackPanelShape()
+        {           
+            if (this.Article.Script.StartsWith(BlockScriptCode.PDG + KD.StringTools.Const.BraceOpen))
+            {
+                return true;
+            }           
+            return false;
+        }
+        public bool IsMeasurementsChange()
+        {            
+            int line = reference.GetArticleLineIndexFromReference(this.Article.KeyRef);
+
+            if (line != KD.Const.UnknownId)
+            {
+                reference = new Reference(this.Article.CurrentAppli, (int)KD.SDK.CatalogEnum.ClusterRankType.CLUSTER_FROM_ITEM, line);
+                if ((this.Article.DimensionX != reference.Article_Width) || (this.Article.DimensionY != reference.Article_Depth) || (this.Article.DimensionZ != reference.Article_Height))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public string GetShape()
         {
@@ -519,6 +586,8 @@ namespace TT.Import.EGI
             string shapePointList = this.GetShape();
             return shapePointList.Split(KD.CharTools.Const.SemiColon);
         }
+
+        
     }
 }
 

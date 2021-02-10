@@ -151,7 +151,7 @@
             this.version_LNK.TabIndex = 12;
             this.version_LNK.TabStop = true;
             this.version_LNK.Text = "?";
-            this.version_LNK.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.version_LNK_LinkClicked);
+            this.version_LNK.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.Version_LNK_LinkClicked);
             // 
             // Delivery_GBX
             // 

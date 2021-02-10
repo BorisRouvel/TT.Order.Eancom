@@ -184,18 +184,16 @@ namespace Ord_Eancom
         }
         private bool IsChecked(Control control)
         {
-            if (control is RadioButton)
+            if (control is RadioButton controlBox)
             {
-                RadioButton controlBox = (RadioButton)control;
                 if (controlBox.Checked)
                 {
                     return true;
                 }
             }
-            else if (control is CheckBox)
+            else if (control is CheckBox controlCBox)
             {
-                CheckBox controlBox = (CheckBox)control;
-                if (controlBox.Checked)
+                if (controlCBox.Checked)
                 {
                     return true;
                 }
@@ -209,16 +207,14 @@ namespace Ord_Eancom
             {
                  if (bool.TryParse(choice, out bool bChoice))
                 {
-                    if (control is RadioButton)
+                    if (control is RadioButton controlBox)
                     {
-                        RadioButton controlBox = (RadioButton)control;
                         controlBox.Checked = bChoice;
-                        
+
                     }
-                    else if (control is CheckBox)
+                    else if (control is CheckBox controlCBox)
                     {
-                        CheckBox controlBox = (CheckBox)control;
-                        controlBox.Checked = bChoice;
+                        controlCBox.Checked = bChoice;
                     }
                 }
                 
@@ -364,7 +360,7 @@ namespace Ord_Eancom
             this.SetMandatoryDeliveryTextBox();
         }
 
-        private void version_LNK_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void Version_LNK_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MessageBox.Show(this.ProductVersion, "Version");
         }
