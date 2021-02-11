@@ -70,7 +70,10 @@ namespace Ord_Eancom
                     MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + retailerNumber);
 
                     string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr;commandes@discac.fr;ETL@discac.fr";
+                    recipientAddresses = recipientAddresses.Replace(KD.StringTools.Const.SemiColon, KD.StringTools.Const.Comma);
+
                     string ccAdress = MainForm.EmailCc;
+                    ccAdress = ccAdress.Replace(KD.StringTools.Const.SemiColon, KD.StringTools.Const.Comma);
 
                     if (!String.IsNullOrEmpty(recipientAddresses))
                     {                       
