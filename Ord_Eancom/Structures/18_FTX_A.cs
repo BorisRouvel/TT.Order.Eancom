@@ -17,7 +17,7 @@ namespace Eancom
 
         public class C108
         {
-            OrderInformations _orderInformations = null;            
+            readonly OrderInformations _orderInformations = null;            
 
             private string _e4440;
             public string E4440

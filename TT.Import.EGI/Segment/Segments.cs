@@ -254,7 +254,7 @@ namespace TT.Import.EGI
         public const string Leaf = "vantail";
     }
 
-    public class BlockScriptCode
+    public class BlockScriptCodeForMEAmeasureChange
     {
         public const string PDH = "PDH";
         public const string PDVFH = "PDVFH";
@@ -262,6 +262,99 @@ namespace TT.Import.EGI
         public const string PDG = "PDG";
         public const string PC = "PC";
         public const string PCM = "PCM";
+
+        public const string JTB = "JTB";
+        public const string JTBPP = "JTBPP";
+        public const string JTBPH = "JTBPH";
+        public const string JTBPHPP = "JTBPHPP";
+        public const string JTBGH = "JTBGH";
+        public const string JTBGHPP = "JTBGHPP";
+        public const string JTA = "JTA";
+        public const string JTAPP = "JTAPP";
+        public const string JTAPH = "JTAPH";
+        public const string JTAPHPP = "JTAPHPP";
+        public const string JTAGH = "JTAGH";
+        public const string JTAGHPP = "JTAGHPP";
+        public const string JTH = "JTH";
+        public const string JTHPP = "JTHPP";
+        public const string JTHPH = "JTHPH";
+        public const string JTHPHPP = "JTHPHPP";
+        public const string JTHGH = "JTHGH";
+        public const string JTHGHPP = "JTHGHPP";
+        public const string JTAPT = "JTAPT";
+        public const string JTAPTPP = "JTAPTPP";
+        public const string JTBF = "JTBF";
+        public const string JTBPPF = "JTBPPF";
+        public const string JTBPHF = "JTBPHF";
+        public const string JTBPHPPF = "JTBPHPPF";
+        public const string JTBGHF = "JTBGHF";
+        public const string JTBGHPPF = "JTBGHPPF";
+        public const string JTAF = "JTAF";
+        public const string JTAPPF = "JTAPPF";
+        public const string JTAPHF = "JTAPHF";
+        public const string JTAPHPPF = "JTAPHPPF";
+        public const string JTAGHF = "JTAGHF";
+        public const string JTAGHPPF = "JTAGHPPF";
+        public const string JTHF = "JTHF";
+        public const string JTHPPF = "JTHPPF";
+        public const string JTHPHF = "JTHPHF";
+        public const string JTHPHPPF = "JTHPHPPF";
+        public const string JTHGHF = "JTHGHF";
+        public const string JTHGHPPF = "JTHGHPPF";
+        public const string JTAPTF = "JTAPTF";
+        public const string JTAPTPPF = "JTAPTPPF";
+        public const string PILB = "PILB";
+        public const string PILBCAR = "PILBCAR";
+        public const string PILBCHA = "PILBCHA";
+        public const string PILBCINOX = "PILBCINOX";
+        public const string PILBAR = "PILBAR";
+        public const string PILBTUL = "PILBTUL";
+        public const string PILBWS = "PILBWS";
+        public const string PILBBT = "PILBBT";
+        public const string PILBGB = "PILBGB";
+        public const string PILBWSD = "PILBWSD";
+        public const string PILBBTD = "PILBBTD";
+        public const string PILBGBD = "PILBGBD";
+        public const string PILH = "PILH";
+        public const string PILHCAR = "PILHCAR";
+        public const string PILHCHA = "PILHCHA";
+        public const string PILHAR = "PILHAR";
+        public const string PILHTUL = "PILHTUL";
+        public const string PILHWS = "PILHWS";
+        public const string PILHBT = "PILHBT";
+        public const string PILHGB = "PILHGB";
+        public const string PILHWSD = "PILHWSD";
+        public const string PILHBTD = "PILHBTD";
+        public const string PILHGBD = "PILHGBD";
+        public const string PILAPT = "PILAPT";
+        public const string PILAPTCAR = "PILAPTCAR";
+        public const string PILAPTCHA = "PILAPTCHA";
+        public const string PILAPTAR = "PILAPTAR";
+        public const string PILAPTTUL = "PILAPTTUL";
+        public const string PILAPTWS = "PILAPTWS";
+        public const string PILAPTBT = "PILAPTBT";
+        public const string PILAPTGB = "PILAPTGB";
+        public const string PILAPTWSD = "PILAPTWSD";
+        public const string PILAPTBTD = "PILAPTBTD";
+        public const string PILAPTGBD = "PILAPTGBD";
+        public const string DOSEPI = "DOSEPI";
+        public const string DOSEPIFILV = "DOSEPIFILV";
+        public const string DOSEPIFILH = "DOSEPIFILH";
+        public const string PBE = "PBE";
+        public const string SUPMMOD = "SUPMMOD";
+        public const string SUPMMET = "SUPMMET";
+        public const string PLB = "PLB";
+        public const string PLBC = "PLBC";
+        public const string PLA = "PLA";
+        public const string PLAC = "PLAC";
+        public const string PLHC = "PLHC";
+        public const string JAMB = "JAMB";
+        public const string SEPPIL = "SEPPIL";
+        public const string CPG = "CPG";
+        public const string CPD = "CPD";
+        public const string CDFG = "CDFG";
+        public const string CDFD = "CDFD";
+
     }
 
     public class SegmentClassification
@@ -285,9 +378,58 @@ namespace TT.Import.EGI
 
         private Reference reference = null;
 
-        private readonly List<string> splashbackPanelScriptCodeList = new List<string> { BlockScriptCode.PDH, BlockScriptCode.PDVFH,
-                                                                                         BlockScriptCode.PDVFV, BlockScriptCode.PDG,
-                                                                                         BlockScriptCode.PC, BlockScriptCode.PCM };
+        #region //List SplashbackPanel
+        private readonly List<string> splashbackPanelScriptCodeList = new List<string>{ BlockScriptCodeForMEAmeasureChange.PDH, BlockScriptCodeForMEAmeasureChange.PDVFH,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PDVFV, BlockScriptCodeForMEAmeasureChange.PDG,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PC, BlockScriptCodeForMEAmeasureChange.PCM,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTB, BlockScriptCodeForMEAmeasureChange.JTBPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTBPH, BlockScriptCodeForMEAmeasureChange.JTBPHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTBGH, BlockScriptCodeForMEAmeasureChange.JTBGHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTA, BlockScriptCodeForMEAmeasureChange.JTAPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAPH, BlockScriptCodeForMEAmeasureChange.JTAPHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAGH, BlockScriptCodeForMEAmeasureChange.JTAGHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTH, BlockScriptCodeForMEAmeasureChange.JTHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTHPH, BlockScriptCodeForMEAmeasureChange.JTHPHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTHGH, BlockScriptCodeForMEAmeasureChange.JTHGHPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAPT, BlockScriptCodeForMEAmeasureChange.JTAPTPP,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTBF, BlockScriptCodeForMEAmeasureChange.JTBPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTBPHF, BlockScriptCodeForMEAmeasureChange.JTBPHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTBGHF, BlockScriptCodeForMEAmeasureChange.JTBGHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAF, BlockScriptCodeForMEAmeasureChange.JTAPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAPHF, BlockScriptCodeForMEAmeasureChange.JTAPHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAGHF, BlockScriptCodeForMEAmeasureChange.JTAGHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTHF, BlockScriptCodeForMEAmeasureChange.JTHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTHPHF, BlockScriptCodeForMEAmeasureChange.JTHPHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTHGHF, BlockScriptCodeForMEAmeasureChange.JTHGHPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.JTAPTF, BlockScriptCodeForMEAmeasureChange.JTAPTPPF,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILB, BlockScriptCodeForMEAmeasureChange.PILBCAR,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILBCHA, BlockScriptCodeForMEAmeasureChange.PILBCINOX,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILBAR,BlockScriptCodeForMEAmeasureChange.PILBTUL,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILBWS, BlockScriptCodeForMEAmeasureChange.PILBBT,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILBGB, BlockScriptCodeForMEAmeasureChange.PILBWSD,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILBBTD, BlockScriptCodeForMEAmeasureChange.PILBGBD,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILH, BlockScriptCodeForMEAmeasureChange.PILHCAR,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILHCHA, BlockScriptCodeForMEAmeasureChange.PILHAR,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILHTUL, BlockScriptCodeForMEAmeasureChange.PILHWS,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILHBT, BlockScriptCodeForMEAmeasureChange.PILHGB,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILHWSD, BlockScriptCodeForMEAmeasureChange.PILHBTD,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILHGBD, BlockScriptCodeForMEAmeasureChange.PILAPT,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILAPTCAR, BlockScriptCodeForMEAmeasureChange.PILAPTCHA,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILAPTAR, BlockScriptCodeForMEAmeasureChange.PILAPTTUL,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILAPTWS, BlockScriptCodeForMEAmeasureChange.PILAPTBT,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILAPTGB, BlockScriptCodeForMEAmeasureChange.PILAPTWSD,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PILAPTBTD, BlockScriptCodeForMEAmeasureChange.PILAPTGBD,
+                                                                                        BlockScriptCodeForMEAmeasureChange.DOSEPI, BlockScriptCodeForMEAmeasureChange.DOSEPIFILV,
+                                                                                        BlockScriptCodeForMEAmeasureChange.DOSEPIFILH, BlockScriptCodeForMEAmeasureChange.PBE,
+                                                                                        BlockScriptCodeForMEAmeasureChange.SUPMMOD, BlockScriptCodeForMEAmeasureChange.SUPMMET,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PLB, BlockScriptCodeForMEAmeasureChange.PLBC,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PLA, BlockScriptCodeForMEAmeasureChange.PLAC,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PLHC, BlockScriptCodeForMEAmeasureChange.JAMB,
+                                                                                        BlockScriptCodeForMEAmeasureChange.SEPPIL, BlockScriptCodeForMEAmeasureChange.CPG,
+                                                                                        BlockScriptCodeForMEAmeasureChange.CPD, BlockScriptCodeForMEAmeasureChange.CDFG,
+                                                                                        BlockScriptCodeForMEAmeasureChange.CDFD, };
+        #endregion
+
 
         public SegmentClassification(Article article)
         {
@@ -555,11 +697,11 @@ namespace TT.Import.EGI
             return false;
         }
         public bool IsArticleSplashbackPanelShape()
-        {           
-            if (this.Article.Script.StartsWith(BlockScriptCode.PDG + KD.StringTools.Const.BraceOpen))
+        {
+            if (this.Article.Script.StartsWith(BlockScriptCodeForMEAmeasureChange.PDG + KD.StringTools.Const.BraceOpen))
             {
                 return true;
-            }           
+            }
             return false;
         }
         public bool IsMeasurementsChange()
