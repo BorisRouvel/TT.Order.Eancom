@@ -352,12 +352,15 @@ namespace Ord_Eancom
                 }
                 else if(catalogsList.Contains(catalogFileName))
                 {
-                    FileEDI currentFileEDI = new FileEDI(this.CurrentAppli, orderInformationsFromArticles, article.Ref);
-                    if (!String.IsNullOrEmpty(article.Ref) && currentFileEDI.csvPairingFileReader == null)
+                    if (!article.KeyRef.EndsWith(OrderConstants.HandleName))
                     {
-                        referenceNoValid = article.Ref;
-                        numberNoValid = article.Number.ToString();
-                        return false;
+                        FileEDI currentFileEDI = new FileEDI(this.CurrentAppli, orderInformationsFromArticles, article.Ref);
+                        if (!String.IsNullOrEmpty(article.Ref) && currentFileEDI.csvPairingFileReader == null)
+                        {
+                            referenceNoValid = article.Ref;
+                            numberNoValid = article.Number.ToString();
+                            return false;
+                        }
                     }
                 }
             }            

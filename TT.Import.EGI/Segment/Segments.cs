@@ -355,6 +355,10 @@ namespace TT.Import.EGI
         public const string CDFG = "CDFG";
         public const string CDFD = "CDFD";
 
+        public const string PANH = "PANH";
+        public const string PANV = "PANV";
+        public const string TAPAPRT = "TAPAPRT";
+
     }
 
     public class SegmentClassification
@@ -427,7 +431,9 @@ namespace TT.Import.EGI
                                                                                         BlockScriptCodeForMEAmeasureChange.PLHC, BlockScriptCodeForMEAmeasureChange.JAMB,
                                                                                         BlockScriptCodeForMEAmeasureChange.SEPPIL, BlockScriptCodeForMEAmeasureChange.CPG,
                                                                                         BlockScriptCodeForMEAmeasureChange.CPD, BlockScriptCodeForMEAmeasureChange.CDFG,
-                                                                                        BlockScriptCodeForMEAmeasureChange.CDFD, };
+                                                                                        BlockScriptCodeForMEAmeasureChange.CDFD, BlockScriptCodeForMEAmeasureChange.PANH,
+                                                                                        BlockScriptCodeForMEAmeasureChange.PANV, BlockScriptCodeForMEAmeasureChange.TAPAPRT
+                                                                                        };
         #endregion
 
 
