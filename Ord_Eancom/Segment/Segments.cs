@@ -5,7 +5,8 @@ using KD.Model;
 using KD.Config;
 using KD.CatalogProperties;
 
-namespace TT.Import.EGI
+
+namespace Eancom // TT.Import.EGI
 {
     public class SegmentFormat
     {
@@ -379,7 +380,7 @@ namespace TT.Import.EGI
 
         private readonly string _section;
         private IniFile _currentFileEGI = null;
-
+       
         private Reference reference = null;
 
         #region //List SplashbackPanel
@@ -442,7 +443,7 @@ namespace TT.Import.EGI
             _article = article;
 
             this.SetMembers();
-        }
+        }       
         public SegmentClassification(string section, IniFile currentFileEGI)
         {           
             _section = section;
@@ -710,7 +711,7 @@ namespace TT.Import.EGI
             }
             return false;
         }
-        public bool IsMeasurementsChange()
+        public bool IsMeasurementsChange() //Do not use, its replace for dim from EDI
         {            
             int line = reference.GetArticleLineIndexFromReference(this.Article.KeyRef);
 
@@ -723,8 +724,7 @@ namespace TT.Import.EGI
                 }
             }
             return false;
-        }
-
+        }    
         public string GetShape()
         {
             return this.Article.CurrentAppli.Scene.ObjectGetShape(this.Article.ObjectId);
@@ -734,8 +734,94 @@ namespace TT.Import.EGI
             string shapePointList = this.GetShape();
             return shapePointList.Split(KD.CharTools.Const.SemiColon);
         }
+     
+    }
 
-        
+    //-----------------------------
+    public class Separator
+    {
+        public static readonly string NewLine = Environment.NewLine;
+        public const string DataGroup = "+";
+        public const string DataElement = ":";
+        public static string EndLine = "'" + NewLine;
+        public const string DecimalSep = ".";
+        public const string FreeChar = "?";
+        public static char ArticleFieldEDI = KD.CharTools.Const.Pipe;
+    }
+
+    public class PairingTablePosition
+    {
+        public const int ArticleSupplierId = 0;
+        public const int ArticleSerieNo = 1;
+        public const int ArticleEDPNumber = 2;
+        public const int ArticleEANNumber = 3;
+        public const int ArticleHinge = 4;
+        public const int ArticleConstructionId = 5;
+        public const int ArticleShape = 6;        
+
+        public const int StartArticleMeasure = 7;
+        public const int ArticleWidth_B1 = 7;
+        public const int ArticleWidth_B2 = 8;
+        public const int ArticleWidth_B3 = 9;
+        public const int ArticleWidth_B4 = 10;
+        public const int ArticleWidth_B5 = 11;
+        public const int ArticleWidth_Be = 12;
+
+        public const int ArticleHeight_H1 = 13;
+        public const int ArticleHeight_H2 = 14;
+        public const int ArticleHeight_H3 = 15;
+        public const int ArticleHeight_H4 = 16;
+        public const int ArticleHeight_H5 = 17;
+        public const int ArticleHeight_He = 18;
+
+        public const int ArticleDepth_T1 = 19;
+        public const int ArticleDepth_T2 = 20;
+        public const int ArticleDepth_T3 = 21;
+        public const int ArticleDepth_T4 = 22;
+        public const int ArticleDepth_T5 = 23;
+        public const int ArticleDepth_Te = 24;
+        public const int EndArticleMeasure = 24;
+
+        public const int ArticleWidth = 0;
+        public const int ArticleWidth_B = 0;
+        public const int ArticleWidth_Bfrom = 1;
+        public const int ArticleWidth_Bto = 2;
+        public const int ArticleWidth_Bstep = 3;
+
+        public const int ArticleHeight = 1;
+        public const int ArticleHeight_H = 0;
+        public const int ArticleHeight_Hfrom = 1;
+        public const int ArticleHeight_Hto = 2;
+        public const int ArticleHeight_Hstep = 3;
+
+        public const int ArticleDepth = 2;
+        public const int ArticleDepth_T = 0;
+        public const int ArticleDepth_Tfrom = 1;
+        public const int ArticleDepth_Tto = 2;
+        public const int ArticleDepth_Tstep = 3;
+
+        public const int ArticleBaseMeasureNb = 3;
+    }
+
+    public class Tools
+    {
+        public static string ConvertCommaToDot(string value)
+        {
+            value = value.Replace(KD.StringTools.Const.Comma, KD.StringTools.Const.Dot);
+            return value;
+        }
+        public static string DelCharAndAllAfter(string text, string car)
+        {
+            if (!String.IsNullOrEmpty(text))
+            {
+                if (text.Contains(car))
+                {
+                    int end = text.IndexOf(car);
+                    text = text.Substring(0, end);
+                }
+            }
+            return text;
+        }
     }
 }
 

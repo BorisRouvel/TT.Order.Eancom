@@ -10,7 +10,7 @@ namespace Eancom
     {
         OrderInformations _orderInformationsFromArticles = null;
         FileEDI _fileEDI = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
         C212 c212 = null;
 
         private const string E4347 = "5";
@@ -81,7 +81,7 @@ namespace Eancom
             _orderInformationsFromArticles = orderInformationsFromArticles;
             c212 = new C212();            
             _fileEDI = fileEDI;
-            utility = new Utility();
+            utility = new UtilitySegment();
         }
 
         private string BuildLine()
@@ -134,15 +134,15 @@ namespace Eancom
 
             if (codeAndName.Length == 3)
             {
-                string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                code = Tools.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
                 code = _orderInformationsFromArticles.ReleaseChar(code);
 
                 string name = codeAndName[2];
                 name = _orderInformationsFromArticles.ReleaseChar(name);
 
                 int nameCharStart = 0;
-                for (int c = 0; c < Utility.finishLineMaxNb; c++)
+                for (int c = 0; c < UtilitySegment.finishLineMaxNb; c++)
                 {                    
                     code = utility.GetCodeLen(code);
                     
@@ -155,9 +155,9 @@ namespace Eancom
                     dataLine += BuildLine();
 
                     OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                    nameCharStart += Utility.nameCharLen;
+                    nameCharStart += UtilitySegment.nameCharLen;
 
-                    name = utility.GetFollowingChar(name, Utility.nameCharLen);
+                    name = utility.GetFollowingChar(name, UtilitySegment.nameCharLen);
                     if (String.IsNullOrEmpty(name))
                     {
                         break;
@@ -180,8 +180,8 @@ namespace Eancom
                     string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
                     if (codeAndName.Length == 4)
                     {
-                        string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                        code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                        string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                        code = Tools.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
                         code = _orderInformationsFromArticles.ReleaseChar(code);
 
                         if (utility.IsPlinth(codeAndName[3]))//Cause exept plinth height 402 //KD.StringTools.Const.TrueCamelCase
@@ -192,7 +192,7 @@ namespace Eancom
                         name = _orderInformationsFromArticles.ReleaseChar(name);
 
                         int nameCharStart = 0;
-                        for (int c = 0; c < Utility.finishLineMaxNb; c++)
+                        for (int c = 0; c < UtilitySegment.finishLineMaxNb; c++)
                         {
                             code = utility.GetCodeLen(code);
 
@@ -212,9 +212,9 @@ namespace Eancom
 
                             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
                             dataLine += BuildLine();
-                            nameCharStart += Utility.nameCharLen;
+                            nameCharStart += UtilitySegment.nameCharLen;
 
-                            name = utility.GetFollowingChar(name, Utility.nameCharLen);
+                            name = utility.GetFollowingChar(name, UtilitySegment.nameCharLen);
                             if (String.IsNullOrEmpty(name))
                             {
                                 break;
@@ -236,7 +236,7 @@ namespace Eancom
                     string[] codeAndName = codeAndNameFinishLine.Split(KD.CharTools.Const.SemiColon);
                     if (codeAndName.Length == 4)
                     {
-                        string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                        string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
                         if (!utility.IsPlinth(codeAndName[3])) //Cause get only plinth height 402 //KD.StringTools.Const.FalseCamelCase
                         {
                             continue;

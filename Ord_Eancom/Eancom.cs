@@ -9,18 +9,7 @@ using KD.Model;
 using Ord_Eancom;
 
 namespace Eancom
-{    
-    public class Separator
-    {
-        public static readonly string NewLine = Environment.NewLine;
-        public const string DataGroup = "+";
-        public const string DataElement = ":";
-        public static string EndLine = "'" + NewLine;
-        public const string DecimalSep = ".";
-        public const string FreeChar = "?";
-
-    }
-
+{
     public class StructureEDI
     {
         public static string UNA = "UNA";       //{Définition du caractère de séparation}
@@ -33,12 +22,12 @@ namespace Eancom
         public const string NAD = "NAD";        //{Identification des parties impliquées (nom / adresse)}
         public const string CTA = "CTA";        //{Spécification de la personne de contact de cette partie}
         public const string COM = "COM";        //{Spécification de la manière d'atteindre la personne de contact, par exemple fax / téléphone}
-        public const string LIN_H  = "LIN";     //(données d'en-tête) {Début d'une gamme de produits / d'une option}
-        public const string PIA_H  = "PIA";     //{Spécification plus détaillée d//une option}
+        public const string LIN_H = "LIN";     //(données d'en-tête) {Début d'une gamme de produits / d'une option}
+        public const string PIA_H = "PIA";     //{Spécification plus détaillée d//une option}
         public const string LIN_A = "LIN";      //(données d//article) {Début d//un nouvel élément}
         public const string PIA_A = "PIA";      //{Spécification plus détaillée de l'article: spécification des options, etc.}
         public const string IMD = "IMD";        //{Description de l'article}
-        public const string MEA  = "MEA";     //{Dimensions d'article pour articles spécifiques à une dimension}
+        public const string MEA = "MEA";     //{Dimensions d'article pour articles spécifiques à une dimension}
         public const string QTY = "QTY";      //{Spécification de la quantité commandée}
         public const string FTX_A = "FTX";    //{Informations supplémentaires au niveau de l'article}
         public const string RFF_A = "RFF";    //{Numéros de référence}
@@ -74,7 +63,7 @@ namespace Eancom
         private const string ostrptKey = "OSTRPT";
         private const string emailKey = "EMAIL";
 
-        public const char separatorArticleField = KD.CharTools.Const.Pipe;
+        //public static char separatorArticleField = KD.CharTools.Const.Pipe;
 
         private const string numberSection = "Number";
         private const string nextKey = "Next";
@@ -111,7 +100,7 @@ namespace Eancom
             }
         }
 
-        private readonly OrderInformations _orderInformationsFromArticles = null;        
+        private readonly OrderInformations _orderInformationsFromArticles = null;
         public string appairingCSVFileName = String.Empty;
 
         public static KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.rootOrderDir, FileEDI.IniOrderFileName));
@@ -123,15 +112,15 @@ namespace Eancom
             _currentAppli = appli;
             _supplierName = supplierName;
             _orderInformationsFromArticles = orderInformationsFromArticles;
-            this.appairingCSVFileName = _orderInformationsFromArticles.GetFirstPairingCSVFileName(this.RootCsvPairingFileName());            
+            this.appairingCSVFileName = _orderInformationsFromArticles.GetFirstPairingCSVFileName(this.RootCsvPairingFileName());
             rowList.Clear();
 
             this.OpenCsvPairingFile(String.Empty);
         }
         public FileEDI(AppliComponent appli, OrderInformations orderInformationsFromArticles, string articleRef)
         {
-            _currentAppli = appli;            
-            _orderInformationsFromArticles = orderInformationsFromArticles;           
+            _currentAppli = appli;
+            _orderInformationsFromArticles = orderInformationsFromArticles;
             this.appairingCSVFileName = _orderInformationsFromArticles.GetEachPairingCSVFileName(this.RootCsvPairingFileName(), articleRef);
             rowList.Clear();
 
@@ -149,7 +138,7 @@ namespace Eancom
                 while (!csvPairingFileReader.EndOfStream)
                 {
                     rowList.Add(csvPairingFileReader.ReadLine());
-                }                
+                }
             }
             catch (Exception)
             {
@@ -161,18 +150,18 @@ namespace Eancom
             {
                 System.Collections.Generic.List<string> list = new System.Collections.Generic.List<string>();
                 foreach (string row in rowList)
-                {                    
+                {
                     list.Add(row.Split(KD.CharTools.Const.SemiColon)[0]);
                 }
 
                 if (!list.Contains(articleRef))
                 {
-                    csvPairingFileReader = null;                    
+                    csvPairingFileReader = null;
                 }
             }
 
             return true;
-        }     
+        }
 
         public string GetNextOrdersNumberHex()
         {
@@ -195,35 +184,35 @@ namespace Eancom
         {
             return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + KD.IO.File.Extension.Csv);
         }
-        
+
         public string GetCsvValue(string value, int position = 1)
-        {            
-           foreach (string dataLine in rowList)
+        {
+            foreach (string dataLine in rowList)
             {
                 string[] datas = dataLine.Split(KD.CharTools.Const.SemiColon);
                 if ((!String.IsNullOrEmpty(datas[0]) && datas[0] == value) || (this.IsDiscacAssembly(datas[0], value)))
                 {
                     return datas[position];
-                }                
+                }
             }
             return null;
         }
         private bool IsDiscacAssembly(string data, string value)
-        {            
+        {
             if (data.EndsWith(KD.StringTools.Const.Slatch + value))
             {
                 return true;
-            }           
+            }
             return false;
         }
 
         public string IniFileName()
         {
             return (SupplierName + KD.StringTools.Const.Underscore + FileEDI.EANCOMPAIRINGTABLES + ".ini"); // KD.IO.File.Extension.Ini);
-        }        
+        }
         public string ManufacturerID()
         {
-            return this.GetCsvValue(FileEDI.manufacturerIDKey, 1);          
+            return this.GetCsvValue(FileEDI.manufacturerIDKey, 1);
         }
         public string ManufacturerGLN()
         {
@@ -248,9 +237,9 @@ namespace Eancom
         public string CatalogID()
         {
             string catalogId = this.GetCsvValue(catalogIDKey, 1);
-            if (catalogId.Contains(FileEDI.separatorArticleField.ToString()))
+            if (catalogId.Contains(Separator.ArticleFieldEDI.ToString()))
             {
-                catalogId = catalogId.Replace(FileEDI.separatorArticleField, KD.CharTools.Const.SemiColon);
+                catalogId = catalogId.Replace(Separator.ArticleFieldEDI, KD.CharTools.Const.SemiColon);
             }
             return catalogId;
         }
@@ -284,7 +273,7 @@ namespace Eancom
         }
     }
 
-    public class Utility
+    public class UtilitySegment
     {
         private const char whiteSpaceChar = ' ';
         public const int codeCharLen = 5;
@@ -293,22 +282,10 @@ namespace Eancom
         public const int freelyWordCharLen = 70;
         public const int freelyLineMaxNb = 99;
 
-        public Utility()
+        public UtilitySegment()
         {
         }
 
-        public string DelCharAndAllAfter(string text, string car)
-        {
-            if (!String.IsNullOrEmpty(text))
-            {
-                if (text.Contains(car))
-                {
-                    int end = text.IndexOf(car);
-                    text = text.Substring(0, end);
-                }
-            }
-            return text;
-        }
         public StringBuilder CodeStringBuilder(string code)
         {
             StringBuilder codeStringBuilder = new StringBuilder(codeCharLen);
@@ -339,9 +316,9 @@ namespace Eancom
         }
         public string GetCodeLen(string code)
         {
-            if (code.Length > Utility.codeCharLen)
+            if (code.Length > UtilitySegment.codeCharLen)
             {
-                code = code.Substring(0, Utility.codeCharLen);
+                code = code.Substring(0, UtilitySegment.codeCharLen);
             }
             return code;
         }
@@ -376,7 +353,7 @@ namespace Eancom
                 //case "":
                 //    return "103";
                 default:
-                    return null;                  
+                    return null;
             }
         }
         public string GetQuantityByOccurrence(AppliComponent currentAppli, int objectId)

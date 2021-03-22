@@ -30,7 +30,7 @@ namespace Eancom
    OrderInformations _orderInformationsFromArticles = null;
         FileEDI _fileEDI = null;
         C212 c212 = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
 
         public const string E4347_1 = "1";
         public const string E4347_5 = "5";
@@ -135,7 +135,7 @@ namespace Eancom
             _orderInformationsFromArticles = orderInformationsFromArticles;
             _fileEDI = fileEDI;
             c212 = new C212();
-            utility = new Utility();
+            utility = new UtilitySegment();
         }
 
         private string BuildLine()
@@ -165,10 +165,10 @@ namespace Eancom
 
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
-                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                if (articleInformation.Length > OrderConstants.ArticleEDPNumber_InFile_Position)
+                string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                if (articleInformation.Length > PairingTablePosition.ArticleEDPNumber)
                 {
-                    return articleInformation[OrderConstants.ArticleEDPNumber_InFile_Position];
+                    return articleInformation[PairingTablePosition.ArticleEDPNumber];
                 }
             }
             return String.Empty;
@@ -179,10 +179,10 @@ namespace Eancom
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(artRef, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
-                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                if (articleInformation.Length > OrderConstants.ArticleHinge_InFile_Position)
+                string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                if (articleInformation.Length > PairingTablePosition.ArticleHinge)
                 {
-                    string hinge = articleInformation[OrderConstants.ArticleHinge_InFile_Position];
+                    string hinge = articleInformation[PairingTablePosition.ArticleHinge];
                     if (!String.IsNullOrEmpty(hinge))
                     //if (hinge == "L" || hinge == "R" || hinge == "M")
                     {
@@ -198,10 +198,10 @@ namespace Eancom
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
-                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                if (articleInformation.Length > OrderConstants.ArticleHinge_InFile_Position)
+                string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                if (articleInformation.Length > PairingTablePosition.ArticleHinge)
                 {
-                    hinge = articleInformation[OrderConstants.ArticleHinge_InFile_Position];
+                    hinge = articleInformation[PairingTablePosition.ArticleHinge];
                     if (hinge == "L" || hinge == "R" || hinge == "M")
                     {
                         return hinge;
@@ -226,10 +226,10 @@ namespace Eancom
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(artRef, 1);
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
-                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                if (articleInformation.Length > OrderConstants.ArticleConstructionId_InFile_Position)
+                string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                if (articleInformation.Length > PairingTablePosition.ArticleConstructionId)
                 {
-                    string constructionID = articleInformation[OrderConstants.ArticleConstructionId_InFile_Position];
+                    string constructionID = articleInformation[PairingTablePosition.ArticleConstructionId];
                     if (constructionID == "L" || constructionID == "R")
                     {
                         return constructionID;
@@ -279,10 +279,10 @@ namespace Eancom
                 string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
                 if (!String.IsNullOrEmpty(articleReferenceKey))
                 {
-                    string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                    if (articleInformation.Length > OrderConstants.ArticleSupplierId_InFile_Position)
+                    string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                    if (articleInformation.Length > PairingTablePosition.ArticleSupplierId)
                     {
-                        c212.E7140 = articleInformation[OrderConstants.ArticleSupplierId_InFile_Position]; // "External Manufacturer ID";
+                        c212.E7140 = articleInformation[PairingTablePosition.ArticleSupplierId]; // "External Manufacturer ID";
                         c212.E7143 = C212.E7143_36;
                         c212.E3055 = C212.E3055_91;
 
@@ -301,10 +301,10 @@ namespace Eancom
                 string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);
                 if (!String.IsNullOrEmpty(articleReferenceKey))
                 {
-                    string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                    if (articleInformation.Length > OrderConstants.ArticleSerieNo_InFile_Position)
+                    string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                    if (articleInformation.Length > PairingTablePosition.ArticleSerieNo)
                     {
-                        c212.E7140 = articleInformation[OrderConstants.ArticleSerieNo_InFile_Position]; // "External Serie No"; 
+                        c212.E7140 = articleInformation[PairingTablePosition.ArticleSerieNo]; // "External Serie No"; 
                         c212.E7143 = C212.E7143_18;
                         c212.E3055 = C212.E3055_91;
 
@@ -325,7 +325,7 @@ namespace Eancom
             }
            
             _e4347 = PIA_A.E4347_5;
-            c212.E7140 = utility.DelCharAndAllAfter(reference, KD.StringTools.Const.Underscore);
+            c212.E7140 = Tools.DelCharAndAllAfter(reference, KD.StringTools.Const.Underscore);
             c212.E7143 = C212.E7143_SA;
             c212.E3055 = C212.E3055_91;
 
@@ -335,13 +335,13 @@ namespace Eancom
         public string Add_EDPNumber(Article article) //EDI
         {
             _e4347 = PIA_A.E4347_5;           
-            c212.E7140 = String.Empty;//utility.DelCharAndAllAfter(article.CodeNoDoublons, KD.StringTools.Const.Underscore);
+            c212.E7140 = String.Empty;//Tools.DelCharAndAllAfter(article.CodeNoDoublons, KD.StringTools.Const.Underscore);
 
             string articleReferenceKey = _fileEDI.ArticleReferenceKey(article.Ref, 1);            
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
-                string[] articleInformation = articleReferenceKey.Split(FileEDI.separatorArticleField);
-                if (articleInformation.Length > OrderConstants.ArticleEDPNumber_InFile_Position)
+                string[] articleInformation = articleReferenceKey.Split(Separator.ArticleFieldEDI);
+                if (articleInformation.Length > PairingTablePosition.ArticleEDPNumber)
                 {
                     c212.E7140 = articleInformation[2];
                 }
@@ -423,8 +423,8 @@ namespace Eancom
                             string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
                             if (codeAndName.Length == 4)
                             {
-                                string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                                code = utility.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                                string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                                code = Tools.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
                                 code = _orderInformationsFromArticles.ReleaseChar(code);
 
                                 if (utility.IsAssemblyWorktop(codeAndName[3]))
@@ -465,9 +465,9 @@ namespace Eancom
                                     dataLine += BuildLine();
 
                                     OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                                    nameCharStart += Utility.nameCharLen;
+                                    nameCharStart += UtilitySegment.nameCharLen;
 
-                                    name = utility.GetFollowingChar(name, Utility.nameCharLen);
+                                    name = utility.GetFollowingChar(name, UtilitySegment.nameCharLen);
                                     if (String.IsNullOrEmpty(name))
                                     {
                                         break;
@@ -524,8 +524,8 @@ namespace Eancom
 
         public string Add_WorktopAssemblyTypeNo(string assemblyReference)
         {
-            assemblyReference  = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
+            assemblyReference  = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             _e4347 = PIA_A.E4347_5;           
             c212.E7140 = _orderInformationsFromArticles.ReleaseChar(assemblyReference);
@@ -537,8 +537,8 @@ namespace Eancom
         }
         public string Add_WorktopAssemblyEDPNumber(string assemblyReference) //EDI
         {
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             _e4347 = PIA_A.E4347_5;
             c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetEDPNumber(assemblyReference));
@@ -555,8 +555,8 @@ namespace Eancom
         }
         public string Add_WorktopAssemblyHinge(string assemblyReference)
         {
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetIDMHinge(assemblyReference));
 
@@ -573,8 +573,8 @@ namespace Eancom
         }
         public string Add_WorktopAssemblyConstructionID(string assemblyReference)
         {
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
-            assemblyReference = utility.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Underscore);
+            assemblyReference = Tools.DelCharAndAllAfter(assemblyReference, KD.StringTools.Const.Colon);
 
             c212.E7140 = _orderInformationsFromArticles.ReleaseChar(this.GetIDMConstructionID(assemblyReference));
 

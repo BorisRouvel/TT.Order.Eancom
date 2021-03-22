@@ -8,7 +8,6 @@ using KD.Analysis;
 using KD.Model;
 
 using Eancom;
-using TT.Import.EGI;
 
 
 namespace Ord_Eancom
@@ -30,7 +29,7 @@ namespace Ord_Eancom
         readonly OrderInformations _orderInformationsFromArticles = null;
         readonly BuildCommon _buildCommon = null;
         FileEDI _fileEDI = null;
-        readonly Eancom.Utility _utility = null;
+        readonly Eancom.UtilitySegment _utility = null;
 
         private int consecutiveNumbering = 1;
         public static int segmentNumberBetweenUNHandUNT = 0;
@@ -121,7 +120,7 @@ namespace Ord_Eancom
             _orderInformations = orderInformations;
             _orderInformationsFromArticles = orderInformationsFromArticles;
             _fileEDI = fileEDI;
-            _utility = new Eancom.Utility();
+            _utility = new Eancom.UtilitySegment();
 
             this.InitializeEancomStructure();
 
@@ -153,7 +152,7 @@ namespace Ord_Eancom
             lIN_A = new Eancom.LIN_A(_orderInformationsFromArticles, Convert.ToString(this.consecutiveNumbering), _fileEDI);
             pIA_A = new Eancom.PIA_A(_orderInformationsFromArticles, _fileEDI);
             iMD = new Eancom.IMD(_orderInformationsFromArticles);
-            mEA = new Eancom.MEA();
+            mEA = new Eancom.MEA(_fileEDI);
             qTY = new Eancom.QTY();
             fTX_A = new Eancom.FTX_A(_orderInformationsFromArticles);
             rFF_A = new Eancom.RFF_A(_orderInformationsFromArticles);
@@ -467,11 +466,7 @@ namespace Ord_Eancom
             _buildCommon.ResetReference();
         }
 
-        private string ConvertCommaToDot(string value)
-        {
-            value = value.Replace(KD.StringTools.Const.Comma, KD.StringTools.Const.Dot);
-            return value;
-        }
+       
         private void GetContraintsList()
         {
             int objectNumber = this.CurrentAppli.Scene.SceneGetObjectsNb();
@@ -533,7 +528,7 @@ namespace Ord_Eancom
 
             string roomHeight = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
             string room = Convert.ToInt32(roomHeight).ToString(SegmentFormat.DotDecimal);
-            structureLineEGIList.Add(ItemKey.RoomHeight + KD.StringTools.Const.EqualSign + this.ConvertCommaToDot(room) + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.RoomHeight + KD.StringTools.Const.EqualSign + Tools.ConvertCommaToDot(room) + Separator.NewLine);
             structureLineEGIList.Add(ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + _fileEDI.ManufacturerID() + Separator.NewLine);
             structureLineEGIList.Add(ItemKey.System + KD.StringTools.Const.EqualSign + _orderInformations.GetNameAndVersionSoftware() + Separator.NewLine);
         }
@@ -877,12 +872,12 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+                keyRef = Tools.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
                 string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
                 if (articleInfos != null)
                 {
                     string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                    return ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleSupplierId_InFile_Position] + Separator.NewLine;
+                    return ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + articleInfo[PairingTablePosition.ArticleSupplierId] + Separator.NewLine;
                 }
             }
             return null;
@@ -891,7 +886,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                return ItemKey.Name + KD.StringTools.Const.EqualSign + this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
+                return ItemKey.Name + KD.StringTools.Const.EqualSign + Tools.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
             }
             return null;
         }
@@ -936,40 +931,55 @@ namespace Ord_Eancom
         private List<string> ArticleMeasureShapeList(string keyRef)
         {
             List<string> list = new List<string>();
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = Tools.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
-                string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
-                if (articleInfo.Length > 7)
+                string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);
+                if (articleInfo.Length >= PairingTablePosition.EndArticleMeasure + 1)
                 {
-                    for (int index = 7; index <= articleInfo.Length - 1; index++)
+                    for (int index = PairingTablePosition.StartArticleMeasure; index <= PairingTablePosition.EndArticleMeasure; index++)
                     {
-                        list.Add(ItemKey.Measure_ + this.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                        if (!String.IsNullOrEmpty(articleInfo[index]))
+                        {
+                            list.Add(ItemKey.Measure_ + Tools.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                        }
                     }
                 }
-            }
+                else if (articleInfo.Length > PairingTablePosition.StartArticleMeasure)
+                {
+                    for (int index = PairingTablePosition.StartArticleMeasure; index <= articleInfo.Length - 1; index++)
+                    {
+                        list.Add(ItemKey.Measure_ + Tools.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                    }
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("Certaines informations ne sont pas correctes." + Separator.NewLine +
+                                                         "Veuillez télécharger la mise à jour du catalogue !", "Information", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+                }
+            }            
             return list;
         }
         private string ArticleDimensionX(double value)
         {
             string data = ItemKey.Measure_B + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionX(double value)
         {
             string data = ItemKey.Measure_B1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionXE(double value)
         {
             string data = ItemKey.Measure_BE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionZ(double value)
         {
             string data = ItemKey.Measure_H + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionY(Article article, double value)
         {
@@ -994,26 +1004,26 @@ namespace Ord_Eancom
             }
             
             string data = ItemKey.Measure_T + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionY(double value)
         {
             string data = ItemKey.Measure_T1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionYE(double value)
         {
             string data = ItemKey.Measure_TE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleConstructionType(string keyRef)
         {
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = Tools.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleConstructionId_InFile_Position] + Separator.NewLine;
+                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + articleInfo[PairingTablePosition.ArticleConstructionId] + Separator.NewLine;
             }
             return null;
         }
@@ -1075,14 +1085,14 @@ namespace Ord_Eancom
 
         private string GetShapeNumberByType(string keyRef)
         {
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = Tools.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
-                string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
-                if (articleInfo.Length > OrderConstants.ArticleShape_InFile_Position)
+                string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);
+                if (articleInfo.Length > PairingTablePosition.ArticleShape)
                 {
-                    return articleInfo[OrderConstants.ArticleShape_InFile_Position];
+                    return articleInfo[PairingTablePosition.ArticleShape];
                 }
             }
             return KD.StringTools.Const.Zero;
@@ -1151,37 +1161,37 @@ namespace Ord_Eancom
         private string PositionX(double value)
         {
             string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string PositionY(double value)
         {
             string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string PositionZ(double value)
         {
             string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionX(double value)
         {
             string data = ItemKey.Width + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionY(double value)
         {
             string data = ItemKey.Depth + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionZ(double value)
         {
             string data = ItemKey.Height + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }     
         private string Angle(double value)
         {
             string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string Opening(Article article)
         {

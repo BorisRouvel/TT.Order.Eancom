@@ -201,6 +201,9 @@
       <Link>Nub\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="..\Ord_Eancom\Segment\Segments.cs">
+      <Link>Segment\Segments.cs</Link>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -215,7 +218,6 @@
     <Compile Include="Segment\DoorSegment.cs" />
     <Compile Include="Segment\GlobalSegment.cs" />
     <Compile Include="Segment\RecessSegment.cs" />
-    <Compile Include="Segment\Segments.cs" />
     <Compile Include="Segment\WallSegment.cs" />
     <Compile Include="Segment\WindowSegment.cs" />
   </ItemGroup>

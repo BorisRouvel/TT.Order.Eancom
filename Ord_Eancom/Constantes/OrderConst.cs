@@ -56,13 +56,13 @@ namespace Ord_Eancom
 
         public const double FrontDepth = 20.0;
 
-        public const int ArticleSupplierId_InFile_Position = 0;
-        public const int ArticleSerieNo_InFile_Position = 1;
-        public const int ArticleEDPNumber_InFile_Position = 2;
-        public const int ArticleEANNumber_InFile_Position = 3;
-        public const int ArticleHinge_InFile_Position = 4;
-        public const int ArticleConstructionId_InFile_Position = 5;
-        public const int ArticleShape_InFile_Position = 6;
+        //public const int ArticleSupplierId_InFile_Position = 0;
+        //public const int ArticleSerieNo_InFile_Position = 1;
+        //public const int ArticleEDPNumber_InFile_Position = 2;
+        //public const int ArticleEANNumber_InFile_Position = 3;
+        //public const int ArticleHinge_InFile_Position = 4;
+        //public const int ArticleConstructionId_InFile_Position = 5;
+        //public const int ArticleShape_InFile_Position = 6;
     }
 
     public class OrderTransmission
@@ -90,4 +90,41 @@ namespace Ord_Eancom
 
         public const string HeaderTagMandatoryDeliveryInformation = "{}";
     }
+
+    //public class PairingTablePosition
+    //{
+    //    public const int ArticleSupplierId = 0;
+    //    public const int ArticleSerieNo = 1;
+    //    public const int ArticleEDPNumber = 2;
+    //    public const int ArticleEANNumber = 3;
+    //    public const int ArticleHinge = 4;
+    //    public const int ArticleConstructionId = 5;
+    //    public const int ArticleShape = 6;
+    //    public const int ArticleWidth_B = 7;
+    //    public const int ArticleHeight_H = 8;
+    //    public const int ArticleDepth_T = 9;
+
+    //    public const int StartArticleMeasure = 10;
+    //    public const int ArticleWidth_B1 = 10;
+    //    public const int ArticleWidth_B2 = 11;
+    //    public const int ArticleWidth_B3 = 12;
+    //    public const int ArticleWidth_B4 = 13;
+    //    public const int ArticleWidth_B5 = 14;
+    //    public const int ArticleWidth_Be = 15;
+
+    //    public const int ArticleHeight_H1 = 16;
+    //    public const int ArticleHeight_H2 = 17;
+    //    public const int ArticleHeight_H3 = 18;
+    //    public const int ArticleHeight_H4 = 19;
+    //    public const int ArticleHeight_H5 = 20;
+    //    public const int ArticleHeight_He = 21;
+
+    //    public const int ArticleDepth_T1 = 22;
+    //    public const int ArticleDepth_T2 = 23;
+    //    public const int ArticleDepth_T3 = 24;
+    //    public const int ArticleDepth_T4 = 25;
+    //    public const int ArticleDepth_T5 = 26;
+    //    public const int ArticleDepth_Te = 27;
+    //    public const int EndArticleMeasure = 27;
+    //}
 }

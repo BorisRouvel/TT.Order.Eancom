@@ -3,6 +3,8 @@ using System.Windows.Forms;
 
 using KD.Model;
 
+using Eancom;
+
 namespace TT.Import.EGI
 {
     public class DoorSegment

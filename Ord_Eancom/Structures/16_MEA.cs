@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using KD.Model;
 
 using Ord_Eancom;
-using TT.Import.EGI;
 
 namespace Eancom
 {
@@ -12,7 +11,8 @@ namespace Eancom
     {
         C502 c502 = null;
         C174 c174 = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
+        FileEDI _fileEDI = null;
 
         public const string E6311 = "AAE"; //dimensions
         public const string Width = "WD";
@@ -72,11 +72,12 @@ namespace Eancom
             }          
         }
 
-        public MEA()
+        public MEA(FileEDI fileEDI)
         {
+            _fileEDI = fileEDI;
             c502 = new C502();
             c174 = new C174();
-            utility = new Utility();
+            utility = new UtilitySegment();
         }
 
         public string Add(Article article)
@@ -85,7 +86,7 @@ namespace Eancom
             OrderInformations articleInformations = new OrderInformations(article, segmentClassification);            
             string dataLine = null;
 
-            if (articleInformations.IsOption_MEA())
+            if (articleInformations.IsOption_MEA(_fileEDI))
             {
                 double dimX = this.DimensionX(article, segmentClassification);
                 double dimY = article.DimensionY;

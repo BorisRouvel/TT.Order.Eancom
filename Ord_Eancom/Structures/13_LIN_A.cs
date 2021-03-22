@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using KD.Model;
 
@@ -104,9 +101,9 @@ namespace Eancom
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(KD.CharTools.Const.SemiColon);
-                if (articleInformation.Length > OrderConstants.ArticleEANNumber_InFile_Position)
+                if (articleInformation.Length > PairingTablePosition.ArticleEANNumber)
                 {
-                    return articleInformation[OrderConstants.ArticleEANNumber_InFile_Position]; //"EAN_NUMBER"; //Provide EAN_NUMBER somewhere in catalog
+                    return articleInformation[PairingTablePosition.ArticleEANNumber]; //"EAN_NUMBER"; //Provide EAN_NUMBER somewhere in catalog
                 }
             }
             return String.Empty;

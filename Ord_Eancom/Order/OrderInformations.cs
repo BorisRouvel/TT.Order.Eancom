@@ -8,7 +8,6 @@ using KD.Analysis;
 using KD.Model;
 
 using Eancom;
-using TT.Import.EGI;
 
 namespace Ord_Eancom
 {
@@ -59,7 +58,7 @@ namespace Ord_Eancom
         }
 
         private SceneAnalysis _sceneAnalysis = null;
-        private SegmentClassification _segmentClassification = null;
+        private SegmentClassification _segmentClassification = null;        
 
         public static string deliveryDate = String.Empty;
         public static string installationDate = String.Empty;
@@ -94,7 +93,7 @@ namespace Ord_Eancom
         {
             _article = article;
             _segmentClassification = segmentClassification;
-        }
+        }       
 
         public string ReleaseChar(string text)
         {
@@ -122,42 +121,6 @@ namespace Ord_Eancom
             string catalogFileName = this.Articles[index].CatalogFileName;
             return catalogFileName;
         }
-        //public string GetFirstPairingCatalogFileName(string csvFileName)
-        //{
-        //    for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
-        //    {
-        //        string catalogFileName = this.GetCatalogFileName(indexCat);
-        //        Reference reference = new Reference(this.CurrentAppli, catalogFileName);
-        //        for (int indexRes = 0; indexRes < reference.RessourcesLinesNb; indexRes++)
-        //        {
-        //            if (reference.Resource_Name(indexRes).Contains(csvFileName))
-        //            {
-        //                return catalogFileName;
-        //            }
-        //        }
-        //    }
-        //    return String.Empty;
-        //}
-        //public string GetEachPairingCatalogFileName(string csvFileName, string keyRef)
-        //{
-        //    for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
-        //    {
-        //        string currentKeyRef = this.Articles[indexCat].KeyRef;
-        //        if (currentKeyRef == keyRef)
-        //        {
-        //            string catalogFileName = this.GetCatalogFileName(indexCat);
-        //            Reference reference = new Reference(this.CurrentAppli, catalogFileName);
-        //            for (int indexRes = 0; indexRes < reference.RessourcesLinesNb; indexRes++)
-        //            {
-        //                if (reference.Resource_Name(indexRes).Contains(csvFileName))
-        //                {
-        //                    return catalogFileName;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return String.Empty;
-        //}
         public string GetFirstPairingCSVFileName(string csvFileName)
         {
             for (int indexCat = 0; indexCat < this.Articles.Count; indexCat++)
@@ -666,58 +629,58 @@ namespace Ord_Eancom
             }
             return false;
         }
-        //public bool IsWorktop()
-        //{
-        //    if (this.Article.Type == 5 && this.Article.Layer == 5)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool IsPlinth()
-        //{
-        //    if (this.Article.Type == 6 && this.Article.Layer == 2)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool IsLightpelmet()
-        //{
-        //    if (this.Article.Type == 6 && this.Article.Layer == 8)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool IsCornice()
-        //{
-        //    if (this.Article.Type == 6 && this.Article.Layer == 11)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool IsShape()
-        //{
-        //    if (this.Article.Type == 5)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        //public bool IsLinear()
-        //{
-        //    if (this.Article.Type == 6)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-        public bool IsOption_MEA()
+        private bool IsDimensionChange(double articleDim, string ediDim, double frontValue)
+        {
+            if (!String.IsNullOrEmpty(ediDim) && ediDim != KD.StringTools.Const.Zero)
+            {
+                double.TryParse(ediDim, out double value);
+                if ( (articleDim - frontValue) != value)
+                {
+                    //System.Windows.Forms.MessageBox.Show(this.Article.Ref + Separator.NewLine + articleDim.ToString() + Separator.NewLine + value.ToString());
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsMeasurementsByEDIChange(FileEDI _fileEDI)
+        {            
+            List<string> list = new List<string>();
+            string keyRef = Tools.DelCharAndAllAfter(this.Article.KeyRef, KD.StringTools.Const.Underscore);
+            // 2 for base measure structure separate with ; 
+            // ref;x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x|x;b:0:0|h:0:0|t:0:0
+            string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 2);
+            if (articleInfos != null)
+            {
+                string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);                
+                string dimsX = articleInfo[PairingTablePosition.ArticleWidth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleWidth_B];
+                string dimsZ = articleInfo[PairingTablePosition.ArticleHeight].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleHeight_H];
+                string dimsY = articleInfo[PairingTablePosition.ArticleDepth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleDepth_T];
+
+                double frontValue = 0.0;
+                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && !_segmentClassification.IsArticleSplashbackPanel())
+                {
+                     frontValue = (OrderConstants.FrontDepth - 1);
+                }
+
+                if (this.IsDimensionChange(this.Article.DimensionX, dimsX, 0))
+                {
+                    return true;
+                }
+                if (this.IsDimensionChange(this.Article.DimensionZ, dimsZ, 0))
+                {
+                    return true;
+                }
+                if (this.IsDimensionChange(this.Article.DimensionY, dimsY, frontValue))
+                {
+                    return true;
+                }                
+            }            
+            return false;
+        }
+        public bool IsOption_MEA(FileEDI _fileEDI)
         {
             if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear() ||
-                (_segmentClassification.IsArticleSplashbackPanel() && _segmentClassification.IsMeasurementsChange()))
+                 this.IsMeasurementsByEDIChange(_fileEDI)) // _segmentClassification.IsMeasurementsChange()) //(_segmentClassification.IsArticleSplashbackPanel() &&
             {
                 return true;
             }
@@ -739,11 +702,11 @@ namespace Ord_Eancom
                         string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
                         if (codeAndName.Length == 4)
                         {
-                            Eancom.Utility utility = new Eancom.Utility();
+                            Eancom.UtilitySegment utility = new Eancom.UtilitySegment();
                             if (utility.IsAssemblyWorktop(codeAndName[3]))
                             {
-                                string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                                string name = utility.DelCharAndAllAfter(codeAndName[2], KD.StringTools.Const.Underscore);
+                                string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                                string name = Tools.DelCharAndAllAfter(codeAndName[2], KD.StringTools.Const.Underscore);
                                 codeList.Add(code + KD.StringTools.Const.SemiColon + name);
                             }
                         }

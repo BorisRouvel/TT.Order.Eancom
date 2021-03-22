@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using KD.Model;
 
 using Eancom;
-using TT.Import.EGI;
 
 
 namespace Ord_Eancom
@@ -35,8 +34,7 @@ namespace Ord_Eancom
         private string numberNoValid = String.Empty;
 
         public Order()
-        {
-           
+        {           
         }
 
 
@@ -428,12 +426,12 @@ namespace Ord_Eancom
         }
         private Articles AddLinearsGraphikArticles(Articles articles)
         {
-            string IDs = this.CurrentAppli.SceneComponent.SceneGetObjectIdList(null, KD.Analysis.FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+            string IDs = this.CurrentAppli.SceneComponent.SceneGetObjectIdList(null, KD.Analysis.FilterArticle.strFilterToGetValidPlacedParent());//strFilterToGetValidPlacedHostedAndChildren
             Articles articlesList = new Articles(CurrentAppli, IDs);
             foreach (Article article in articlesList)
             {
                 SegmentClassification segmentClassification = new SegmentClassification(article);
-                if (segmentClassification.IsArticleLinear() && !article.HasParent() && article.IsValid)
+                if (segmentClassification.IsArticleLinear())// && !article.HasParent()) // && article.IsValid
                 {
                     if (!articles.Contains(article))
                     {

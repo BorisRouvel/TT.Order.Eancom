@@ -9,7 +9,7 @@ namespace Eancom
     public class FTX_A
     {       
         C108 c108 = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
 
         public const string E4451 = "LIN";
 
@@ -53,7 +53,7 @@ namespace Eancom
         public FTX_A(OrderInformations orderInformations)
         {
             c108 = new C108(orderInformations);
-            utility = new Utility();
+            utility = new UtilitySegment();
         }
 
         public string BuildLine(string text)
@@ -69,7 +69,7 @@ namespace Eancom
 
             if (!String.IsNullOrEmpty(allText))
             {
-                if (allText.Length <= Utility.freelyWordCharLen)
+                if (allText.Length <= UtilitySegment.freelyWordCharLen)
                 {
                     OrderWrite.segmentNumberBetweenUNHandUNT += 1;
                     return this.BuildLine(allText);
@@ -78,17 +78,17 @@ namespace Eancom
                 string partText = allText;                
                 int startIndex = 0;
 
-                for (int c = 0; c < Utility.freelyLineMaxNb; c++)
+                for (int c = 0; c < UtilitySegment.freelyLineMaxNb; c++)
                 {
-                    if (partText.Length > Utility.freelyWordCharLen)
+                    if (partText.Length > UtilitySegment.freelyWordCharLen)
                     {
-                        string text = allText.Substring(startIndex, Utility.freelyWordCharLen);
+                        string text = allText.Substring(startIndex, UtilitySegment.freelyWordCharLen);
                         dataLine += this.BuildLine(text);
 
                         OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                        startIndex += Utility.freelyWordCharLen;
+                        startIndex += UtilitySegment.freelyWordCharLen;
 
-                        partText = utility.GetFollowingChar(partText, Utility.freelyWordCharLen);
+                        partText = utility.GetFollowingChar(partText, UtilitySegment.freelyWordCharLen);
                         if (String.IsNullOrEmpty(partText))
                         {                            
                             return dataLine;

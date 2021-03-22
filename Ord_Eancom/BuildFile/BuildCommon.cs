@@ -5,7 +5,7 @@ using KD.SDKComponent;
 using KD.Model;
 using KD.Analysis;
 
-using TT.Import.EGI;
+using Eancom;
 
 namespace Ord_Eancom
 {

@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using KD.Plugin;
 using KD.Model;
 
+using Eancom;
 
 namespace TT.Import.EGI
 {
