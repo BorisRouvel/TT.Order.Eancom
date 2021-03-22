@@ -1,8 +1,7 @@
 ﻿using KD.Model;
+using Eancom;
 
-using Ord_Eancom;
-
-namespace Eancom
+namespace Ord_Eancom
 {
     public class QTY
     {
@@ -10,7 +9,7 @@ namespace Eancom
         
         public class C186
         {
-            Utility utility = null;
+            UtilitySegment utility = null;
 
             private string _e6060;
             public string E6060
@@ -30,7 +29,7 @@ namespace Eancom
 
             public C186()
             {
-                utility = new Utility();
+                utility = new UtilitySegment();
             }
 
             public string Add(Article article)

@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 
 using KD.Model;
+using Eancom;
 
-using Ord_Eancom;
-using TT.Import.EGI;
-
-namespace Eancom
+namespace Ord_Eancom
 {
     public class MEA
     {
         C502 c502 = null;
         C174 c174 = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
 
         public const string E6311 = "AAE"; //dimensions
         public const string Width = "WD";
@@ -76,7 +74,7 @@ namespace Eancom
         {
             c502 = new C502();
             c174 = new C174();
-            utility = new Utility();
+            utility = new UtilitySegment();
         }
 
         public string Add(Article article)
@@ -91,12 +89,12 @@ namespace Eancom
                 double dimY = article.DimensionY;
                 double dimZ = article.DimensionZ;
 
-                if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleSplashbackPanel())
+                if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleSplashbackPanel()) //diminition de 20mm pour les meubles
                 {
                     dimY -= (OrderConstants.FrontDepth - 1);
                 }
 
-                if (segmentClassification.IsArticleSplashbackPanelShape())
+                if (segmentClassification.IsArticleSplashbackPanelShape()) //changement d'axe pour les panneaux au gabarit
                 {
                     double dimT = dimY;
                     dimY = dimZ;

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Eancom;
+
 
 using KD.Model;
 
-using Ord_Eancom;
-
-namespace Eancom
+namespace Ord_Eancom
 {
     public class LIN_A
     {
@@ -104,9 +101,9 @@ namespace Eancom
             if (!String.IsNullOrEmpty(articleReferenceKey))
             {
                 string[] articleInformation = articleReferenceKey.Split(KD.CharTools.Const.SemiColon);
-                if (articleInformation.Length > OrderConstants.ArticleEANNumber_InFile_Position)
+                if (articleInformation.Length > PairingTablePosition.ArticleEANNumber)
                 {
-                    return articleInformation[OrderConstants.ArticleEANNumber_InFile_Position]; //"EAN_NUMBER"; //Provide EAN_NUMBER somewhere in catalog
+                    return articleInformation[PairingTablePosition.ArticleEANNumber]; //"EAN_NUMBER"; //Provide EAN_NUMBER somewhere in catalog
                 }
             }
             return String.Empty;

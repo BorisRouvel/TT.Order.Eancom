@@ -51,9 +51,15 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KD.Plugin.Word">
+      <HintPath>..\..\..\..\Ic91dev\Plugins\Standard\Word\KD.Plugin.Word.dll</HintPath>
+    </Reference>
     <Reference Include="kd.sdk">
       <HintPath>..\..\..\..\Ic90dev\kd.sdk.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Ord_Eancom">
+      <HintPath>..\..\..\..\Ic91dev\Ord_Eancom.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
@@ -68,139 +74,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\ArticleAnalysis.cs">
-      <Link>src\Analysis\ArticleAnalysis.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\ArticlesAnalysis.cs">
-      <Link>src\Analysis\ArticlesAnalysis.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\Constraint.cs">
-      <Link>src\Analysis\Constraint.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\Tolerance.cs">
-      <Link>src\Analysis\Tolerance.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Analysis\WallsAnalysis.cs">
-      <Link>src\Analysis\WallsAnalysis.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Classification\ArticleClassification.cs">
-      <Link>src\Classification\ArticleClassification.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Const\LayerConst.cs">
-      <Link>src\Const\LayerConst.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Const\SubTypeConst.cs">
-      <Link>src\Const\SubTypeConst.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Const\TopicConst.cs">
-      <Link>src\Const\TopicConst.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\InSitu\InSitu.Ini.cs">
-      <Link>src\InSitu\InSitu.Ini.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Maths\Maths.cs">
-      <Link>src\Maths\Maths.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Model\ModelWrapper.cs">
-      <Link>src\Model\ModelWrapper.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Model\TypedArticle.cs">
-      <Link>src\Model\TypedArticle.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Model\TypedArticles.cs">
-      <Link>src\Model\TypedArticles.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Config.cs">
-      <Link>src\Profile\Config.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\CustomXmlSection.cs">
-      <Link>src\Profile\CustomXmlSection.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Events.cs">
-      <Link>src\Profile\Events.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Ini.cs">
-      <Link>src\Profile\Ini.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\IProfile.cs">
-      <Link>src\Profile\IProfile.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Profile.cs">
-      <Link>src\Profile\Profile.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Registry.cs">
-      <Link>src\Profile\Registry.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\Xml.cs">
-      <Link>src\Profile\Xml.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\Profile\XmlHelper.cs">
-      <Link>src\Profile\XmlHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\CatalogHelper.cs">
-      <Link>src\SDK\CatalogHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\DicoHelper.cs">
-      <Link>src\SDK\DicoHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\FilterBuilder.cs">
-      <Link>src\SDK\FilterBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\PluginHelper.cs">
-      <Link>src\SDK\PluginHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\ScriptHelper.cs">
-      <Link>src\SDK\ScriptHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\SDK\SDKWrapper.cs">
-      <Link>src\SDK\SDKWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\AssemblyHelper.cs">
-      <Link>src\System\AssemblyHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\CommandLine.Utility.cs">
-      <Link>src\System\CommandLine.Utility.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\CsvHelper.cs">
-      <Link>src\System\CsvHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\DataHelper.cs">
-      <Link>src\System\DataHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\HSLColor.cs">
-      <Link>src\System\HSLColor.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\ImageHelper.cs">
-      <Link>src\System\ImageHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\IniHelper.cs">
-      <Link>src\System\IniHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\IOHelper.cs">
-      <Link>src\System\IOHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\StringHelper.cs">
-      <Link>src\System\StringHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Core\src\System\StringsHelper.cs">
-      <Link>src\System\StringsHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Analysis\FilterArticle.cs">
-      <Link>Nub\Analysis\FilterArticle.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Analysis\SceneAnalysis.cs">
-      <Link>Nub\Analysis\SceneAnalysis.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Model\CatalogProperties.cs">
-      <Link>Nub\Model\CatalogProperties.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\..\Plugins.Nub\KD.Plugins.Nub\KD.Plugins.Nub\Nub\Model\SortedArticle.cs">
-      <Link>Nub\Model\SortedArticle.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -215,7 +88,6 @@
     <Compile Include="Segment\DoorSegment.cs" />
     <Compile Include="Segment\GlobalSegment.cs" />
     <Compile Include="Segment\RecessSegment.cs" />
-    <Compile Include="Segment\Segments.cs" />
     <Compile Include="Segment\WallSegment.cs" />
     <Compile Include="Segment\WindowSegment.cs" />
   </ItemGroup>

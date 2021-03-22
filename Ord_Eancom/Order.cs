@@ -10,8 +10,6 @@ using System.Runtime.InteropServices;
 using KD.Model;
 
 using Eancom;
-using TT.Import.EGI;
-
 
 namespace Ord_Eancom
 {
@@ -65,9 +63,9 @@ namespace Ord_Eancom
                     Order.rootOrderDir = orderInformations.GetRootOrderDir();
                     KD.Config.IniFile ordersIniFile = new KD.Config.IniFile(Path.Combine(Order.rootOrderDir, FileEDI.IniOrderFileName));
 
-                    MainForm.EmailTo = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + supplierName);
-                    MainForm.EmailCc = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + supplierName);
-                    MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + retailerNumber);
+                    MainForm.EmailTo = ordersIniFile.ReadValue(FileEDI.ediSection, FileEDI.emailToKey + supplierName);
+                    MainForm.EmailCc = ordersIniFile.ReadValue(FileEDI.ediSection, FileEDI.emailCcKey + supplierName);
+                    MainForm.MandatoryDeliveryInformation = ordersIniFile.ReadValue(FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + retailerNumber);
 
                     string recipientAddresses = MainForm.EmailTo; // "commande-EDI@discac.fr;commandes@discac.fr;ETL@discac.fr";
                     recipientAddresses = recipientAddresses.Replace(KD.StringTools.Const.SemiColon, KD.StringTools.Const.Comma);

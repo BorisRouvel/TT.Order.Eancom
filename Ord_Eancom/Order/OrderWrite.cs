@@ -6,15 +6,13 @@ using System.Text;
 using KD.SDKComponent;
 using KD.Analysis;
 using KD.Model;
-
 using Eancom;
-using TT.Import.EGI;
 
 
 namespace Ord_Eancom
 {
     public class OrderWrite
-    {
+    {       
         public const string Key_SetCode = "KeySetCode";
         public const string Key_SetPrice = "KeySetPrice";
         public const string BlockSetCustomInfo = "BlockSet";
@@ -30,7 +28,7 @@ namespace Ord_Eancom
         readonly OrderInformations _orderInformationsFromArticles = null;
         readonly BuildCommon _buildCommon = null;
         FileEDI _fileEDI = null;
-        readonly Eancom.Utility _utility = null;
+        readonly UtilitySegment _utility = null;
 
         private int consecutiveNumbering = 1;
         public static int segmentNumberBetweenUNHandUNT = 0;
@@ -85,34 +83,36 @@ namespace Ord_Eancom
         private double dimZ = 0.0;
 
         public static string version = String.Empty;
+        private bool bVersioningMessage = false;
 
 
         #region //Structure EDI
-        Eancom.UNA uNA = null;
-        Eancom.UNB uNB = null;
-        Eancom.UNH uNH = null;
-        Eancom.BGM bGM = null;
-        Eancom.DTM dTM = null;
-        Eancom.FTX_H fTX_H = null;
-        Eancom.RFF_H rFF_H = null;
-        Eancom.NAD nAD = null;
-        Eancom.CTA cTA = null;
-        Eancom.COM cOM = null;
+        UNA uNA = null;
+        UNB uNB = null;
+        UNH uNH = null;
+        BGM bGM = null;
+        DTM dTM = null;
+        FTX_H fTX_H = null;
+        RFF_H rFF_H = null;
+        NAD nAD = null;
+        CTA cTA = null;
+        COM cOM = null;
 
-        Eancom.LIN_H lIN_H = null;
-        Eancom.PIA_H pIA_H = null;
+        LIN_H lIN_H = null;
+        PIA_H pIA_H = null;
 
-        Eancom.LIN_A lIN_A = null;
-        Eancom.PIA_A pIA_A = null;
-        Eancom.IMD iMD = null;
-        Eancom.MEA mEA = null;
-        Eancom.QTY qTY = null;
-        Eancom.FTX_A fTX_A = null;
-        Eancom.RFF_A rFF_A = null;
+        LIN_A lIN_A = null;
+        PIA_A pIA_A = null;
+        IMD iMD = null;
+        MEA mEA = null;
+        QTY qTY = null;
+        FTX_A fTX_A = null;
+        RFF_A rFF_A = null;
 
-        Eancom.UNS uNS = null;
-        Eancom.UNT uNT = null;
-        Eancom.UNZ uNZ = null;
+        UNS uNS = null;
+        UNT uNT = null;
+        UNZ uNZ = null;
+       
         #endregion
 
         public OrderWrite(AppliComponent appli, OrderInformations orderInformations, BuildCommon buildCommon, OrderInformations orderInformationsFromArticles, Articles articles, FileEDI fileEDI)
@@ -121,7 +121,7 @@ namespace Ord_Eancom
             _orderInformations = orderInformations;
             _orderInformationsFromArticles = orderInformationsFromArticles;
             _fileEDI = fileEDI;
-            _utility = new Eancom.Utility();
+            _utility = new UtilitySegment();
 
             this.InitializeEancomStructure();
 
@@ -135,32 +135,32 @@ namespace Ord_Eancom
         {
             this.ClearStructureEDIList();
 
-            uNA = new Eancom.UNA();
-            uNB = new Eancom.UNB(_orderInformations, _fileEDI);
-            uNH = new Eancom.UNH(_orderInformations);
-            bGM = new Eancom.BGM(_orderInformations);
-            dTM = new Eancom.DTM(_orderInformations);
-            fTX_H = new Eancom.FTX_H(_orderInformations);
-            rFF_H = new Eancom.RFF_H(_orderInformations);
-            nAD = new Eancom.NAD(_orderInformations, _fileEDI);
-            cTA = new Eancom.CTA(_orderInformations);
-            cOM = new Eancom.COM(_orderInformations, _fileEDI);
+            uNA = new UNA();
+            uNB = new UNB(_orderInformations, _fileEDI);
+            uNH = new UNH(_orderInformations);
+            bGM = new BGM(_orderInformations);
+            dTM = new DTM(_orderInformations);
+            fTX_H = new FTX_H(_orderInformations);
+            rFF_H = new RFF_H(_orderInformations);
+            nAD = new NAD(_orderInformations, _fileEDI);
+            cTA = new CTA(_orderInformations);
+            cOM = new COM(_orderInformations, _fileEDI);
 
-            lIN_H = new Eancom.LIN_H(Convert.ToString(this.consecutiveNumbering));
-            pIA_H = new Eancom.PIA_H(_orderInformationsFromArticles, _fileEDI);
+            lIN_H = new LIN_H(Convert.ToString(this.consecutiveNumbering));
+            pIA_H = new PIA_H(_orderInformationsFromArticles, _fileEDI);
 
             this.consecutiveNumbering += 1;
-            lIN_A = new Eancom.LIN_A(_orderInformationsFromArticles, Convert.ToString(this.consecutiveNumbering), _fileEDI);
-            pIA_A = new Eancom.PIA_A(_orderInformationsFromArticles, _fileEDI);
-            iMD = new Eancom.IMD(_orderInformationsFromArticles);
-            mEA = new Eancom.MEA();
-            qTY = new Eancom.QTY();
-            fTX_A = new Eancom.FTX_A(_orderInformationsFromArticles);
-            rFF_A = new Eancom.RFF_A(_orderInformationsFromArticles);
+            lIN_A = new LIN_A(_orderInformationsFromArticles, Convert.ToString(this.consecutiveNumbering), _fileEDI);
+            pIA_A = new PIA_A(_orderInformationsFromArticles, _fileEDI);
+            iMD = new IMD(_orderInformationsFromArticles);
+            mEA = new MEA();
+            qTY = new QTY();
+            fTX_A = new FTX_A(_orderInformationsFromArticles);
+            rFF_A = new RFF_A(_orderInformationsFromArticles);
 
-            uNS = new Eancom.UNS();
-            uNT = new Eancom.UNT(_orderInformations);
-            uNZ = new Eancom.UNZ(_orderInformations, _fileEDI);
+            uNS = new UNS();
+            uNT = new UNT(_orderInformations);
+            uNZ = new UNZ(_orderInformations, _fileEDI);
 
             this.ClearStructureEGIList();
 
@@ -316,7 +316,7 @@ namespace Ord_Eancom
                         SetLineEDIList(pIA_A.Add_LongPartType(article));
 
                         consecutiveNumbering += 1;
-                        Eancom.LIN_A._consecutiveNumbering = consecutiveNumbering.ToString();
+                        LIN_A._consecutiveNumbering = consecutiveNumbering.ToString();
 
                         if (!hasBlockSet)
                         {
@@ -357,7 +357,7 @@ namespace Ord_Eancom
                                         SetLineEDIList(pIA_A.Add_WorktopAssemblyConstructionID(assemblyCode));
 
                                         consecutiveNumbering += 1;
-                                        Eancom.LIN_A._consecutiveNumbering = consecutiveNumbering.ToString();
+                                        LIN_A._consecutiveNumbering = consecutiveNumbering.ToString();
 
                                         string assemblyName = assemblyCodeAndName.Split(KD.CharTools.Const.SemiColon)[1];
 
@@ -466,12 +466,7 @@ namespace Ord_Eancom
 
             _buildCommon.ResetReference();
         }
-
-        private string ConvertCommaToDot(string value)
-        {
-            value = value.Replace(KD.StringTools.Const.Comma, KD.StringTools.Const.Dot);
-            return value;
-        }
+       
         private void GetContraintsList()
         {
             int objectNumber = this.CurrentAppli.Scene.SceneGetObjectsNb();
@@ -533,7 +528,7 @@ namespace Ord_Eancom
 
             string roomHeight = this.CurrentAppli.Scene.SceneGetInfo(KD.SDK.SceneEnum.SceneInfo.DIMZ);
             string room = Convert.ToInt32(roomHeight).ToString(SegmentFormat.DotDecimal);
-            structureLineEGIList.Add(ItemKey.RoomHeight + KD.StringTools.Const.EqualSign + this.ConvertCommaToDot(room) + Separator.NewLine);
+            structureLineEGIList.Add(ItemKey.RoomHeight + KD.StringTools.Const.EqualSign + UtilitySegment.ConvertCommaToDot(room) + Separator.NewLine);
             structureLineEGIList.Add(ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + _fileEDI.ManufacturerID() + Separator.NewLine);
             structureLineEGIList.Add(ItemKey.System + KD.StringTools.Const.EqualSign + _orderInformations.GetNameAndVersionSoftware() + Separator.NewLine);
         }
@@ -768,6 +763,7 @@ namespace Ord_Eancom
             _buildCommon.SetSceneReference(OrderWrite.version);
 
             int index = 1;
+            bVersioningMessage = false;
 
             foreach (Article article in articles)
             {
@@ -877,12 +873,12 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+                keyRef = UtilitySegment.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
                 string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
                 if (articleInfos != null)
                 {
                     string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                    return ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleSupplierId_InFile_Position] + Separator.NewLine;
+                    return ItemKey.Manufacturer + KD.StringTools.Const.EqualSign + articleInfo[PairingTablePosition.ArticleSupplierId] + Separator.NewLine;
                 }
             }
             return null;
@@ -891,7 +887,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                return ItemKey.Name + KD.StringTools.Const.EqualSign + this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
+                return ItemKey.Name + KD.StringTools.Const.EqualSign + UtilitySegment.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore) + Separator.NewLine; ;
             }
             return null;
         }
@@ -936,17 +932,26 @@ namespace Ord_Eancom
         private List<string> ArticleMeasureShapeList(string keyRef)
         {
             List<string> list = new List<string>();
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = UtilitySegment.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
-                if (articleInfo.Length > 7)
+                if (articleInfo.Length >= PairingTablePosition.EndArticleMeasure + 1)
                 {
-                    for (int index = 7; index <= articleInfo.Length - 1; index++)
+                    for (int index = PairingTablePosition.StartArticleMeasure; index <= PairingTablePosition.EndArticleMeasure; index++)
                     {
-                        list.Add(ItemKey.Measure_ + this.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                        if (!String.IsNullOrEmpty(articleInfo[index]))
+                        {
+                            list.Add(ItemKey.Measure_ + UtilitySegment.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                        }
                     }
+                }
+                else if (!bVersioningMessage)
+                {
+                    bVersioningMessage = true;
+                    System.Windows.Forms.MessageBox.Show("Certaines informations ne sont pas correctes." + System.Environment.NewLine + 
+                                                         "Veuillez télécharger la mise à jour du catalogue !", "Information", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
                 }
             }
             return list;
@@ -954,22 +959,22 @@ namespace Ord_Eancom
         private string ArticleDimensionX(double value)
         {
             string data = ItemKey.Measure_B + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionX(double value)
         {
             string data = ItemKey.Measure_B1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionXE(double value)
         {
             string data = ItemKey.Measure_BE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionZ(double value)
         {
             string data = ItemKey.Measure_H + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleDimensionY(Article article, double value)
         {
@@ -994,26 +999,26 @@ namespace Ord_Eancom
             }
             
             string data = ItemKey.Measure_T + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionY(double value)
         {
             string data = ItemKey.Measure_T1 + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleAngleDimensionYE(double value)
         {
             string data = ItemKey.Measure_TE + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string ArticleConstructionType(string keyRef)
         {
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = UtilitySegment.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + articleInfo[OrderConstants.ArticleConstructionId_InFile_Position] + Separator.NewLine;
+                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + articleInfo[PairingTablePosition.ArticleConstructionId] + Separator.NewLine;
             }
             return null;
         }
@@ -1075,14 +1080,14 @@ namespace Ord_Eancom
 
         private string GetShapeNumberByType(string keyRef)
         {
-            keyRef = this._utility.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
+            keyRef = UtilitySegment.DelCharAndAllAfter(keyRef, KD.StringTools.Const.Underscore);
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 1);
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
-                if (articleInfo.Length > OrderConstants.ArticleShape_InFile_Position)
+                if (articleInfo.Length > PairingTablePosition.ArticleShape)
                 {
-                    return articleInfo[OrderConstants.ArticleShape_InFile_Position];
+                    return articleInfo[PairingTablePosition.ArticleShape];
                 }
             }
             return KD.StringTools.Const.Zero;
@@ -1151,37 +1156,37 @@ namespace Ord_Eancom
         private string PositionX(double value)
         {
             string data = ItemKey.RefPntX + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string PositionY(double value)
         {
             string data = ItemKey.RefPntY + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string PositionZ(double value)
         {
             string data = ItemKey.RefPntZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionX(double value)
         {
             string data = ItemKey.Width + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionY(double value)
         {
             string data = ItemKey.Depth + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string DimensionZ(double value)
         {
             string data = ItemKey.Height + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }     
         private string Angle(double value)
         {
             string data = ItemKey.AngleZ + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
-            return this.ConvertCommaToDot(data) + Separator.NewLine;
+            return UtilitySegment.ConvertCommaToDot(data) + Separator.NewLine;
         }
         private string Opening(Article article)
         {

@@ -1,8 +1,7 @@
 ﻿using KD.Model;
+using Eancom;
 
-using Ord_Eancom;
-
-namespace Eancom
+namespace Ord_Eancom
 {
     public class IMD
     {

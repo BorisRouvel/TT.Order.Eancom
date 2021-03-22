@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace TT.Import.EGI
+namespace Ord_Eancom // TT.Import.EGI
 {
     public class FileEGI
     {
@@ -22,9 +22,11 @@ namespace TT.Import.EGI
 
         public bool Open()
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = FileEGI.FilterEGIFile;
-            openFile.RestoreDirectory = true;           
+            OpenFileDialog openFile = new OpenFileDialog
+            {
+                Filter = FileEGI.FilterEGIFile,
+                RestoreDirectory = true
+            };
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using KD.Model;
 using KD.Analysis;
 
+using Ord_Eancom;
+
 namespace TT.Import.EGI
 { 
     public class ArticleSegment

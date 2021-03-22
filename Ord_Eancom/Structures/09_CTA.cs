@@ -1,7 +1,7 @@
 ﻿using System;
-using Ord_Eancom;
+using Eancom;
 
-namespace Eancom
+namespace Ord_Eancom
 {
     public class CTA
     {
@@ -84,7 +84,7 @@ namespace Eancom
 
         public string Add_Supplier_OC()
         {
-            _e3139 = Eancom.CTA.E3139_OC;
+            _e3139 = CTA.E3139_OC;
             C056 c056 = new C056(String.Empty, _orderInformations.GetSupplierName1());
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
@@ -92,7 +92,7 @@ namespace Eancom
         }
         public string Add_Seller_OC()
         {
-            _e3139 = Eancom.CTA.E3139_OC;
+            _e3139 = CTA.E3139_OC;
             C056 c056 = new C056( _orderInformations.GetSellerID(),  _orderInformations.GetSellerInformations());
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;

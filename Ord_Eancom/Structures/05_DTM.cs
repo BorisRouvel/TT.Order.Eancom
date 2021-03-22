@@ -1,7 +1,8 @@
 ﻿using System;
-using Ord_Eancom;
 
-namespace Eancom
+using Eancom;
+
+namespace Ord_Eancom
 {
     public class DTM
     {

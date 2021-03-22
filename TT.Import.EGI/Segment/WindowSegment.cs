@@ -3,6 +3,8 @@ using System.Windows.Forms;
 
 using KD.Model;
 
+using Ord_Eancom;
+
 namespace TT.Import.EGI
 {
     public class WindowSegment

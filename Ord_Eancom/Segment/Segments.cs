@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using KD.Model;
 using KD.Config;
 using KD.CatalogProperties;
+using Eancom;
 
-namespace TT.Import.EGI
+namespace Ord_Eancom
 {
     public class SegmentFormat
     {
@@ -713,6 +714,37 @@ namespace TT.Import.EGI
         public bool IsMeasurementsChange()
         {            
             int line = reference.GetArticleLineIndexFromReference(this.Article.KeyRef);
+
+            if (line != KD.Const.UnknownId)
+            {
+                reference = new Reference(this.Article.CurrentAppli, (int)KD.SDK.CatalogEnum.ClusterRankType.CLUSTER_FROM_ITEM, line);
+                if ((this.Article.DimensionX != reference.Article_Width) || (this.Article.DimensionY != reference.Article_Depth) || (this.Article.DimensionZ != reference.Article_Height))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsMeasurementsByEDIChange()
+        {
+            List<string> list = new List<string>();
+            string keyRef = UtilitySegment.DelCharAndAllAfter(this.Article.KeyRef, KD.StringTools.Const.Underscore);
+            string articleInfos = null; //_fileEDI.ArticleReferenceKey(keyRef, 1);
+            if (articleInfos != null)
+            {
+                string[] articleInfo = articleInfos.Split(FileEDI.separatorArticleField);
+                if (articleInfo.Length >= PairingTablePosition.EndArticleMeasure + 1)
+                {
+                    for (int index = PairingTablePosition.StartArticleMeasure; index <= PairingTablePosition.EndArticleMeasure; index++)
+                    {
+                        if (!String.IsNullOrEmpty(articleInfo[index]))
+                        {
+                            list.Add(ItemKey.Measure_ + UtilitySegment.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
+                        }
+                    }
+                }
+            }
+                int line = reference.GetArticleLineIndexFromReference(this.Article.KeyRef);
 
             if (line != KD.Const.UnknownId)
             {

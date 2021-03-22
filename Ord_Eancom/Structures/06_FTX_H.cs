@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Eancom;
 
-using Ord_Eancom;
-
-namespace Eancom
+namespace Ord_Eancom
 {
     public class FTX_H
     {
@@ -162,7 +161,7 @@ namespace Eancom
         private string SetAdd(string information)
         {
             c108 = new C108(information);
-            _e4451 = Eancom.FTX_H.E4451_ZZZ + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
+            _e4451 = FTX_H.E4451_ZZZ + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
             return StructureEDI.FTX_H + Separator.DataGroup + this.E4451 + c108.Add() + Separator.DataGroup + this.E3453 + Separator.EndLine;
@@ -171,7 +170,7 @@ namespace Eancom
         public List<string> AddComment()
         {
             List<string> FTXCommentList = new List<string>();            
-            _e4451 = Eancom.FTX_H.E4451_AAI + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
+            _e4451 = FTX_H.E4451_AAI + Separator.DataGroup + Separator.DataGroup + Separator.DataGroup;
 
             //Mandatory delivery informations
             //Get text in texbox box from windows form, max lenght = ?

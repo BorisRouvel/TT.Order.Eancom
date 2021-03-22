@@ -1,7 +1,7 @@
 ﻿using System;
-using Ord_Eancom;
+using Eancom;
 
-namespace Eancom
+namespace Ord_Eancom
 { 
 
     public class RFF_H
@@ -59,7 +59,7 @@ namespace Eancom
 
         public string Add_CR()
         {
-            C506 c506 = new C506(Eancom.RFF_H.C506.E1153_CR, _orderInformations.GetCommissionNumber());
+            C506 c506 = new C506(RFF_H.C506.E1153_CR, _orderInformations.GetCommissionNumber());
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
             return StructureEDI.RFF_H + Separator.DataGroup + c506.Add() + Separator.EndLine;           
@@ -67,7 +67,7 @@ namespace Eancom
         public string Add_UC()
         {
             string commissionName = _orderInformations.GetCommissionName();
-            C506 c506 = new C506(Eancom.RFF_H.C506.E1153_UC, commissionName);
+            C506 c506 = new C506(RFF_H.C506.E1153_UC, commissionName);
 
             if (!String.IsNullOrEmpty(commissionName))
             {

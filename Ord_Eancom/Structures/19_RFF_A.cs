@@ -3,15 +3,14 @@ using System.Collections.Generic;
 
 using KD.Model;
 
-using Ord_Eancom;
-using TT.Import.EGI;
+using Eancom;
 
-namespace Eancom
+namespace Ord_Eancom
 {
     public class RFF_A
     {
         C506 c506 = null;
-        Utility utility = null;
+        UtilitySegment utility = null;
         OrderInformations _orderInformationsFromArticles = null;
 
         List<string> childLevelList = new List<string>() { };
@@ -43,7 +42,7 @@ namespace Eancom
         {
             _orderInformationsFromArticles = orderInformationsFromArticles;
             c506 = new C506();
-            utility = new Utility();
+            utility = new UtilitySegment();
            
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using Ord_Eancom;
+using Eancom;
 
-namespace Eancom
+namespace Ord_Eancom
 {
     public class COM
     {
@@ -61,7 +61,7 @@ namespace Eancom
         public string Add_Supplier_TE()
         {
             string e3148 = _orderInformations.GetSupplierPhone();
-            C076 c076 = new C076(e3148, Eancom.COM.C076.E3155_TE);
+            C076 c076 = new C076(e3148, COM.C076.E3155_TE);
 
             if (!String.IsNullOrEmpty(e3148))
             {
@@ -73,7 +73,7 @@ namespace Eancom
         public string Add_Supplier_FX()
         {
             string e3148 = _orderInformations.GetSupplierFax();
-            C076 c076 = new C076(e3148,  Eancom.COM.C076.E3155_FX);
+            C076 c076 = new C076(e3148,  COM.C076.E3155_FX);
 
             if (!String.IsNullOrEmpty(e3148))
             {
@@ -85,7 +85,7 @@ namespace Eancom
         public string Add_Supplier_EM()
         {
             string e3148 = _fileEDI.Email(); // _orderInformations.GetSupplierEmail(); Change 03/06/2020 cause supplier email want to send the order and here its only for informations
-            C076 c076 = new C076(e3148, Eancom.COM.C076.E3155_EM);
+            C076 c076 = new C076(e3148, COM.C076.E3155_EM);
 
             if (!String.IsNullOrEmpty(e3148))
             {
@@ -98,7 +98,7 @@ namespace Eancom
         public string Add_Retailer_TE()
         {
             string e3148 = _orderInformations.GetRetailerPhone();
-            C076 c076 = new C076(e3148, Eancom.COM.C076.E3155_TE);
+            C076 c076 = new C076(e3148, COM.C076.E3155_TE);
 
             if (!String.IsNullOrEmpty(e3148))
             {
@@ -110,7 +110,7 @@ namespace Eancom
         public string Add_Retailer_FX()
         {
             string e3148 = _orderInformations.GetRetailerFax();          
-            C076 c076 = new C076(e3148,Eancom.COM.C076.E3155_FX);
+            C076 c076 = new C076(e3148,COM.C076.E3155_FX);
 
             if (!String.IsNullOrEmpty(e3148))
             {
@@ -122,7 +122,7 @@ namespace Eancom
         public string Add_Retailer_EM()
         {
             string e3148 = _orderInformations.GetRetailerEmail();           
-            C076 c076 = new C076(e3148, Eancom.COM.C076.E3155_EM);
+            C076 c076 = new C076(e3148, COM.C076.E3155_EM);
 
             if (!String.IsNullOrEmpty(e3148))
             {

@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Eancom;
 
 namespace Ord_Eancom
 {
@@ -229,7 +223,7 @@ namespace Ord_Eancom
             }
             if (MainForm.IsChoiceRetailerDelivery)
             {
-                _mandatoryDeliveryInformation = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber);
+                _mandatoryDeliveryInformation = FileEDI.ordersIniFile.ReadValue(FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber);
                 this.MandatoryDeliveryInformation_TBX.Text = MandatoryDeliveryInformation;
             }
         }
@@ -270,22 +264,22 @@ namespace Ord_Eancom
         }
         private void LoadInfoFromIni()
         {
-            _emailTo = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + _supplierName);
+            _emailTo = FileEDI.ordersIniFile.ReadValue(FileEDI.ediSection, FileEDI.emailToKey + _supplierName);
             this.EmailTo_TBX.Text = EmailTo;
 
-            _emailCc = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName);
+            _emailCc = FileEDI.ordersIniFile.ReadValue(FileEDI.ediSection, FileEDI.emailCcKey + _supplierName);
             this.EmailCc_TBX.Text = EmailCc;
 
             this.SetMandatoryDeliveryTextBox();
         }
         private void SaveInfoToIni()
         {            
-            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailToKey + _supplierName, EmailTo);
-            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.emailCcKey + _supplierName, EmailCc);
+            FileEDI.ordersIniFile.WriteValue(FileEDI.ediSection, FileEDI.emailToKey + _supplierName, EmailTo);
+            FileEDI.ordersIniFile.WriteValue(FileEDI.ediSection, FileEDI.emailCcKey + _supplierName, EmailCc);
 
             if (MainForm.IsChoiceRetailerDelivery)
             {
-                Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber, MandatoryDeliveryInformation);
+                FileEDI.ordersIniFile.WriteValue(FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber, MandatoryDeliveryInformation);
             }
         }      
         private void UpdateForm()

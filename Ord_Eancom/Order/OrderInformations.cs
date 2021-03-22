@@ -6,9 +6,8 @@ using KD.SDKComponent;
 using KD.CatalogProperties;
 using KD.Analysis;
 using KD.Model;
-
 using Eancom;
-using TT.Import.EGI;
+
 
 namespace Ord_Eancom
 {
@@ -260,22 +259,22 @@ namespace Ord_Eancom
             if (!String.IsNullOrEmpty(exactDayDelivery))
             {
                 deliveryDate = ConvertStringToDate(exactDayDelivery);
-                return Eancom.DTM.C507.E2005_2;
+                return DTM.C507.E2005_2;
             }
             else if (!String.IsNullOrEmpty(latestDayDelivery))
             {
                 deliveryDate = ConvertStringToDate(latestDayDelivery);
-                return Eancom.DTM.C507.E2005_63;
+                return DTM.C507.E2005_63;
             }
             else if (!String.IsNullOrEmpty(earliestDayDelivery))
             {
                 deliveryDate = ConvertStringToDate(earliestDayDelivery);
-                return Eancom.DTM.C507.E2005_64;
+                return DTM.C507.E2005_64;
             }
             else if (!String.IsNullOrEmpty(weekDelivery))
             {
                 deliveryDate = ConvertStringToDate(weekDelivery);
-                return Eancom.DTM.C507.E2005_2;
+                return DTM.C507.E2005_2;
             }
 
             return String.Empty;
@@ -288,12 +287,12 @@ namespace Ord_Eancom
             if (!String.IsNullOrEmpty(dayInstallation))
             {
                 installationDate = ConvertStringToDate(dayInstallation);
-                return Eancom.DTM.C507.E2005_18;
+                return DTM.C507.E2005_18;
             }
             else if (!String.IsNullOrEmpty(weekInstallation))
             {
                 installationDate = ConvertStringToDate(weekInstallation);
-                return Eancom.DTM.C507.E2005_18;
+                return DTM.C507.E2005_18;
             }
 
             return String.Empty;
@@ -308,7 +307,7 @@ namespace Ord_Eancom
             try
             {
                 DateTime result = DateTime.ParseExact(dateString, OrderConstants.FormatDate_4yMd, provider);
-                return Eancom.DTM.C507.E2379_102;
+                return DTM.C507.E2379_102;
             }
             catch (FormatException)
             {
@@ -318,7 +317,7 @@ namespace Ord_Eancom
                     int.TryParse(dateString.Substring(dateString.Length - 2, 2), out int resultInt);
                     if (IsValidWeek(resultInt))
                     {
-                        return Eancom.DTM.C507.E2379_616;
+                        return DTM.C507.E2379_616;
                     }
                 }
                 catch (FormatException)
@@ -717,7 +716,7 @@ namespace Ord_Eancom
         public bool IsOption_MEA()
         {
             if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear() ||
-                (_segmentClassification.IsArticleSplashbackPanel() && _segmentClassification.IsMeasurementsChange()))
+                _segmentClassification.IsMeasurementsChange()) //(_segmentClassification.IsArticleSplashbackPanel() && 
             {
                 return true;
             }
@@ -739,11 +738,11 @@ namespace Ord_Eancom
                         string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
                         if (codeAndName.Length == 4)
                         {
-                            Eancom.Utility utility = new Eancom.Utility();
+                            UtilitySegment utility = new UtilitySegment();
                             if (utility.IsAssemblyWorktop(codeAndName[3]))
                             {
-                                string code = utility.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
-                                string name = utility.DelCharAndAllAfter(codeAndName[2], KD.StringTools.Const.Underscore);
+                                string code = UtilitySegment.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
+                                string name = UtilitySegment.DelCharAndAllAfter(codeAndName[2], KD.StringTools.Const.Underscore);
                                 codeList.Add(code + KD.StringTools.Const.SemiColon + name);
                             }
                         }

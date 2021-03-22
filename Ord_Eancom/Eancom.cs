@@ -284,7 +284,7 @@ namespace Eancom
         }
     }
 
-    public class Utility
+    public class UtilitySegment
     {
         private const char whiteSpaceChar = ' ';
         public const int codeCharLen = 5;
@@ -293,11 +293,17 @@ namespace Eancom
         public const int freelyWordCharLen = 70;
         public const int freelyLineMaxNb = 99;
 
-        public Utility()
+        public UtilitySegment()
         {
         }
 
-        public string DelCharAndAllAfter(string text, string car)
+        public static string ConvertCommaToDot(string value)
+        {
+            value = value.Replace(KD.StringTools.Const.Comma, KD.StringTools.Const.Dot);
+            return value;
+        }
+
+        public static string DelCharAndAllAfter(string text, string car)
         {
             if (!String.IsNullOrEmpty(text))
             {
@@ -339,9 +345,9 @@ namespace Eancom
         }
         public string GetCodeLen(string code)
         {
-            if (code.Length > Utility.codeCharLen)
+            if (code.Length > UtilitySegment.codeCharLen)
             {
-                code = code.Substring(0, Utility.codeCharLen);
+                code = code.Substring(0, UtilitySegment.codeCharLen);
             }
             return code;
         }
@@ -383,7 +389,7 @@ namespace Eancom
         {
             return currentAppli.Scene.ObjectGetInfo(objectId, KD.SDK.SceneEnum.ObjectInfo.OCCURRENCESNB);
         }
-
+        
         public bool IsPlinth(string code) //Cause exept plinth height 402 and 19 and 20
         {
             if (code == OrderConstants.PlinthFinishType)

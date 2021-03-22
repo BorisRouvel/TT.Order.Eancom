@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\..\Ic90dev\</OutputPath>
+    <OutputPath>..\..\..\..\Ic91dev\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -48,7 +48,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\..\..\..\Ic90\</OutputPath>
+    <OutputPath>..\..\..\..\Ic91dev\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -189,9 +189,6 @@
       <Link>Nub\Model\SortedArticle.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="..\TT.Import.EGI\Segment\Segments.cs">
-      <Link>Segment\Segments.cs</Link>
-    </Compile>
     <Compile Include="BuildFile\BuildElevation.cs" />
     <Compile Include="BuildFile\BuildOrder.cs" />
     <Compile Include="BuildFile\BuildPerspective.cs" />
@@ -216,6 +213,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Segment\Segments.cs" />
     <Compile Include="Structures\01_UNA.cs" />
     <Compile Include="Structures\10_COM.cs" />
     <Compile Include="Structures\09_CTA.cs" />

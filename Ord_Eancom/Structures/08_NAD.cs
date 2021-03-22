@@ -1,7 +1,8 @@
 ﻿using System;
-using Ord_Eancom;
+using Eancom;
 
-namespace Eancom
+
+namespace Ord_Eancom
 {
     public class NAD
     {
@@ -192,16 +193,16 @@ namespace Eancom
 
         public string Add_SU()
         {            
-            _e3035 = Eancom.NAD.E3035_SU;
+            _e3035 = NAD.E3035_SU;
             _e3164 = _orderInformations.GetSupplierCity();
             _e3251 = _orderInformations.GetSupplierPostCode();
             _e3207 = _orderInformations.GetSupplierCountry();
 
-            ////c082 = new C082(_orderInformations.GetSupplierGLN(), Eancom.NAD.C082.E3055_9);
+            ////c082 = new C082(_orderInformations.GetSupplierGLN(), NAD.C082.E3055_9);
             //c082.E3039 = _orderInformations.GetSupplierGLN();
 
             c082.E3039 = String.Empty; // Discac want the manufacturer Id (IDM 1201) instead of _fileEDI.ManufacturerGLN() pos44 first line 100.
-            c082.E3055 = Eancom.NAD.C082.E3055_9;
+            c082.E3055 = NAD.C082.E3055_9;
             c080.E3036_1 = _orderInformations.GetSupplierName1();
             c080.E3036_2 = _orderInformations.GetSupplierName2();
             c059.E3042 = _orderInformations.GetSupplierAddress();
@@ -209,7 +210,7 @@ namespace Eancom
             if (!_fileEDI.HasManufacturerGLNCode(c082.E3039))
             {
                 c082.E3039 = _fileEDI.ManufacturerID();
-                c082.E3055 = Eancom.NAD.C082.E3055_91;              
+                c082.E3055 = NAD.C082.E3055_91;              
             }
 
             OrderWrite.segmentNumberBetweenUNHandUNT += 1;
@@ -218,26 +219,26 @@ namespace Eancom
         }
         public string Add_BY(int seg)
         {
-            _e3035 = Eancom.NAD.E3035_BY;            
+            _e3035 = NAD.E3035_BY;            
             _e3164 = _orderInformations.GetRetailerCity();
             _e3251 = _orderInformations.GetRetailerPostCode();
             _e3207 = _orderInformations.GetRetailerCountry();
 
-            //c082 = new C082(_orderInformations.GetRetailerGLN(), Eancom.NAD.C082.E3055_9);
+            //c082 = new C082(_orderInformations.GetRetailerGLN(), NAD.C082.E3055_9);
             //C080 c080 = new C080(_orderInformations.GetRetailerName1(), String.Empty);
             //C059 c059 = new C059(_orderInformations.GetRetailerAddress());
 
             c082.E3039 = _orderInformations.GetRetailerGLN();
-            c082.E3055 = Eancom.NAD.C082.E3055_9;
+            c082.E3055 = NAD.C082.E3055_9;
             c080.E3036_1 = _orderInformations.GetRetailerName1();
             c080.E3036_2 = _orderInformations.GetRetailerName2();
             c059.E3042 = _orderInformations.GetRetailerAddress();
 
             if (String.IsNullOrEmpty(c082.E3039))
             {                
-                //c082 = new C082(_fileEDI.RetailerNumber(), Eancom.NAD.C082.E3055_91);
+                //c082 = new C082(_fileEDI.RetailerNumber(), NAD.C082.E3055_91);
                 c082.E3039 = _orderInformations.GetRetailerNumber(); //_fileEDI.RetailerNumber();
-                c082.E3055 = Eancom.NAD.C082.E3055_91;
+                c082.E3055 = NAD.C082.E3055_91;
             }
 
             OrderWrite.segmentNumberBetweenUNHandUNT += seg;
@@ -246,7 +247,7 @@ namespace Eancom
         }
         public string Add_Delivery_DP(int seg)
         {
-            _e3035 = Eancom.NAD.E3035_DP;
+            _e3035 = NAD.E3035_DP;
 
             if (!String.IsNullOrEmpty(_orderInformations.GetDeliveryName1()))
             {
@@ -254,21 +255,21 @@ namespace Eancom
                 _e3251 = _orderInformations.GetDeliveryPostCode();
                 _e3207 = _orderInformations.GetDeliveryCountry();
 
-                //c082 = new C082(_orderInformations.GetRetailerGLN(), Eancom.NAD.C082.E3055_9);
+                //c082 = new C082(_orderInformations.GetRetailerGLN(), NAD.C082.E3055_9);
                 //C080 c080 = new C080(_orderInformations.GetDeliveryName1(), String.Empty);
                 //C059 c059 = new C059(_orderInformations.GetDeliveryAddress());
 
                 c082.E3039 = _orderInformations.GetRetailerGLN();
-                c082.E3055 = Eancom.NAD.C082.E3055_9;
+                c082.E3055 = NAD.C082.E3055_9;
                 c080.E3036_1 = _orderInformations.GetDeliveryName1();
                 c080.E3036_2 = String.Empty;
                 c059.E3042 = _orderInformations.GetDeliveryAddress();
 
                 if (String.IsNullOrEmpty(c082.E3039))
                 {
-                    //c082 = new C082(_fileEDI.RetailerNumber(), Eancom.NAD.C082.E3055_91);
+                    //c082 = new C082(_fileEDI.RetailerNumber(), NAD.C082.E3055_91);
                     c082.E3039 = _orderInformations.GetRetailerNumber(); //_fileEDI.RetailerNumber();
-                    c082.E3055 = Eancom.NAD.C082.E3055_91;
+                    c082.E3055 = NAD.C082.E3055_91;
                 }
 
                 OrderWrite.segmentNumberBetweenUNHandUNT += seg;
@@ -280,7 +281,7 @@ namespace Eancom
         }
         public string Add_CustomerDelivery_DP()
         {
-            _e3035 = Eancom.NAD.E3035_DP;
+            _e3035 = NAD.E3035_DP;
             string customerDeliveryName1 = _orderInformations.GetCustomerDeliveryName1();
             if (!String.IsNullOrEmpty(customerDeliveryName1))
             {               
@@ -310,11 +311,11 @@ namespace Eancom
         //Be careful to don't add a segment line number (0)
         public bool IsBYequalDDP() 
         {
-            nadBYCompare = this.Add_BY(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_BY + Separator.DataGroup, String.Empty);
+            nadBYCompare = this.Add_BY(0).Replace(StructureEDI.NAD + Separator.DataGroup + NAD.E3035_BY + Separator.DataGroup, String.Empty);
 
             if (this.Add_Delivery_DP(0) != null)
             {
-                nadDPCompare = this.Add_Delivery_DP(0).Replace(StructureEDI.NAD + Separator.DataGroup + Eancom.NAD.E3035_DP + Separator.DataGroup, String.Empty);
+                nadDPCompare = this.Add_Delivery_DP(0).Replace(StructureEDI.NAD + Separator.DataGroup + NAD.E3035_DP + Separator.DataGroup, String.Empty);
 
                 if (nadBYCompare.Equals(nadDPCompare))
                 {

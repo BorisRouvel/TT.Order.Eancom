@@ -1,5 +1,6 @@
-﻿
-namespace Eancom
+﻿using Eancom;
+
+namespace Ord_Eancom
 {
     public class UNA
     {
