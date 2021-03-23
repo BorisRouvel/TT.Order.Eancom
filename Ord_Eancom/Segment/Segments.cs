@@ -685,14 +685,14 @@ namespace Eancom // TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Type == 5)
+                if (this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLANARTICLE)
                 {
                     return true;
                 }
             }
             return false;
         }
-        public bool IsArticleSplashbackPanel()
+        public bool IsArticleSplashbackPanel2()
         {
             foreach (string scriptCode in splashbackPanelScriptCodeList)
             {
@@ -703,11 +703,33 @@ namespace Eancom // TT.Import.EGI
             }
             return false;
         }
-        public bool IsArticleSplashbackPanelShape()
+        public bool IsArticleSplashbackPanel()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 6) // Level6=Eléments de finition, 6
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool IsArticleSplashbackPanelShape2()
         {
             if (this.Article.Script.StartsWith(BlockScriptCodeForMEAmeasureChange.PDG + KD.StringTools.Const.BraceOpen))
             {
                 return true;
+            }
+            return false;
+        }
+        public bool IsArticleSplashbackPanelShape()
+        {
+            if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
+            {
+                if (this.Article.Layer == 6 && this.Article.SubType == -2) // Level6=Eléments de finition, 6 // Subtype -2 for shape linear
+                {
+                    return true;
+                }
             }
             return false;
         }

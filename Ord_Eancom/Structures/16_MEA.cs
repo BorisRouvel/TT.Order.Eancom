@@ -92,12 +92,12 @@ namespace Eancom
                 double dimY = article.DimensionY;
                 double dimZ = article.DimensionZ;
 
-                if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleSplashbackPanel())
+                if (segmentClassification.IsArticleUnit() && (!segmentClassification.IsArticleSplashbackPanel() || !segmentClassification.IsArticleSplashbackPanel2()))
                 {
                     dimY -= (OrderConstants.FrontDepth - 1);
                 }
 
-                if (segmentClassification.IsArticleSplashbackPanelShape())
+                if (segmentClassification.IsArticleSplashbackPanelShape() || segmentClassification.IsArticleSplashbackPanelShape2())
                 {
                     double dimT = dimY;
                     dimY = dimZ;

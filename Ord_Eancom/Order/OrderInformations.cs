@@ -657,7 +657,7 @@ namespace Ord_Eancom
                 string dimsY = articleInfo[PairingTablePosition.ArticleDepth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleDepth_T];
 
                 double frontValue = 0.0;
-                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && !_segmentClassification.IsArticleSplashbackPanel())
+                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && (!_segmentClassification.IsArticleSplashbackPanel() || !_segmentClassification.IsArticleSplashbackPanel2()))
                 {
                      frontValue = (OrderConstants.FrontDepth - 1);
                 }

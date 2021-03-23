@@ -793,7 +793,7 @@ namespace Ord_Eancom
                     structureLineEGIList.Add(PositionZ(posZ));
                     structureLineEGIList.Add(ArticleDimensionX(dimX));
 
-                    if (segmentClassification.IsArticleSplashbackPanelShape())
+                    if (segmentClassification.IsArticleSplashbackPanelShape() || segmentClassification.IsArticleSplashbackPanelShape2())
                     {
                         double dimT = dimY;
                         dimY = dimZ;
@@ -984,7 +984,7 @@ namespace Ord_Eancom
         private string ArticleDimensionY(Article article, double value)
         {
             SegmentClassification segmentClassification = new SegmentClassification(article);
-            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && !segmentClassification.IsArticleSplashbackPanel())
+            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && (!segmentClassification.IsArticleSplashbackPanel() || !segmentClassification.IsArticleSplashbackPanel2()) )
             {
                 value -= OrderConstants.FrontDepth;
             }
