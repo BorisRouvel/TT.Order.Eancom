@@ -685,7 +685,7 @@ namespace Eancom // TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLANARTICLE)
+                if (this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLANARTICLE || this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLAN)
                 {
                     return true;
                 }
@@ -726,7 +726,7 @@ namespace Eancom // TT.Import.EGI
         {
             if (this.Article.Topic == (int)KD.SDK.SceneEnum.TopicId.KITCHEN)
             {
-                if (this.Article.Layer == 6 && this.Article.SubType == -2) // Level6=Eléments de finition, 6 // Subtype -2 for shape linear
+                if (this.Article.Layer == 6 && (this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLANARTICLE || this.Article.Type == (int)KD.SDK.SceneEnum.ObjectType.PLAN)) // Level6=Eléments de finition, 6 
                 {
                     return true;
                 }
