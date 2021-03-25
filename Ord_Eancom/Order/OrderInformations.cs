@@ -634,7 +634,7 @@ namespace Ord_Eancom
             if (!String.IsNullOrEmpty(ediDim) && ediDim != KD.StringTools.Const.Zero)
             {
                 double.TryParse(ediDim, out double value);
-                if ( (articleDim - frontValue) != value)
+                if (Math.Abs((articleDim - frontValue) - value) > 1)
                 {
                     //System.Windows.Forms.MessageBox.Show(this.Article.Ref + Separator.NewLine + articleDim.ToString() + Separator.NewLine + value.ToString());
                     return true;
@@ -659,7 +659,7 @@ namespace Ord_Eancom
                 double frontValue = 0.0;
                 if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && (!_segmentClassification.IsArticleSplashbackPanel() || !_segmentClassification.IsArticleSplashbackPanel2()))
                 {
-                     frontValue = (OrderConstants.FrontDepth - 1);
+                     frontValue = (OrderConstants.FrontDepth); // -1
                 }
 
                 if (this.IsDimensionChange(this.Article.DimensionX, dimsX, 0))
@@ -679,8 +679,8 @@ namespace Ord_Eancom
         }
         public bool IsOption_MEA(FileEDI _fileEDI)
         {
-            if (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear() ||
-                 this.IsMeasurementsByEDIChange(_fileEDI)) // _segmentClassification.IsMeasurementsChange()) //(_segmentClassification.IsArticleSplashbackPanel() &&
+            if ( (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear()) ||
+                 (_segmentClassification.IsNotAccessory() && this.IsMeasurementsByEDIChange(_fileEDI)) ) // _segmentClassification.IsMeasurementsChange()) //(_segmentClassification.IsArticleSplashbackPanel() &&
             {
                 return true;
             }

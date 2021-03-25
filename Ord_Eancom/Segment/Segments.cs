@@ -733,7 +733,7 @@ namespace Eancom // TT.Import.EGI
             }
             return false;
         }
-        public bool IsMeasurementsChange() //Do not use, its replace for dim from EDI
+        public bool IsMeasurementsChange() //Do not use, its replace by another method with dim from EDI
         {            
             int line = reference.GetArticleLineIndexFromReference(this.Article.KeyRef);
 
@@ -747,6 +747,14 @@ namespace Eancom // TT.Import.EGI
             }
             return false;
         }    
+        public bool IsNotAccessory()
+        {
+            if (this.Article.Topic != (int)KD.SDK.SceneEnum.TopicId.ACCESSORIES)
+            {
+                return true;
+            }
+            return false;
+        }
         public string GetShape()
         {
             return this.Article.CurrentAppli.Scene.ObjectGetShape(this.Article.ObjectId);
