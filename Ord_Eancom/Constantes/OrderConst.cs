@@ -55,6 +55,7 @@ namespace Ord_Eancom
         public const string RightAssemblyFinishType = "20";
 
         public const double FrontDepth = 20.0;
+        public static bool IsOldDll = false;
 
         //public const int ArticleSupplierId_InFile_Position = 0;
         //public const int ArticleSerieNo_InFile_Position = 1;

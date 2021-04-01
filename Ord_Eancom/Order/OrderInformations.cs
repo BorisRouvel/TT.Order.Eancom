@@ -643,7 +643,8 @@ namespace Ord_Eancom
             return false;
         }
         public bool IsMeasurementsByEDIChange(FileEDI _fileEDI)
-        {            
+        {
+            OrderConstants.IsOldDll = false;
             List<string> list = new List<string>();
             string keyRef = Tools.DelCharAndAllAfter(this.Article.KeyRef, KD.StringTools.Const.Underscore);
             // 2 for base measure structure separate with ; 
@@ -674,15 +675,28 @@ namespace Ord_Eancom
                 {
                     return true;
                 }                
-            }            
+            }
+            else
+            {
+                OrderConstants.IsOldDll = true;
+            }
             return false;
         }
         public bool IsOption_MEA(FileEDI _fileEDI)
         {
             if ( (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear()) ||
-                 (_segmentClassification.IsNotAccessory() && this.IsMeasurementsByEDIChange(_fileEDI)) ) // _segmentClassification.IsMeasurementsChange()) //(_segmentClassification.IsArticleSplashbackPanel() &&
+                 (_segmentClassification.IsNotAccessory() && this.IsMeasurementsByEDIChange(_fileEDI)) )  //(_segmentClassification.IsArticleSplashbackPanel() &&
             {
-                return true;
+                return true;                
+            }
+
+            if (OrderConstants.IsOldDll)
+            {                
+                if ( (_segmentClassification.IsArticleWorkTop() || _segmentClassification.IsArticleShape() || _segmentClassification.IsArticleLinear()) ||
+                 (_segmentClassification.IsNotAccessory() && _segmentClassification.IsMeasurementsChange()) )
+                {
+                    return true;
+                }
             }
             return false;
         }

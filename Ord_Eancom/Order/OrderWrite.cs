@@ -936,7 +936,7 @@ namespace Ord_Eancom
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);
-                if (articleInfo.Length >= PairingTablePosition.EndArticleMeasure + 1)
+                if (articleInfo.Length >= PairingTablePosition.EndArticleMeasure + 1) // new pairing table
                 {
                     for (int index = PairingTablePosition.StartArticleMeasure; index <= PairingTablePosition.EndArticleMeasure; index++)
                     {
@@ -946,18 +946,18 @@ namespace Ord_Eancom
                         }
                     }
                 }
-                else if (articleInfo.Length > PairingTablePosition.StartArticleMeasure)
+                else if (articleInfo.Length > PairingTablePosition.StartArticleMeasure) // old pairing table
                 {
                     for (int index = PairingTablePosition.StartArticleMeasure; index <= articleInfo.Length - 1; index++)
                     {
                         list.Add(ItemKey.Measure_ + Tools.ConvertCommaToDot(articleInfo[index].ToUpper()) + Separator.NewLine);
                     }
                 }
-                else
-                {
-                    System.Windows.Forms.MessageBox.Show("Certaines informations ne sont pas correctes." + Separator.NewLine +
-                                                         "Veuillez télécharger la mise à jour du catalogue !", "Information", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
-                }
+                //else
+                //{
+                //    System.Windows.Forms.MessageBox.Show("Certaines informations ne sont pas correctes." + Separator.NewLine +
+                //                                         "Veuillez télécharger la mise à jour du catalogue !", "Information", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+                //}
             }            
             return list;
         }

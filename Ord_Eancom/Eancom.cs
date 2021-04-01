@@ -192,7 +192,11 @@ namespace Eancom
                 string[] datas = dataLine.Split(KD.CharTools.Const.SemiColon);
                 if ((!String.IsNullOrEmpty(datas[0]) && datas[0] == value) || (this.IsDiscacAssembly(datas[0], value)))
                 {
-                    return datas[position];
+                    if (datas.Length > position)
+                    {
+                        return datas[position];
+                    }
+                    break;
                 }
             }
             return null;
