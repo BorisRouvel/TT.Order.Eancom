@@ -161,7 +161,7 @@ namespace Ord_Eancom
         {
             foreach (Article article in this.Articles)
             {
-                if (article.HeadingRank <= OrderInformations.furnitureHeadingMaxNb)
+                if (KD.Const.UnknownId < article.HeadingRank && article.HeadingRank <= OrderInformations.furnitureHeadingMaxNb)
                 {
                     return article;
                 }
@@ -658,7 +658,7 @@ namespace Ord_Eancom
                 string dimsY = articleInfo[PairingTablePosition.ArticleDepth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleDepth_T];
 
                 double frontValue = 0.0;
-                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && (!_segmentClassification.IsArticleSplashbackPanel() || !_segmentClassification.IsArticleSplashbackPanel2()))
+                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && !_segmentClassification.IsArticleSplashbackPanel() && !_segmentClassification.IsArticleSplashbackPanel2())
                 {
                      frontValue = (OrderConstants.FrontDepth); // -1
                 }

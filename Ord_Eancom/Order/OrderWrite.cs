@@ -699,8 +699,12 @@ namespace Ord_Eancom
         {
             posX = article.PositionX;
             posY = article.PositionY;
-            posZ = article.PositionZ;
-            a = article.AngleOXY - 180;
+            posZ = article.PositionZ;           
+            a = (article.AngleOXY - 180);
+            if (a < 0)
+            {
+                a += 360;
+            }            
 
             double angle = 0.0;
             switch (OrderWrite.version.ToUpper())
@@ -984,7 +988,7 @@ namespace Ord_Eancom
         private string ArticleDimensionY(Article article, double value)
         {
             SegmentClassification segmentClassification = new SegmentClassification(article);
-            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && (!segmentClassification.IsArticleSplashbackPanel() || !segmentClassification.IsArticleSplashbackPanel2()) )
+            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && !segmentClassification.IsArticleSplashbackPanel() && !segmentClassification.IsArticleSplashbackPanel2() )
             {
                 value -= OrderConstants.FrontDepth;
             }
