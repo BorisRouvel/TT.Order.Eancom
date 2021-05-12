@@ -40,6 +40,7 @@ namespace TT.Import.EGI
         private int _hingeType = 0;
         private string _refNo = String.Empty;
         private string _refPos = String.Empty;
+        private string _refPosComment = String.Empty;
         private string _shape = String.Empty;
         private string _polyType = String.Empty;
         private string _polyCounter = String.Empty;
@@ -332,6 +333,17 @@ namespace TT.Import.EGI
                 _refPos = value;
             }
         }
+        public string RefPosComment
+        {
+            get
+            {
+                return _refPosComment;
+            }
+            set
+            {
+                _refPosComment = value;
+            }
+        }
         public string Shape
         {
             get
@@ -413,6 +425,7 @@ namespace TT.Import.EGI
             _hingeType = 0;
             _refNo = String.Empty;
             _refPos = String.Empty;
+            _refPosComment = String.Empty;
             _shape = String.Empty;
             _polyType = KD.StringTools.Const.Zero;
             _polyCounter = KD.StringTools.Const.Zero;
@@ -444,6 +457,7 @@ namespace TT.Import.EGI
             
             _refNo = this._currentFileEGI.GetStringValue(_section, ItemKey.RefNo);
             _refPos = this._currentFileEGI.GetStringValue(_section, ItemKey.RefPos);
+            _refPosComment = this._currentFileEGI.GetStringValue(_section, SegmentFormat.CommentChar + ItemKey.RefPos);
 
             _refPntX = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.RefPntX));
             _refPntY = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.RefPntY));
@@ -466,6 +480,8 @@ namespace TT.Import.EGI
             _measure_BE = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_BE));
             _measure_TE = KD.StringTools.Convert.ToDouble(this._currentFileEGI.GetStringValue(_section, ItemKey.Measure_TE));
 
+            _shape = _currentFileEGI.GetStringValue(_section, ItemKey.Shape);
+
             _polyType = _currentFileEGI.GetStringValue(_section, ItemKey.PolyType);
             _polyCounter = _currentFileEGI.GetStringValue(_section, ItemKey.PolyCounter);
 
@@ -481,7 +497,10 @@ namespace TT.Import.EGI
                 Article component = this.PlaceComponentObject();
                 if (component != null && component.IsValid)
                 {
-                    this.AddPlacedArticleDict(component, this.RefPos);
+                    _article = component;                   
+
+                    this.AddPlacedArticleDicts(component);//, this.RefPos
+                    this.DeSelectArticle();
                     return;
                 }
                 else
@@ -512,13 +531,22 @@ namespace TT.Import.EGI
                         }
                         else
                         {
-                            this.MoveArticlePerRepere();
-                            this.MoveArticlePositionZPlinth();
+                           
 
-                            if (segmentClassification.IsArticleUnit())
+                            if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleSplashbackPanel())
                             {
-                                this.ChangeCarcasseDimY();
+                                if (!segmentClassification.IsArticleSplashbackPanel2())
+                                {
+                                    //this.ChangeCarcasseDimY();
+
+                                    _measure_T += CatalogConstante.FrontDepth;
+                                    _article.DeleteFromScene();
+                                    _article = this.PlaceObject();
+                                }
                             }
+
+                            this.MoveArticlePerRepere(this.Shape);
+                            this.MoveArticlePositionZPlinth();
                         }                        
                        
                         if (segmentClassification.IsSectionAngleWithFiler()) //shape 27 angle
@@ -528,8 +556,8 @@ namespace TT.Import.EGI
                             this.SetAnglePositionAngle();
                         }
 
-                        this.SetArticleNumber();
-                        this.AddPlacedArticleDict(this.Article, this.RefPos);
+                        this.AddPlacedArticleDicts(this.Article);//, this.RefPos
+                        this.DeSelectArticle();
                     }
                     else
                     {
@@ -540,12 +568,13 @@ namespace TT.Import.EGI
                         }
                         else
                         {
-                            Plugin.notPlacedArticleList.Add(this.Name);
+                            ImportObject.articleNotPlacedList.Add(this.Name);
                         }
                     }
                 }
             }
-        } 
+        }
+
         public void AddLinear(string section, List<string> catalogsList)
         {
             string polyPoints = String.Empty;
@@ -622,7 +651,7 @@ namespace TT.Import.EGI
                         string linearRef = String.Empty;
                         foreach (string linearReference in linearReferenceList)
                         {
-                            if (linearReference.StartsWith(this.Name))
+                            if (linearReference.Equals(this.CommentName))//StartsWith(this.Name)
                             {
                                 if (linearType.Equals(PolytypeValue.Polytype_WorkTop) || linearType.Equals(PolytypeValue.Polytype_Base))
                                 {
@@ -656,6 +685,7 @@ namespace TT.Import.EGI
                                 break;
                             }
                         }
+
                         if (!isPlace)
                         {
                             if (catalogsList.Count > 1)
@@ -665,22 +695,16 @@ namespace TT.Import.EGI
                             }
                             else
                             {
-                                Plugin.notPlacedArticleList.Add(this.Name);
+                                ImportObject.articleNotPlacedList.Add(this.Name);
                             }
                         }
                         else
                         {
                             _article = _plugin.CurrentAppli.ActiveArticle;
-                            this.MoveArticlePositionZPlinth();
-                            //KD.FilterBuilder.FilterClauseDict filterBuilder = new KD.FilterBuilder.FilterClauseDict();
-                            //filterBuilder.Clear();
-                            //filterBuilder.Add(KD.SDK.SceneEnum.ObjectInfo.REF, linearRef);
 
-                            //Articles linearArticles = this.CurrentAppli.GetArticleList(filterBuilder);
-                            //if (linearArticles[0].ObjectId != KD.Const.UnknownId)
-                            //{
-                            //    this.AddPlacedArticleDict(linearArticles[0]);
-                            //}
+                            this.MoveArticlePositionZPlinth();                            
+                            this.AddPlacedArticleDicts(this.Article);//, this.RefPos, this.RefPosComment
+                            this.DeSelectArticle();                          
                         }
                     }                   
                 }
@@ -751,41 +775,45 @@ namespace TT.Import.EGI
             {
                 string refBase = this.RefPos.Split(KD.CharTools.Const.Dot)[0];
 
-                foreach (KeyValuePair<int, string> kvp in Plugin.articleAlreadyPlacedDict)
+                foreach (KeyValuePair<int, string> kvp in ImportObject.articlePlacedDict)
                 {
-                    if (kvp.Value.Equals(refBase))
+                    if (kvp.Value.Contains(KD.StringTools.Const.Dot))
                     {
-                        Article parent = new Article(_plugin.CurrentAppli, kvp.Key);
-                        Articles childs = parent.GetChildren(FilterArticle.strFilterToGetValidNotPlacedHostedAndChildren());
-                        foreach (Article child in childs)
+                        string kvpBase = kvp.Value.Split(KD.CharTools.Const.Dot)[0];
+                        if (kvpBase.Equals(refBase))
                         {
-                            //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
-                            if (child.IsValid && child.KeyRef.Equals(this.CommentName))
+                            Article parent = new Article(_plugin.CurrentAppli, kvp.Key);
+                            Articles childs = parent.GetChildren(FilterArticle.strFilterToGetValidHostedAndChildren());//FilterArticle.strFilterToGetValidNotPlacedHostedAndChildren
+                            foreach (Article child in childs)
                             {
-                                bool find = false;  //Test with Bauformat Side panel maybe don't work for another
-                                if (this.RefPntX == 0.0 && child.Handing == _plugin.CurrentAppli.GetTranslatedText("G"))
+                                //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
+                                if (child.IsValid && child.KeyRef.Equals(this.CommentName))
                                 {
-                                    find = true;
-                                }
-                                else if (this.RefPntX > 0.0 && child.Handing == _plugin.CurrentAppli.GetTranslatedText("D"))
-                                {
-                                    find = true;
-                                }
-                                else
-                                {
-                                    find = true;
-                                }
+                                    bool find = false;  //Test with Bauformat Side panel maybe don't work for another
+                                    if (this.RefPntX == 0.0 && child.Handing == _plugin.CurrentAppli.GetTranslatedText("G"))
+                                    {
+                                        find = true;
+                                    }
+                                    else if (this.RefPntX > 0.0 && child.Handing == _plugin.CurrentAppli.GetTranslatedText("D"))
+                                    {
+                                        find = true;
+                                    }
+                                    else
+                                    {
+                                        find = true;
+                                    }
 
-                                if (find)
-                                {
-                                    child.IsPlaced = true;
-                                    //child.DimensionX = w1;
-                                    //child.DimensionY = d1;
-                                    child.DimensionZ = this.Measure_H;
-                                    //child.PositionX = x1;
-                                    //child.PositionY = y1;
-                                    child.PositionZ = this.RefPntZ;
-                                    return child;
+                                    if (find)
+                                    {
+                                        child.IsPlaced = true;
+                                        //child.DimensionX = w1;
+                                        //child.DimensionY = d1;
+                                        child.DimensionZ = this.Measure_H;
+                                        //child.PositionX = x1;
+                                        //child.PositionY = y1;
+                                        child.PositionZ = this.RefPntZ;
+                                        return child;
+                                    }
                                 }
                             }
                         }
@@ -798,7 +826,7 @@ namespace TT.Import.EGI
         {
             _plugin.SetReference();
             //The 20/01/2021 i change the reference to place the article with CommentName instead of Name cause the article with underscore doesnt work
-            if (!String.IsNullOrEmpty(_commentName))
+            if (!String.IsNullOrEmpty(this.CommentName))
             {
                 bool bReplace = _plugin.CurrentAppli.Scene.EditReplaceSelection(this.CatalogManufacturer, this.CommentName, this.HingeType, (int)this.Measure_B,
                 (int)this.Measure_T, (int)this.Measure_H, false);
@@ -817,25 +845,34 @@ namespace TT.Import.EGI
             //}
             //return null;
         }
-        private void MoveArticlePerRepere()
+        private void MoveArticlePerRepere(string shape)
         {
             GlobalSegment globalSegment = new GlobalSegment(this._currentFileEGI);
             string version = globalSegment.GetVersion();
             _plugin.CurrentAppli.SceneComponent.SetReferenceFromObject(this.Article, false);
-            switch (version)
+
+            if (shape == ItemValue.Shape_27_AngleWithFiler && this.Article.Handing == _plugin.CurrentAppli.GetTranslatedText("G"))
             {
-                case ItemValue.V1_50: //DISCAC
-                    _article.PositionX += this.Measure_B;
-                    _article.AngleOXY += 180;
-                    break;
-                case ItemValue.V1_51: //FBD et Bauformat
-                    _article.PositionX += this.Measure_B;
-                    _article.AngleOXY += 180;
-                    break;
-                default:
-                    _article.PositionX += this.Measure_B; 
-                    _article.AngleOXY += 180;
-                    break;
+                _article.PositionY -= this.Measure_B;
+                _article.AngleOXY += 180;
+            }
+            else
+            {
+                switch (version)
+                {
+                    case ItemValue.V1_50: //DISCAC
+                        _article.PositionX += this.Measure_B;
+                        _article.AngleOXY += 180;
+                        break;
+                    case ItemValue.V1_51: //FBD et Bauformat
+                        _article.PositionX += this.Measure_B;
+                        _article.AngleOXY += 180;
+                        break;
+                    default:
+                        _article.PositionX += this.Measure_B;
+                        _article.AngleOXY += 180;
+                        break;
+                }
             }
         }
         private void MoveArticlePositionZPlinth()
@@ -923,48 +960,61 @@ namespace TT.Import.EGI
             }
         }
 
-        private void SetArticleNumber()
+        private void DeSelectArticle()
         {
-            if (!String.IsNullOrEmpty(this.RefPos) && !this.RefPos.Contains(KD.StringTools.Const.Dot))
-            {
-                _article.Number = Convert.ToInt16(this.RefPos);
-            }
+            this.Article.IsSelected = false;
+            this.Article.IsActive = false;
         }
 
-        private void AddPlacedArticleDict(Article article, string refPos)
+        private void AddPlacedArticleDicts(Article article)//, string refPos, string refPosComment
         {
             if (article != null && article.IsValid && article.Number != KD.Const.UnknownId)
             {
-                Plugin.articleAlreadyPlacedDict.Add(article.ObjectId, refPos);
+                ImportObject.articlePlacedDict.Add(article.ObjectId, this.RefPos);
             }
             else if (article == null)
             {
-                Plugin.articleAlreadyPlacedDict.Add(Convert.ToInt32(refPos), refPos);
+                ImportObject.articlePlacedDict.Add(Convert.ToInt32(this.RefPos), this.RefPos);
             }
-        }
+
+            if (article != null && article.IsValid && !String.IsNullOrEmpty(this.RefPosComment))
+            {
+                if (this.RefPosComment.Contains(KD.StringTools.Const.Dot))
+                {
+                    string[] stringAfterDot = this.RefPosComment.Split(KD.CharTools.Const.Dot);
+                    int.TryParse(stringAfterDot[0], out int valueBeforeDot);
+                    if (valueBeforeDot > 0)
+                    {
+                        ImportObject.articlePlacedRenumberDict.Add(article.ObjectId, valueBeforeDot);
+                    }
+                }
+            }
+        }     
 
         public void NoPlacedArticleMessage()
         {
-            if (Plugin.notPlacedArticleList.Count > 0)
+            if (ImportObject.articleNotPlacedList.Count > 0)
             {
                 string listString = String.Empty;
-                foreach (string notPlacedArticle in Plugin.notPlacedArticleList)
+                foreach (string notPlacedArticle in ImportObject.articleNotPlacedList)
                 {
                     listString += notPlacedArticle + Environment.NewLine;
                 }
-                System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Réf. non trouvé");
+                System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Référence(s) non trouvée(s)");
             }
+        }
 
-            if (Plugin.articleAlreadyPlacedDict.Count > 0)
+        public void PlacedArticleMessage()
+        {
+            if (ImportObject.articlePlacedDict.Count > 0)
             {
                 string listString = String.Empty;
-                foreach (KeyValuePair<int, string> articleAlreadyPlaced in Plugin.articleAlreadyPlacedDict)
+                foreach (KeyValuePair<int, string> articleAlreadyPlaced in ImportObject.articlePlacedDict)
                 {
                     listString += articleAlreadyPlaced.Key.ToString() + " : " + articleAlreadyPlaced.Value.ToString() + Environment.NewLine;
                 }
-                //System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Réf. posé");
+                System.Windows.Forms.MessageBox.Show(listString, "Import EGI : Référence(s). posée(s)");
             }
-
         }
     }
 }

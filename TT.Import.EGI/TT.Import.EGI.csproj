@@ -204,6 +204,7 @@
     <Compile Include="..\Ord_Eancom\Segment\Segments.cs">
       <Link>Segment\Segments.cs</Link>
     </Compile>
+    <Compile Include="ImportObject.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

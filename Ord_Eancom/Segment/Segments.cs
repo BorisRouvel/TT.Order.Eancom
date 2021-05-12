@@ -755,6 +755,7 @@ namespace Eancom // TT.Import.EGI
             }
             return false;
         }
+
         public string GetShape()
         {
             return this.Article.CurrentAppli.Scene.ObjectGetShape(this.Article.ObjectId);

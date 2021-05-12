@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using System.ComponentModel;
+using System.Linq;
 
 // ---------------------------------------
 // for KD self registration via RegAsm
@@ -29,7 +30,7 @@ namespace TT.Import.EGI
         private GlobalSegment globalSegment = null;
         private WallSegment wallSegment = null;
         private DoorSegment doorSegment = null;
-        public WindowSegment windowSegment = null;
+        private WindowSegment windowSegment = null;
         private RecessSegment recessSegment = null;
         //private HindranceSegment hindranceSegment = null;
         private ArticleSegment articleSegment = null;
@@ -38,10 +39,7 @@ namespace TT.Import.EGI
         public static double sceneDimY = 0.0;
         public static string strSceneDimZ = String.Empty;
         public static double sceneDimZ = 0.0;
-        public static double angleScene = 0.0;
-
-        public static List<String> notPlacedArticleList = new List<string>(0);
-        public static Dictionary<int, string> articleAlreadyPlacedDict = new Dictionary<int, string>();
+        public static double angleScene = 0.0;               
 
         List<string> wallSectionList = new List<string>();
         List<string> doorSectionList = new List<string>();
@@ -164,14 +162,17 @@ namespace TT.Import.EGI
         {
             if (this.CurrentFileEGI != null)
             {
-                Cursor.Current = Cursors.WaitCursor;                
+                Cursor.Current = Cursors.WaitCursor;
 
-                this.PlaceWallsInScene();
+                this.ClearObjectList();
+
+                this.PlaceWallsInScene();               
                 this.PlaceDoorsInScene();
                 this.PlaceWindowsInScene();
                 this.PlaceRecessInScene();
                 //this.PlaceHindrancesInScene();
                 this.PlaceArticlesInScene();
+                this.RenumberArticle();
                 this.EnableUnitFloorDetails();
                 this.ResetReference();
                
@@ -186,7 +187,30 @@ namespace TT.Import.EGI
 
             return 100;
         }
-  
+
+        private void RenumberArticle()
+        {
+            if (ImportObject.articlePlacedRenumberDict.Count > 0)
+            {
+                var sortedDict = from entry in ImportObject.articlePlacedRenumberDict orderby entry.Value ascending select entry;
+
+                foreach (KeyValuePair<int, int> kvp in sortedDict)
+                {
+                    Article articleRenumber = new Article(this.CurrentAppli, kvp.Key)
+                    {
+                        Number = kvp.Value
+                    };
+                }
+            }
+        }
+
+        private void ClearObjectList()
+        {
+            ImportObject.articleNotPlacedList.Clear();
+            ImportObject.articlePlacedDict.Clear();
+            ImportObject.articlePlacedRenumberDict.Clear();
+        }
+
         private string TemporisNumber()
         {
             string accountNumber = this.CurrentAppli.GetAccountNumber();
@@ -331,9 +355,6 @@ namespace TT.Import.EGI
             //Shape = 1             
             #endregion
 
-            Plugin.notPlacedArticleList.Clear();
-            Plugin.articleAlreadyPlacedDict.Clear();
-
             foreach (string articleSection in articleSectionList)
             {
                 mainForm.SetProgressBar(articleSection, allSectionsCount);
@@ -352,11 +373,12 @@ namespace TT.Import.EGI
                 }
 
                 this.ResetReference();
-                //mainForm.SetProgressBar(articleSection, allSectionsCount);
+                
             }
 
             if (articleSegment != null)
             {
+                //articleSegment.PlacedArticleMessage();
                 articleSegment.NoPlacedArticleMessage();
             }
         }
@@ -364,11 +386,13 @@ namespace TT.Import.EGI
         //Method to enable feet of unit whose on floor
         private void EnableUnitFloorDetails()
         {
-            Articles articles = this.CurrentAppli.GetArticleList(KD.Analysis.FilterArticle.filterToGetArticleByCodeValidPlaced(manageCatalog.catalogCode));
+            Articles articles = this.CurrentAppli.GetArticleList(KD.Analysis.FilterArticle.filterToGetArticleByCodeValidPlaced_Plus(manageCatalog.catalogCode,
+                                                                                                                                    KD.SDK.SceneEnum.ObjectInfo.TYPE,
+                                                                                                                                    (int)KD.SDK.SceneEnum.ObjectType.LINEAR));
             foreach (Article article in articles)
-            {
+            {               
                 SegmentClassification segmentClassification = new SegmentClassification(article);
-                if ((article.Type == (int)KD.SDK.SceneEnum.ObjectType.LINEAR) && segmentClassification.IsArticlePlinth())
+                if (segmentClassification.IsArticlePlinth())
                 {
                     string articleOverlapping = this.CurrentAppli.SceneComponent.ObjectGetOverlappingObjectsList(article.ObjectId, false);
                     string[] articleOverlappingIDs = articleOverlapping.Split(KD.CharTools.Const.Comma);
@@ -378,10 +402,10 @@ namespace TT.Import.EGI
                         segmentClassification = new SegmentClassification(articleToDelDetails);
                         if (segmentClassification.IsArticleUnitFloor())
                         {
-                            this.CurrentAppli.Scene.ObjectSetInfo(Convert.ToInt32(id), KD.StringTools.Const.Zero, KD.SDK.SceneEnum.ObjectInfo.HASVISIBLEDETAILS);
+                            this.CurrentAppli.Scene.ObjectSetInfo(Convert.ToInt32(id), KD.StringTools.Const.Zero, KD.SDK.SceneEnum.ObjectInfo.HASVISIBLEDETAILS);                                
                         }
                     }
-                }
+                }              
             }
         }
 

@@ -273,9 +273,10 @@ namespace Ord_Eancom
             {
                 OrderWrite.segmentNumberBetweenUNHandUNT = 0;
                 RFF_A.refPosList.Clear();
+                RFF_A.refPosCommentList.Clear();
 
                 //orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
-                
+
                 fileEDI = new FileEDI(this.CurrentAppli, orderInformations.GetSupplierName(), orderInformationsFromArticles);
                 if (fileEDI.csvPairingFileReader == null)
                 {

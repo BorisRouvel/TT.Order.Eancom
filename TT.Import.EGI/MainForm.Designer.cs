@@ -46,13 +46,13 @@
             // 
             this.backgroundWorker.WorkerReportsProgress = true;
             this.backgroundWorker.WorkerSupportsCancellation = true;
-            this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_DoWork);
-            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker_ProgressChanged);
-            this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_RunWorkerCompleted);
+            this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.BackgroundWorker_DoWork);
+            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.BackgroundWorker_ProgressChanged);
+            this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BackgroundWorker_RunWorkerCompleted);
             // 
             // Close_BTN
             // 
-            this.Close_BTN.Location = new System.Drawing.Point(137, 54);
+            this.Close_BTN.Location = new System.Drawing.Point(148, 79);
             this.Close_BTN.Name = "Close_BTN";
             this.Close_BTN.Size = new System.Drawing.Size(75, 23);
             this.Close_BTN.TabIndex = 2;
@@ -63,10 +63,9 @@
             // MainForm_GBX
             // 
             this.MainForm_GBX.Controls.Add(this.progressBar);
-            this.MainForm_GBX.Controls.Add(this.Close_BTN);
             this.MainForm_GBX.Location = new System.Drawing.Point(12, 12);
             this.MainForm_GBX.Name = "MainForm_GBX";
-            this.MainForm_GBX.Size = new System.Drawing.Size(345, 83);
+            this.MainForm_GBX.Size = new System.Drawing.Size(345, 61);
             this.MainForm_GBX.TabIndex = 3;
             this.MainForm_GBX.TabStop = false;
             this.MainForm_GBX.Text = "Status";
@@ -75,9 +74,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(369, 104);
+            this.ClientSize = new System.Drawing.Size(369, 112);
             this.ControlBox = false;
             this.Controls.Add(this.MainForm_GBX);
+            this.Controls.Add(this.Close_BTN);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

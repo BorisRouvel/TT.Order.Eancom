@@ -22,9 +22,11 @@ namespace TT.Import.EGI
 
         public bool Open()
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = FileEGI.FilterEGIFile;
-            openFile.RestoreDirectory = true;           
+            OpenFileDialog openFile = new OpenFileDialog()
+            {
+                Filter = FileEGI.FilterEGIFile,
+                RestoreDirectory = true
+            };
 
             if (openFile.ShowDialog() == DialogResult.OK)
             {

@@ -695,16 +695,34 @@ namespace Ord_Eancom
             }
         }
         //Article
-        private void MoveArticlePerRepere(Article article)
+        private void MoveArticlePerRepere(Article article, string shape)
         {
+            if (shape == ItemValue.Shape_27_AngleWithFiler && article.Handing == article.CurrentAppli.GetTranslatedText("G"))
+            {
+                a = (article.AngleOXY + 90.0);
+            }
+            else
+            {
+                a = (article.AngleOXY - 180.0);                
+            }
+
+            if (a < 0.0)
+            {
+                a += 360.0;
+            }
+            else if (a == 360.0)
+            {
+                a = 0.0;
+            }
+
             posX = article.PositionX;
             posY = article.PositionY;
-            posZ = article.PositionZ;           
-            a = (article.AngleOXY - 180);
-            if (a < 0)
+            posZ = article.PositionZ;
+
+            if (shape == ItemValue.Shape_27_AngleWithFiler && article.Handing == article.CurrentAppli.GetTranslatedText("G"))
             {
-                a += 360;
-            }            
+                return;
+            }
 
             double angle = 0.0;
             switch (OrderWrite.version.ToUpper())
@@ -717,9 +735,7 @@ namespace Ord_Eancom
                 case ItemValue.V1_51: //FBD //BAUFORMAT
                     angle = 2 * Math.PI * (a / 360);
                     posX -= article.DimensionX * Math.Cos(angle);
-                    posY -= article.DimensionX * Math.Sin(angle);
-                    //x1 -= article.DimensionX;
-                    //a -= article.AngleOXY;
+                    posY -= article.DimensionX * Math.Sin(angle);                   
                     break;
                 default: //V1_51
                     angle = 2 * Math.PI * (a / 360);
@@ -780,9 +796,11 @@ namespace Ord_Eancom
                     structureLineEGIList.Add(ArticleManufacturer(article.KeyRef));                    
                     structureLineEGIList.Add(ArticleRefNo(article.ObjectId.ToString())); //RFF.LI  
                     structureLineEGIList.Add(ArticleRefPos(article.ObjectId.ToString())); // RFF.ON
+                    structureLineEGIList.Add(ArticleRefPosComment(article.ObjectId.ToString())); // comment RFF.ON
 
+                    string shape = this.GetShapeNumberByType(article.KeyRef);
                     int polyType = _buildCommon.GetArticlePolyType(article);
-                    this.SetAllPositionsAndDimensions(segmentClassification, article, polyType);
+                    this.SetAllPositionsAndDimensions(segmentClassification, article, polyType, shape);
 
                     bool hasPolytype = false;
                     string[] polyPoints = { };                    
@@ -807,7 +825,7 @@ namespace Ord_Eancom
                     structureLineEGIList.Add(ArticleDimensionZ(dimZ));                    
                     structureLineEGIList.Add(ArticleDimensionY(article, dimY));
 
-                    string shape = this.GetShapeNumberByType(article.KeyRef);
+                    //string shape = this.GetShapeNumberByType(article.KeyRef);
                     if (!shape.Equals(KD.StringTools.Const.Zero) && !segmentClassification.HasArticleCoinParent())
                     {
                         structureLineEGIList.AddRange(ArticleMeasureShapeList(article.KeyRef));                       
@@ -898,7 +916,7 @@ namespace Ord_Eancom
         {
             if (!String.IsNullOrEmpty(keyRef))
             {
-                return SegmentFormat.CommentChar + ItemKey.Name + KD.StringTools.Const.EqualSign + keyRef + Separator.NewLine; ;
+                return SegmentFormat.CommentChar + ItemKey.Name + KD.StringTools.Const.EqualSign + keyRef + Separator.NewLine;
             }
             return null;
         }
@@ -922,6 +940,23 @@ namespace Ord_Eancom
                     if (iD.Equals(id))
                     {
                         return ItemKey.RefPos + KD.StringTools.Const.EqualSign + refPos + Separator.NewLine;
+                    }
+                }
+            }
+            return null;
+        }
+        private string ArticleRefPosComment(string iD)
+        {
+            foreach (string refPosescomment in RFF_A.refPosCommentList)
+            {
+                string[] IdRefPosComment = refPosescomment.Split(KD.CharTools.Const.SemiColon);
+                if (IdRefPosComment.Length > 1)
+                {
+                    string id = IdRefPosComment[0];
+                    string refPosComment = IdRefPosComment[1];
+                    if (iD.Equals(id))
+                    {
+                        return SegmentFormat.CommentChar + ItemKey.RefPos + KD.StringTools.Const.EqualSign + refPosComment + Separator.NewLine;
                     }
                 }
             }
@@ -1102,13 +1137,13 @@ namespace Ord_Eancom
             return KD.StringTools.Const.Zero;
         }        
 
-        private void SetAllPositionsAndDimensions(SegmentClassification segmentClassification, Article article, int polytype)
+        private void SetAllPositionsAndDimensions(SegmentClassification segmentClassification, Article article, int polytype, string shape)
         {
             if (!segmentClassification.HasArticleCoinParent())
             {
                 if (!segmentClassification.IsArticleCornerFilerWithoutCoin())
                 {
-                    this.MoveArticlePerRepere(article);
+                    this.MoveArticlePerRepere(article, shape);
                     this.SetDimensions(article);
                 }
                 else if (segmentClassification.IsArticleCornerFilerWithoutCoin())

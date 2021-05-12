@@ -48,13 +48,13 @@ namespace TT.Import.EGI
             Close_BTN.Enabled = false;
         }
 
-        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {           
             BackgroundWorker worker = new BackgroundWorker();            
             e.Result = _plugin.Execute(worker, e);
         }
 
-        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             if (!backgroundWorker.CancellationPending)
             {
@@ -69,7 +69,7 @@ namespace TT.Import.EGI
             }
         }
 
-        private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Close_BTN.Enabled = true;
             //DialogResult dialog = System.Windows.Forms.MessageBox.Show("Terminé.", "Information", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);

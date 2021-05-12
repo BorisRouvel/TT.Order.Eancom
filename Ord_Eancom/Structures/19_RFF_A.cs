@@ -15,6 +15,8 @@ namespace Eancom
 
         List<string> childLevelList = new List<string>() { };
         public static List<string> refPosList = new List<string>(0);
+        public static List<string> refPosCommentList = new List<string>(0);
+
         private const string BlockSetNumber_LI = "0.1";
         private const string BlockSetNumber_ON = "1";
 
@@ -111,8 +113,15 @@ namespace Eancom
                 }
 
                 OrderWrite.segmentNumberBetweenUNHandUNT += 1;
-                //créer une liste pour EGI REF_POS
+                //créer deux liste pour EGI REF_POS
                 refPosList.Add(article.ObjectId.ToString() + KD.StringTools.Const.SemiColon + c506.E1154);
+
+                if (article.Number != KD.Const.UnknownId)
+                {
+                    string strNumber = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                    refPosCommentList.Add(article.ObjectId.ToString() + KD.StringTools.Const.SemiColon + strNumber);
+                }
+
                 return this.BuildLine();
             }
             return null;
