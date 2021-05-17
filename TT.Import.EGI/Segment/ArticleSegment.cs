@@ -518,15 +518,24 @@ namespace TT.Import.EGI
                                 _name += CatalogBlockName.Coin;
                                 _commentName += CatalogBlockName.Coin;
                                 _article = this.ReplaceObject();
+
                                 if (this.Article != null)
-                                { 
-                                this.ChangeFilerDimensions();
-                                this.ChangeFilerChildDimensions();
+                                {
+                                    if (this.Article.KeyRef.ToUpper().Contains(CatalogBlockName.Coin.ToUpper()))
+                                    {
+                                        this.ChangeFilerDimensions();
+                                        this.ChangeFilerChildDimensions();
+                                    }
+                                    else 
+                                    {
+                                        this.MoveArticlePerRepere(this.Shape);
+                                        this.MoveArticlePositionZPlinth();
+                                    }
                                 }
                             }
                             else
                             {
-                                this.ChangeFilerPositionsAndDimensions();
+                                this.ChangeFilerPositions();
                             }                           
                         }
                         else
@@ -914,12 +923,12 @@ namespace TT.Import.EGI
             }
         }
        
-        private void ChangeFilerPositionsAndDimensions()
+        private void ChangeFilerPositions()//AndDimensions
         {
             _article.PositionX -= CatalogConstante.FrontDepth;
             _article.PositionY -= CatalogConstante.FrontDepth;
-            _article.DimensionX = this.Measure_B + CatalogConstante.FrontDepth;
-            _article.DimensionY = this.Measure_T + CatalogConstante.FrontDepth;
+            //_article.DimensionX = this.Measure_B + CatalogConstante.FrontDepth; //the 17/05/2021 don't need anymore - check this
+            //_article.DimensionY = this.Measure_T + CatalogConstante.FrontDepth;
             _article.AngleOXY -= 90.0;
         }
 

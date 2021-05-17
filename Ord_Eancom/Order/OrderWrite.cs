@@ -823,7 +823,7 @@ namespace Ord_Eancom
                     }
 
                     structureLineEGIList.Add(ArticleDimensionZ(dimZ));                    
-                    structureLineEGIList.Add(ArticleDimensionY(article, dimY));
+                    structureLineEGIList.Add(ArticleDimensionY(article, dimY, shape));
 
                     //string shape = this.GetShapeNumberByType(article.KeyRef);
                     if (!shape.Equals(KD.StringTools.Const.Zero) && !segmentClassification.HasArticleCoinParent())
@@ -1020,24 +1020,27 @@ namespace Ord_Eancom
             string data = ItemKey.Measure_H + KD.StringTools.Const.EqualSign + value.ToString(SegmentFormat.DotDecimal);
             return Tools.ConvertCommaToDot(data) + Separator.NewLine;
         }
-        private string ArticleDimensionY(Article article, double value)
+        private string ArticleDimensionY(Article article, double value, string shape)
         {
             SegmentClassification segmentClassification = new SegmentClassification(article);
             if (segmentClassification.IsArticleUnit() && !segmentClassification.IsArticleCornerOrAngleUnit() && !segmentClassification.IsArticleSplashbackPanel() && !segmentClassification.IsArticleSplashbackPanel2() )
             {
                 value -= OrderConstants.FrontDepth;
             }
-           // this for shape 27 with filer
-            Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
-            if (childs != null && childs.Count > 0)
+            // this for shape 27 with filer
+            if (shape == ItemValue.Shape_27_AngleWithFiler)
             {
-                foreach (Article child in childs)
+                Articles childs = article.GetChildren(FilterArticle.strFilterToGetValidPlacedHostedAndChildren());
+                if (childs != null && childs.Count > 0)
                 {
-                    SegmentClassification childClassification = new SegmentClassification(child);
-                    if (childClassification.IsArticleFiler())
+                    foreach (Article child in childs)
                     {
-                        value += child.DimensionX;
-                        break;
+                        SegmentClassification childClassification = new SegmentClassification(child);
+                        if (childClassification.IsArticleFiler())
+                        {
+                            value += child.DimensionX;
+                            break;
+                        }
                     }
                 }
             }
