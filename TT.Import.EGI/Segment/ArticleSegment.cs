@@ -546,9 +546,8 @@ namespace TT.Import.EGI
                             {
                                 if (!segmentClassification.IsArticleSplashbackPanel2())
                                 {
-                                    //this.ChangeCarcasseDimY();
-
-                                    _measure_T += CatalogConstante.FrontDepth;
+                                    this.ChangeCarcasseDimY(this.Shape);
+                                    
                                     _article.DeleteFromScene();
                                     _article = this.PlaceObject();
                                 }
@@ -865,6 +864,10 @@ namespace TT.Import.EGI
                 _article.PositionY -= this.Measure_B;
                 _article.AngleOXY += 180;
             }
+            else if (shape == ItemValue.Shape_20_CornerOrFiler)
+            {                
+                _article.AngleOXY += 270;
+            }
             else
             {
                 switch (version)
@@ -896,9 +899,12 @@ namespace TT.Import.EGI
                 }
             }
         }
-        private void ChangeCarcasseDimY()
+        private void ChangeCarcasseDimY(string shape)
         {
-            _article.DimensionY += CatalogConstante.FrontDepth;           
+            if (!shape.Equals(ItemValue.Shape_20_CornerOrFiler))
+            {
+                _measure_T += CatalogConstante.FrontDepth;
+            }
         }
       
         private void ChangeFilerDimensions() 

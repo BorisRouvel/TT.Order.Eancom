@@ -697,14 +697,20 @@ namespace Ord_Eancom
         //Article
         private void MoveArticlePerRepere(Article article, string shape)
         {
+            double angle = 0.0;
+
             if (shape == ItemValue.Shape_27_AngleWithFiler && article.Handing == article.CurrentAppli.GetTranslatedText("G"))
+            {
+                a = (article.AngleOXY + 90.0);
+            }
+            else if (shape == ItemValue.Shape_20_CornerOrFiler)
             {
                 a = (article.AngleOXY + 90.0);
             }
             else
             {
                 a = (article.AngleOXY - 180.0);                
-            }
+            }           
 
             if (a < 0.0)
             {
@@ -723,8 +729,13 @@ namespace Ord_Eancom
             {
                 return;
             }
-
-            double angle = 0.0;
+            else if (shape == ItemValue.Shape_20_CornerOrFiler)
+            {
+                angle = 2 * Math.PI * (a / 360);
+                posX -= article.DimensionX * Math.Cos(angle);
+                return;
+            }
+            
             switch (OrderWrite.version.ToUpper())
             {
                 case ItemValue.V1_50: //DISCAC                    
