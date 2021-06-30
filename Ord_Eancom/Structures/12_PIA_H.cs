@@ -175,9 +175,10 @@ namespace Eancom
             {
                 codeAndNameList.RemoveAt(0); //Del the index 0 cause we don't need model here
 
-                foreach (string codeAndNameLine in codeAndNameList)
+                for (int i = 0; i < codeAndNameList.Count; i++)
                 {
-                    string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
+                    //string codeAndNameLine = codeAndNameList[i];
+                    string[] codeAndName = codeAndNameList[i].Split(KD.CharTools.Const.SemiColon);
                     if (codeAndName.Length == 4)
                     {
                         string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
@@ -190,6 +191,23 @@ namespace Eancom
                         } 
                         string name = codeAndName[2];
                         name = _orderInformationsFromArticles.ReleaseChar(name);
+
+                        if (code == OrderConstants.IdemFinishCode)
+                        {
+                            if (i >= 1 & codeAndNameList[i - 1] != null & !String.IsNullOrEmpty(codeAndNameList[i - 1]))
+                            {
+                                string[] idemCodeAndName = codeAndNameList[i - 1].Split(KD.CharTools.Const.SemiColon);
+                                if (idemCodeAndName.Length == 4)
+                                {
+                                    code = Tools.DelCharAndAllAfter(idemCodeAndName[0], KD.StringTools.Const.Underscore);
+                                    code = Tools.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                                    code = _orderInformationsFromArticles.ReleaseChar(code);
+
+                                    name = idemCodeAndName[2];
+                                    name = _orderInformationsFromArticles.ReleaseChar(name);
+                                }
+                            }
+                        }
 
                         int nameCharStart = 0;
                         for (int c = 0; c < UtilitySegment.finishLineMaxNb; c++)

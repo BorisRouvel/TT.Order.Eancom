@@ -37,6 +37,7 @@ namespace Ord_Eancom
     {
         public const string Insitu = "INSITU";
         public const string HandleName = "_HDL";
+        public const string IdemFinishCode = "IDEM";
 
         public const string FormatDate_4yMd = "yyyyMMdd";
         public const string FormatDate_2yMd = "yyMMdd";
