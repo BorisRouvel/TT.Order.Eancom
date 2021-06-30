@@ -103,6 +103,19 @@ namespace Ord_Eancom
             }
         }
 
+        private static bool _isChoiceLinearNumber;
+        public static bool IsChoiceLinearNumber
+        {
+            get
+            {
+                return _isChoiceLinearNumber;
+            }
+            set
+            {
+                _isChoiceLinearNumber = value;
+            }
+        }
+
         private static string _mandatoryDeliveryInformation;
         public static string MandatoryDeliveryInformation
         {
@@ -277,6 +290,20 @@ namespace Ord_Eancom
             this.EmailCc_TBX.Text = EmailCc;
 
             this.SetMandatoryDeliveryTextBox();
+
+            string linearNumberFromIni = Eancom.FileEDI.ordersIniFile.ReadValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.linearNumber);
+            if (!String.IsNullOrEmpty(linearNumberFromIni))
+            {
+                if (bool.TryParse(linearNumberFromIni, out bool result))
+                {
+                    _isChoiceLinearNumber = result;                    
+                }
+                else
+                {
+                    _isChoiceLinearNumber = false;
+                }
+                this.LinearNumber_CHB.Checked = IsChoiceLinearNumber;
+            }
         }
         private void SaveInfoToIni()
         {            
@@ -287,6 +314,8 @@ namespace Ord_Eancom
             {
                 Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, OrderKey.MandatoryDeliveryRetailerInformation + _retailerNumber, MandatoryDeliveryInformation);
             }
+
+            Eancom.FileEDI.ordersIniFile.WriteValue(Eancom.FileEDI.ediSection, Eancom.FileEDI.linearNumber, IsChoiceLinearNumber.ToString());
         }      
         private void UpdateForm()
         {
@@ -378,6 +407,11 @@ namespace Ord_Eancom
         private void MandatoryDeliveryInformation_TBX_TextChanged(object sender, EventArgs e)
         {
             _mandatoryDeliveryInformation = this.MandatoryDeliveryInformation_TBX.Text;
-        }       
+        }
+
+        private void LinearNumber_CHB_CheckedChanged(object sender, EventArgs e)
+        {
+            _isChoiceLinearNumber = LinearNumber_CHB.Checked;
+        }
     }
 }

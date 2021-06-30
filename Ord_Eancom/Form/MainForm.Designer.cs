@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.MainFrame = new System.Windows.Forms.GroupBox();
+            this.AttachedFile_GBX = new System.Windows.Forms.GroupBox();
             this.ChoicePerspective_CHB = new System.Windows.Forms.CheckBox();
             this.ChoiceOrder_CHB = new System.Windows.Forms.CheckBox();
             this.ChoiceElevation_CHB = new System.Windows.Forms.CheckBox();
@@ -47,25 +47,28 @@
             this.MandatoryDeliveryInformation_TBX = new System.Windows.Forms.TextBox();
             this.MandatoryDeliveryInformation_GBX = new System.Windows.Forms.GroupBox();
             this.Cancel_BTN = new System.Windows.Forms.Button();
-            this.MainFrame.SuspendLayout();
+            this.Options_GBX = new System.Windows.Forms.GroupBox();
+            this.LinearNumber_CHB = new System.Windows.Forms.CheckBox();
+            this.AttachedFile_GBX.SuspendLayout();
             this.Delivery_GBX.SuspendLayout();
             this.AdressEmail_GBX.SuspendLayout();
             this.MandatoryDeliveryInformation_GBX.SuspendLayout();
+            this.Options_GBX.SuspendLayout();
             this.SuspendLayout();
             // 
-            // MainFrame
+            // AttachedFile_GBX
             // 
-            this.MainFrame.Controls.Add(this.ChoicePerspective_CHB);
-            this.MainFrame.Controls.Add(this.ChoiceOrder_CHB);
-            this.MainFrame.Controls.Add(this.ChoiceElevation_CHB);
-            this.MainFrame.Controls.Add(this.ChoicePlan_CHB);
-            this.MainFrame.Controls.Add(this.ChoiceEGI_CHB);
-            this.MainFrame.Location = new System.Drawing.Point(218, 12);
-            this.MainFrame.Name = "MainFrame";
-            this.MainFrame.Size = new System.Drawing.Size(94, 152);
-            this.MainFrame.TabIndex = 15;
-            this.MainFrame.TabStop = false;
-            this.MainFrame.Text = "Fichiers Joints :";
+            this.AttachedFile_GBX.Controls.Add(this.ChoicePerspective_CHB);
+            this.AttachedFile_GBX.Controls.Add(this.ChoiceOrder_CHB);
+            this.AttachedFile_GBX.Controls.Add(this.ChoiceElevation_CHB);
+            this.AttachedFile_GBX.Controls.Add(this.ChoicePlan_CHB);
+            this.AttachedFile_GBX.Controls.Add(this.ChoiceEGI_CHB);
+            this.AttachedFile_GBX.Location = new System.Drawing.Point(218, 66);
+            this.AttachedFile_GBX.Name = "AttachedFile_GBX";
+            this.AttachedFile_GBX.Size = new System.Drawing.Size(94, 152);
+            this.AttachedFile_GBX.TabIndex = 15;
+            this.AttachedFile_GBX.TabStop = false;
+            this.AttachedFile_GBX.Text = "Fichiers Joints :";
             // 
             // ChoicePerspective_CHB
             // 
@@ -134,7 +137,7 @@
             // 
             // Ok_BTN
             // 
-            this.Ok_BTN.Location = new System.Drawing.Point(83, 240);
+            this.Ok_BTN.Location = new System.Drawing.Point(85, 294);
             this.Ok_BTN.Name = "Ok_BTN";
             this.Ok_BTN.Size = new System.Drawing.Size(75, 23);
             this.Ok_BTN.TabIndex = 1;
@@ -145,7 +148,7 @@
             // version_LNK
             // 
             this.version_LNK.AutoSize = true;
-            this.version_LNK.Location = new System.Drawing.Point(12, 245);
+            this.version_LNK.Location = new System.Drawing.Point(12, 299);
             this.version_LNK.Name = "version_LNK";
             this.version_LNK.Size = new System.Drawing.Size(13, 13);
             this.version_LNK.TabIndex = 12;
@@ -157,7 +160,7 @@
             // 
             this.Delivery_GBX.Controls.Add(this.CustomerDelivery_RBN);
             this.Delivery_GBX.Controls.Add(this.RetaillerDelivery_RBN);
-            this.Delivery_GBX.Location = new System.Drawing.Point(12, 95);
+            this.Delivery_GBX.Location = new System.Drawing.Point(12, 149);
             this.Delivery_GBX.Name = "Delivery_GBX";
             this.Delivery_GBX.Size = new System.Drawing.Size(200, 69);
             this.Delivery_GBX.TabIndex = 14;
@@ -195,7 +198,7 @@
             this.AdressEmail_GBX.Controls.Add(this.EmailTo_LAB);
             this.AdressEmail_GBX.Controls.Add(this.EmailCc_TBX);
             this.AdressEmail_GBX.Controls.Add(this.EmailTo_TBX);
-            this.AdressEmail_GBX.Location = new System.Drawing.Point(12, 12);
+            this.AdressEmail_GBX.Location = new System.Drawing.Point(12, 66);
             this.AdressEmail_GBX.Name = "AdressEmail_GBX";
             this.AdressEmail_GBX.Size = new System.Drawing.Size(200, 77);
             this.AdressEmail_GBX.TabIndex = 16;
@@ -249,7 +252,7 @@
             // MandatoryDeliveryInformation_GBX
             // 
             this.MandatoryDeliveryInformation_GBX.Controls.Add(this.MandatoryDeliveryInformation_TBX);
-            this.MandatoryDeliveryInformation_GBX.Location = new System.Drawing.Point(12, 170);
+            this.MandatoryDeliveryInformation_GBX.Location = new System.Drawing.Point(12, 224);
             this.MandatoryDeliveryInformation_GBX.Name = "MandatoryDeliveryInformation_GBX";
             this.MandatoryDeliveryInformation_GBX.Size = new System.Drawing.Size(300, 64);
             this.MandatoryDeliveryInformation_GBX.TabIndex = 18;
@@ -259,7 +262,7 @@
             // Cancel_BTN
             // 
             this.Cancel_BTN.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.Cancel_BTN.Location = new System.Drawing.Point(164, 240);
+            this.Cancel_BTN.Location = new System.Drawing.Point(166, 294);
             this.Cancel_BTN.Name = "Cancel_BTN";
             this.Cancel_BTN.Size = new System.Drawing.Size(75, 23);
             this.Cancel_BTN.TabIndex = 19;
@@ -267,33 +270,57 @@
             this.Cancel_BTN.UseVisualStyleBackColor = true;
             this.Cancel_BTN.Click += new System.EventHandler(this.Cancel_BTN_Click);
             // 
+            // Options_GBX
+            // 
+            this.Options_GBX.Controls.Add(this.LinearNumber_CHB);
+            this.Options_GBX.Location = new System.Drawing.Point(12, 12);
+            this.Options_GBX.Name = "Options_GBX";
+            this.Options_GBX.Size = new System.Drawing.Size(300, 48);
+            this.Options_GBX.TabIndex = 20;
+            this.Options_GBX.TabStop = false;
+            this.Options_GBX.Text = "Options";
+            // 
+            // LinearNumber_CHB
+            // 
+            this.LinearNumber_CHB.AutoSize = true;
+            this.LinearNumber_CHB.Location = new System.Drawing.Point(6, 19);
+            this.LinearNumber_CHB.Name = "LinearNumber_CHB";
+            this.LinearNumber_CHB.Size = new System.Drawing.Size(135, 17);
+            this.LinearNumber_CHB.TabIndex = 0;
+            this.LinearNumber_CHB.Text = "Marquage des linéaires";
+            this.LinearNumber_CHB.UseVisualStyleBackColor = true;
+            this.LinearNumber_CHB.CheckedChanged += new System.EventHandler(this.LinearNumber_CHB_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.Ok_BTN;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.Cancel_BTN;
-            this.ClientSize = new System.Drawing.Size(324, 271);
+            this.ClientSize = new System.Drawing.Size(324, 326);
             this.ControlBox = false;
+            this.Controls.Add(this.Options_GBX);
             this.Controls.Add(this.Cancel_BTN);
             this.Controls.Add(this.MandatoryDeliveryInformation_GBX);
             this.Controls.Add(this.AdressEmail_GBX);
             this.Controls.Add(this.Delivery_GBX);
             this.Controls.Add(this.version_LNK);
             this.Controls.Add(this.Ok_BTN);
-            this.Controls.Add(this.MainFrame);
+            this.Controls.Add(this.AttachedFile_GBX);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Commande";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.MainFrame.ResumeLayout(false);
-            this.MainFrame.PerformLayout();
+            this.AttachedFile_GBX.ResumeLayout(false);
+            this.AttachedFile_GBX.PerformLayout();
             this.Delivery_GBX.ResumeLayout(false);
             this.Delivery_GBX.PerformLayout();
             this.AdressEmail_GBX.ResumeLayout(false);
             this.AdressEmail_GBX.PerformLayout();
             this.MandatoryDeliveryInformation_GBX.ResumeLayout(false);
             this.MandatoryDeliveryInformation_GBX.PerformLayout();
+            this.Options_GBX.ResumeLayout(false);
+            this.Options_GBX.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -301,7 +328,7 @@
 
         #endregion
 
-        private System.Windows.Forms.GroupBox MainFrame;
+        private System.Windows.Forms.GroupBox AttachedFile_GBX;
         private System.Windows.Forms.CheckBox ChoiceOrder_CHB;
         private System.Windows.Forms.CheckBox ChoiceElevation_CHB;
         private System.Windows.Forms.CheckBox ChoicePlan_CHB;
@@ -320,5 +347,7 @@
         private System.Windows.Forms.TextBox MandatoryDeliveryInformation_TBX;
         private System.Windows.Forms.GroupBox MandatoryDeliveryInformation_GBX;
         private System.Windows.Forms.Button Cancel_BTN;
+        private System.Windows.Forms.GroupBox Options_GBX;
+        private System.Windows.Forms.CheckBox LinearNumber_CHB;
     }
 }

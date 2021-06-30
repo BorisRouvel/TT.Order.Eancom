@@ -87,14 +87,14 @@ namespace Eancom
 
                     if (_orderInformationsFromArticles.IsParent(itemLevel))
                     {
-                        c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                        c506.E1154 = this.SetLineNumber(article, KD.StringTools.Const.Zero);
                     }
                     else
                     {
                         //case of a filer is a component of a Coin, set the number yet
                         if (article.Name.ToUpper().Contains(article.CurrentAppli.GetTranslatedText(CatalogBlockName.Filer.ToUpper())))
                         {
-                            c506.E1154 = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                            c506.E1154 = this.SetLineNumber(article, KD.StringTools.Const.Zero);
                         }
                         else
                         {
@@ -118,7 +118,7 @@ namespace Eancom
 
                 if (article.Number != KD.Const.UnknownId)
                 {
-                    string strNumber = this.SetLineNumber(article.Number.ToString(), KD.StringTools.Const.Zero);
+                    string strNumber = this.SetLineNumber(article, KD.StringTools.Const.Zero);
                     refPosCommentList.Add(article.ObjectId.ToString() + KD.StringTools.Const.SemiColon + strNumber);
                 }
 
@@ -185,8 +185,17 @@ namespace Eancom
             return null;
         }
 
-        private string SetLineNumber(string number, string level)
+        private string SetLineNumber(Article article, string level)
         {
+            string number = article.Number.ToString();
+
+            if (MainForm.IsChoiceLinearNumber)
+            {
+                if (number == KD.Const.UnknownId.ToString() && article.Type == (int)KD.SDK.SceneEnum.ObjectType.LINEAR)
+                {
+                    number = article.ObjectId.ToString();
+                }
+            }
             return number + KD.StringTools.Const.Dot + level;
         }
         private Article GetParent(Article article)
@@ -219,11 +228,11 @@ namespace Eancom
         }
         private string GetChildLevel(Article article, int level)
         {
-            string childLevel = this.SetLineNumber(article.Number.ToString(), level.ToString());
+            string childLevel = this.SetLineNumber(article, level.ToString());
             while (childLevelList.Contains(childLevel))
             {
                 level += 1;
-                childLevel = this.SetLineNumber(article.Number.ToString(), level.ToString());
+                childLevel = this.SetLineNumber(article, level.ToString());
             }
             return childLevel;
         }
