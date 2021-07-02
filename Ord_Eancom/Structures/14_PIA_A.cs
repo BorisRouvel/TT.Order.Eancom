@@ -415,12 +415,16 @@ namespace Eancom
 
                 codeAndNameList = articleInformations.GetFinishCodeAndName();// article);
                 if (codeAndNameList != null && codeAndNameList.Count > 0)
-                {                   
-                    foreach (string codeAndNameLine in codeAndNameList)
+                {
+                    //foreach (string codeAndNameLine in codeAndNameList)
+                    //{
+                    for (int i = 0; i < codeAndNameList.Count; i++)
                     {
-                        if (!GenericCodeAndNameList.Contains(codeAndNameLine))
+                        //string codeAndNameLine = codeAndNameList[i];                       
+                        if (codeAndNameList[i].StartsWith(OrderConstants.IdemFinishCode) || !GenericCodeAndNameList.Contains(codeAndNameList[i]))
                         {
-                            string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
+                            //string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
+                            string[] codeAndName = codeAndNameList[i].Split(KD.CharTools.Const.SemiColon);
                             if (codeAndName.Length == 4)
                             {
                                 string code = Tools.DelCharAndAllAfter(codeAndName[0], KD.StringTools.Const.Underscore);
@@ -433,6 +437,28 @@ namespace Eancom
                                 }
                                 string name = codeAndName[2];
                                 name = _orderInformationsFromArticles.ReleaseChar(name);
+
+                                // put the same code an name when code = IDEM
+                                if (code == OrderConstants.IdemFinishCode)
+                                {
+                                    if (i >= 1 & codeAndNameList[i - 1] != null & !String.IsNullOrEmpty(codeAndNameList[i - 1]))
+                                    {
+                                        if (GenericCodeAndNameList.Contains(codeAndNameList[i - 1]))
+                                        {
+                                            continue;
+                                        }
+                                        string[] idemCodeAndName = codeAndNameList[i - 1].Split(KD.CharTools.Const.SemiColon);
+                                        if (idemCodeAndName.Length == 4)
+                                        {
+                                            code = Tools.DelCharAndAllAfter(idemCodeAndName[0], KD.StringTools.Const.Underscore);
+                                            code = Tools.DelCharAndAllAfter(code, KD.StringTools.Const.Colon);
+                                            code = _orderInformationsFromArticles.ReleaseChar(code);
+
+                                            name = idemCodeAndName[2];
+                                            name = _orderInformationsFromArticles.ReleaseChar(name);
+                                        }
+                                    }
+                                }
 
                                 int nameCharStart = 0;
 

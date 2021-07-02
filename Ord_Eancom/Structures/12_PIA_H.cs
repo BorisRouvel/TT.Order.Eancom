@@ -192,6 +192,7 @@ namespace Eancom
                         string name = codeAndName[2];
                         name = _orderInformationsFromArticles.ReleaseChar(name);
 
+                        // put the same code an name when code = IDEM
                         if (code == OrderConstants.IdemFinishCode)
                         {
                             if (i >= 1 & codeAndNameList[i - 1] != null & !String.IsNullOrEmpty(codeAndNameList[i - 1]))

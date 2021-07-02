@@ -521,10 +521,12 @@ namespace Ord_Eancom
                     for (int fin = 0; fin < generikFinishTypes.Length; fin++)
                     {
                         int.TryParse(generikFinishTypes[fin], out int generikFinishType);
-                        int.TryParse(generikFinishes[fin], out int generikFinish);
+                        int.TryParse(generikFinishes[fin], out int generikFinish);                       
                         int type = _sceneAnalysis.GetFinishTypeNumber(generikFinishType);
-                        finishesList.Add(_sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish) +
-                            KD.StringTools.Const.SemiColon + type);
+                        string codeAndName = _sceneAnalysis.GetCatalogFinishCodeAndName(generikFinishType, generikFinish);
+                       
+                        finishesList.Add(codeAndName + KD.StringTools.Const.SemiColon + type);
+                       
                     }
                     return finishesList;
                 }
