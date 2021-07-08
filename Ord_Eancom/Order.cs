@@ -163,7 +163,7 @@ namespace Ord_Eancom
             Articles articles = SupplierArticleValidInScene();
             orderInformationsFromArticles = new OrderInformations(this.CurrentAppli, callParamsBlock, articles);
 
-            if (this.IsGenerateOrders(articles))
+            if (this.IsGenerateOrders(articles) && this.IsNotSameNumbers(articles))
             {
                 this.mainForm = new MainForm(orderInformations);
                 this.Main(articles); //callParamsBlock   
@@ -254,6 +254,54 @@ namespace Ord_Eancom
 
             _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.TrueLowerCase, OrderKey.GenerateOrder);
             return true;
+        }
+        private bool IsNotSameNumbers(Articles articles)
+        {
+            List<int> numberList = new List<int>();
+            numberList.Clear();
+
+            foreach (Article article in articles)
+            {
+                if (article.Number != KD.Const.UnknownId)
+                {
+                    if (numberList.Contains(article.Number))
+                    {
+                        DialogResult dialogResult = MessageBox.Show("Certains articles ont des marquages identiques." +
+                            Environment.NewLine + "Voulez-vous renuméroter les articles automatiquement et sauvegarder la scène ?" , "Information"
+                            , MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+                        if (dialogResult == DialogResult.No)
+                        {
+                            _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.FalseLowerCase, OrderKey.GenerateOrder);
+                            return false;
+                        }
+                        else
+                        {
+                            this.RenumberedArticles(articles);
+                            this.IsNotSameNumbers(articles);
+                        }                        
+                    }
+                    else
+                    {
+                        numberList.Add(article.Number);
+                    }
+                }
+            }
+            _pluginWord.CurrentAppli.Scene.SceneSetCustomInfo(KD.StringTools.Const.TrueLowerCase, OrderKey.GenerateOrder);
+            return true;
+        }
+        private void RenumberedArticles(Articles articles)
+        {
+            string articleIds = String.Empty;
+            foreach (Article article in articles)
+            {
+                if (article.Number != KD.Const.UnknownId)
+                {
+                    articleIds += article.ObjectId.ToString() + KD.StringTools.Const.Comma;
+                }
+            }
+            _pluginWord.CurrentAppli.Scene.SceneRenumber(articleIds, 1, true);
+            _pluginWord.CurrentAppli.ExecuteMenuItem(KD.Const.UnknownId, (int)KD.SDK.AppliEnum.FileMenuItemsId.SAVE);
         }
 
         private void Main(Articles articles)//int callParamsBlock

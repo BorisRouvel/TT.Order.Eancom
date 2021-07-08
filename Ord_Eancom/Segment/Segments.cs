@@ -854,5 +854,15 @@ namespace Eancom // TT.Import.EGI
             return text;
         }
     }
+
+    public class ConstructionID
+    {
+        public const string Ask = "J"; //  l’article n’étant pas symétrique, la méthode de construction doit être réclamée.
+        public const string Left = "L"; // Le mode de construction de l’article est fixe(construction à gauche).
+        public const string Right = "R"; //  Le mode de construction de l’article est fixe, en inversion-miroir par rapport à la forme de base.
+        public const string Symmetrical = "N"; // La forme de base est sans ambiguïté, car l’article est symétrique.
+        public const string DependOf = "A"; // en fonction du ferrage (par exemple Ferrage à gauche  construction à gauche)
+        public const string ReverseOf = "E"; // contraire au ferrage (par exemple Ferrage à gauche  construction à droite)
+    }
 }
 
