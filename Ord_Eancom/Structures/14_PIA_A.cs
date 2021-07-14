@@ -402,7 +402,7 @@ namespace Eancom
             }
             return null;
         }
-        public string Add_FinishCodeAndName(Article article)
+        public string Add_GenericFinishCodeAndName(Article article)
         {
             string dataLine = null;
             List<string> GenericCodeAndNameList = new List<string>();
@@ -413,17 +413,13 @@ namespace Eancom
                 OrderInformations articleInformations = new OrderInformations(article);
                 List<string> codeAndNameList = new List<string>();
 
-                codeAndNameList = articleInformations.GetFinishCodeAndName();// article);
+                codeAndNameList = articleInformations.GetGenericFinishCodeAndName(); // GetFinishCodeAndName();
                 if (codeAndNameList != null && codeAndNameList.Count > 0)
-                {
-                    //foreach (string codeAndNameLine in codeAndNameList)
-                    //{
+                {                    
                     for (int i = 0; i < codeAndNameList.Count; i++)
-                    {
-                        //string codeAndNameLine = codeAndNameList[i];                       
+                    {                                            
                         if (codeAndNameList[i].StartsWith(OrderConstants.IdemFinishCode) || !GenericCodeAndNameList.Contains(codeAndNameList[i]))
-                        {
-                            //string[] codeAndName = codeAndNameLine.Split(KD.CharTools.Const.SemiColon);
+                        {                            
                             string[] codeAndName = codeAndNameList[i].Split(KD.CharTools.Const.SemiColon);
                             if (codeAndName.Length == 4)
                             {

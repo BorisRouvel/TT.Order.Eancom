@@ -306,7 +306,7 @@ namespace Ord_Eancom
                         SetLineEDIList(pIA_A.Add_Hinge(article));
                         SetLineEDIList(pIA_A.Add_ConstructionID(article));
                         SetLineEDIList(pIA_A.Add_VisibleSide(article));
-                        SetLineEDIList(pIA_A.Add_FinishCodeAndName(article));
+                        SetLineEDIList(pIA_A.Add_GenericFinishCodeAndName(article));
                         SetLineEDIList(pIA_A.Add_LongPartType(article));
 
                         consecutiveNumbering += 1;

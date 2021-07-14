@@ -538,8 +538,8 @@ namespace Ord_Eancom
             List<string> finishesList = new List<string>();
             _sceneAnalysis = new SceneAnalysis(this.Article);
 
-            bool IsGenerik = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
-            if (IsGenerik)
+            bool IsFinish = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
+            if (IsFinish)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
                 {
@@ -553,13 +553,33 @@ namespace Ord_Eancom
             }
             return null;
         }
-        public List<string> GetFinishCodeAndName()//Article article)
+        public List<string> GetGenericFinishCodeAndName()
+        {
+            List<string> genericFinishesList = new List<string>();
+            _sceneAnalysis = new SceneAnalysis(this.Article);
+
+            bool IsGeneric = _sceneAnalysis.GetGenericFinishes(out string[] genericFinishTypes, out string[] genericFinishes);
+            if (IsGeneric)
+            {
+                for (int fin = 0; fin < genericFinishTypes.Length; fin++)
+                {
+                    int.TryParse(genericFinishTypes[fin], out int genericFinishType);
+                    int.TryParse(genericFinishes[fin], out int genericFinish);
+                    int type = _sceneAnalysis.GetFinishTypeNumber(genericFinishType);
+                    genericFinishesList.Add(_sceneAnalysis.GetGenericFinishCodeAndName(genericFinishType, genericFinish) +
+                        KD.StringTools.Const.SemiColon + type);
+                }
+                return genericFinishesList;
+            }
+            return null;
+        }
+        public List<string> GetFinishCodeAndName()
         {
             List<string> finishesList = new List<string>();
             _sceneAnalysis = new SceneAnalysis(this.Article);
 
-            bool IsGenerik = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
-            if (IsGenerik)
+            bool IsFinish = _sceneAnalysis.GetFinishes(out string[] finishTypes, out string[] finishes);
+            if (IsFinish)
             {
                 for (int fin = 0; fin < finishTypes.Length; fin++)
                 {
@@ -573,7 +593,7 @@ namespace Ord_Eancom
             }
             return null;
         }
-        public string GetSupplierCommentArticle()//Article article)
+        public string GetSupplierCommentArticle()
         {
             return this.ReleaseChar((this.Article.ObjectGetKeywordInfo("@Objet.CommentaireFournisseur()")));
         }
