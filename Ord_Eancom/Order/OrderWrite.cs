@@ -306,7 +306,7 @@ namespace Ord_Eancom
                         SetLineEDIList(pIA_A.Add_Hinge(article));
                         SetLineEDIList(pIA_A.Add_ConstructionID(article));
                         SetLineEDIList(pIA_A.Add_VisibleSide(article));
-                        SetLineEDIList(pIA_A.Add_GenericFinishCodeAndName(article));
+                        SetLineEDIList(pIA_A.Add_FinishCodeAndName(article));
                         SetLineEDIList(pIA_A.Add_LongPartType(article));
 
                         consecutiveNumbering += 1;
@@ -460,8 +460,7 @@ namespace Ord_Eancom
 
             _buildCommon.ResetReference();
         }
-
-       
+      
         private void GetContraintsList()
         {
             int objectNumber = this.Appli.Scene.SceneGetObjectsNb();
@@ -488,8 +487,7 @@ namespace Ord_Eancom
                 }
             }            
         }
-       
-        
+             
         //Header
         public void HeaderEGI()
         {
@@ -689,6 +687,7 @@ namespace Ord_Eancom
                 index += 1;
             }
         }
+
         //Article
         private void MoveArticlePerRepere(Article article, string shape)
         {
@@ -726,8 +725,11 @@ namespace Ord_Eancom
             }
             else if (shape == ItemValue.Shape_20_CornerOrFiler)
             {
-                angle = 2 * Math.PI * (a / 360);
-                posX -= article.DimensionX * Math.Cos(angle);
+                //angle = 2 * Math.PI * (a / 360);
+                //double zz = posX;
+                //   zz -= article.DimensionX * Math.Cos(angle);
+
+                //posX = posX * Math.Cos(angle); //-= article.DimensionX * Math.Cos(angle);
                 return;
             }
             
@@ -795,16 +797,24 @@ namespace Ord_Eancom
 
                 if ((!String.IsNullOrEmpty(article.Number.ToString()) && article.Number != KD.Const.UnknownId) || segmentClassification.IsArticleLinear())
                 {
+                    string shape = this.GetShapeNumberByType(article.KeyRef);
+
+                    if ((article.Topic == (int)KD.SDK.SceneEnum.TopicId.ACCESSORIES) || (article.Topic != (int)KD.SDK.SceneEnum.TopicId.APPLIANCES) && shape == "0")
+                    {
+                        continue;
+                    }
+
                     _buildCommon.SetReference();
-                    //_orderInformations.ReleaseChar
+                   
                     structureLineEGIList.Add(Indexation(SegmentName.Article_, index));
                     structureLineEGIList.Add(ArticleManufacturer(article.KeyRef));                    
                     structureLineEGIList.Add(ArticleRefNo(article.ObjectId.ToString())); //RFF.LI  
                     structureLineEGIList.Add(ArticleRefPos(article.ObjectId.ToString())); // RFF.ON
                     structureLineEGIList.Add(ArticleRefPosComment(article.ObjectId.ToString())); // comment RFF.ON
 
-                    string shape = this.GetShapeNumberByType(article.KeyRef);
+                    //string shape = this.GetShapeNumberByType(article.KeyRef);
                     int polyType = _buildCommon.GetArticlePolyType(article);
+                    // Method below, setting article positions (RefPnt) and dimensions (Measure)
                     this.SetAllPositionsAndDimensions(segmentClassification, article, polyType, shape);
 
                     bool hasPolytype = false;
@@ -1088,33 +1098,36 @@ namespace Ord_Eancom
             if (articleInfos != null)
             {
                 string[] articleInfo = articleInfos.Split(KD.CharTools.Const.Pipe);
-                string construction = articleInfo[PairingTablePosition.ArticleConstructionId];
-
-                if (construction == ConstructionID.Ask)
+                if (articleInfo.Length >= PairingTablePosition.ArticleConstructionId)
                 {
-                    if (dimensionX == dimensionY)
-                    {
-                        construction = ConstructionID.Symmetrical;
-                    }
-                    else if (dimensionX > dimensionY)
-                    {
-                        construction = ConstructionID.Left;
-                    }
-                    else if (dimensionX < dimensionY)
-                    {
-                        construction = ConstructionID.Right;
-                    }
-                }
-                else if (construction == ConstructionID.DependOf)
-                {
+                    string construction = articleInfo[PairingTablePosition.ArticleConstructionId];
 
-                }
-                else if (construction == ConstructionID.ReverseOf)
-                {
+                    if (construction == ConstructionID.Ask)
+                    {
+                        if (dimensionX == dimensionY)
+                        {
+                            construction = ConstructionID.Symmetrical;
+                        }
+                        else if (dimensionX > dimensionY)
+                        {
+                            construction = ConstructionID.Left;
+                        }
+                        else if (dimensionX < dimensionY)
+                        {
+                            construction = ConstructionID.Right;
+                        }
+                    }
+                    else if (construction == ConstructionID.DependOf)
+                    {
 
-                }
+                    }
+                    else if (construction == ConstructionID.ReverseOf)
+                    {
 
-                return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + construction + Separator.NewLine;
+                    }
+
+                    return ItemKey.ConstructionType + KD.StringTools.Const.EqualSign + construction + Separator.NewLine;
+                }
             }
             return null;
         }

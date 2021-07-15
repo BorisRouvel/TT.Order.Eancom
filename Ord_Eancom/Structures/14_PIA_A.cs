@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 using KD.Model;
 using KD.Analysis;
@@ -402,7 +403,7 @@ namespace Eancom
             }
             return null;
         }
-        public string Add_GenericFinishCodeAndName(Article article)
+        public string Add_FinishCodeAndName(Article article)
         {
             string dataLine = null;
             List<string> GenericCodeAndNameList = new List<string>();
@@ -412,8 +413,21 @@ namespace Eancom
             {
                 OrderInformations articleInformations = new OrderInformations(article);
                 List<string> codeAndNameList = new List<string>();
+                List<string> genericCodeAndNameList = new List<string>();
+                List<string> familyCodeAndNameList = new List<string>();
 
-                codeAndNameList = articleInformations.GetGenericFinishCodeAndName(); // GetFinishCodeAndName();
+                genericCodeAndNameList = articleInformations.GetGenericFinishCodeAndName();
+                if (genericCodeAndNameList != null && genericCodeAndNameList.Count > 0)
+                {
+                    codeAndNameList.AddRange(genericCodeAndNameList);
+                }
+
+                familyCodeAndNameList = articleInformations.GetFinishCodeAndName();
+                if (familyCodeAndNameList != null && familyCodeAndNameList.Count > 0)
+                {
+                    codeAndNameList.AddRange(familyCodeAndNameList.Where(item => !genericCodeAndNameList.Contains(item)));
+                }
+
                 if (codeAndNameList != null && codeAndNameList.Count > 0)
                 {                    
                     for (int i = 0; i < codeAndNameList.Count; i++)

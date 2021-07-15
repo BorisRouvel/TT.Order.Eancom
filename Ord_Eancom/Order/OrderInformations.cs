@@ -674,29 +674,32 @@ namespace Ord_Eancom
             string articleInfos = _fileEDI.ArticleReferenceKey(keyRef, 2);
             if (articleInfos != null)
             {
-                string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);                
-                string dimsX = articleInfo[PairingTablePosition.ArticleWidth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleWidth_B];
-                string dimsZ = articleInfo[PairingTablePosition.ArticleHeight].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleHeight_H];
-                string dimsY = articleInfo[PairingTablePosition.ArticleDepth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleDepth_T];
+                string[] articleInfo = articleInfos.Split(Separator.ArticleFieldEDI);
+                if (articleInfo.Length > PairingTablePosition.ArticleDepth)
+                {
+                    string dimsX = articleInfo[PairingTablePosition.ArticleWidth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleWidth_B];
+                    string dimsZ = articleInfo[PairingTablePosition.ArticleHeight].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleHeight_H];
+                    string dimsY = articleInfo[PairingTablePosition.ArticleDepth].Split(new string[] { KD.StringTools.Const.Colon }, StringSplitOptions.None)[PairingTablePosition.ArticleDepth_T];
 
-                double frontValue = 0.0;
-                if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && !_segmentClassification.IsArticleSplashbackPanel() && !_segmentClassification.IsArticleSplashbackPanel2())
-                {
-                     frontValue = (OrderConstants.FrontDepth); // -1
-                }
+                    double frontValue = 0.0;
+                    if (_segmentClassification.IsArticleUnit() && !_segmentClassification.IsArticleCornerOrAngleUnit() && !_segmentClassification.IsArticleSplashbackPanel() && !_segmentClassification.IsArticleSplashbackPanel2())
+                    {
+                        frontValue = (OrderConstants.FrontDepth); // -1
+                    }
 
-                if (this.IsDimensionChange(this.Article.DimensionX, dimsX, 0))
-                {
-                    return true;
+                    if (this.IsDimensionChange(this.Article.DimensionX, dimsX, 0))
+                    {
+                        return true;
+                    }
+                    if (this.IsDimensionChange(this.Article.DimensionZ, dimsZ, 0))
+                    {
+                        return true;
+                    }
+                    if (this.IsDimensionChange(this.Article.DimensionY, dimsY, frontValue))
+                    {
+                        return true;
+                    }
                 }
-                if (this.IsDimensionChange(this.Article.DimensionZ, dimsZ, 0))
-                {
-                    return true;
-                }
-                if (this.IsDimensionChange(this.Article.DimensionY, dimsY, frontValue))
-                {
-                    return true;
-                }                
             }
             else
             {
