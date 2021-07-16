@@ -202,6 +202,44 @@ namespace Eancom
             }
             return null;
         }
+        public string GetCsvValueWithoutPipe(string value, int position = 1)
+        {
+            foreach (string dataLine in rowList)
+            {
+                if (!dataLine.Contains(Separator.ArticleFieldEDI.ToString()))
+                {
+                    string[] datas = dataLine.Split(KD.CharTools.Const.SemiColon);
+                    if ((!String.IsNullOrEmpty(datas[0]) && datas[0] == value) || (this.IsDiscacAssembly(datas[0], value)))
+                    {
+                        if (datas.Length > position)
+                        {
+                            return datas[position];
+                        }
+                        break;
+                    }
+                }
+            }
+            return null;
+        }
+        public string GetCsvValueWithPipe(string value, int position = 1)
+        {
+            foreach (string dataLine in rowList)
+            {
+                if (dataLine.Contains(Separator.ArticleFieldEDI.ToString()))
+                {
+                    string[] datas = dataLine.Split(KD.CharTools.Const.SemiColon);
+                    if ((!String.IsNullOrEmpty(datas[0]) && datas[0] == value) || (this.IsDiscacAssembly(datas[0], value)))
+                    {
+                        if (datas.Length > position)
+                        {
+                            return datas[position];
+                        }
+                        break;
+                    }
+                }
+            }
+            return null;
+        }
         private bool IsDiscacAssembly(string data, string value)
         {
             if (data.EndsWith(KD.StringTools.Const.Slatch + value))
@@ -270,11 +308,11 @@ namespace Eancom
         }
         public string FinishTypeVariant(string finishTypeKey)
         {
-            return this.GetCsvValue(finishTypeKey, 1);
+            return this.GetCsvValueWithoutPipe(finishTypeKey, 1);
         }
         public string ArticleReferenceKey(string referenceKey, int position)
         {
-            return this.GetCsvValue(referenceKey, position);
+            return this.GetCsvValueWithPipe(referenceKey, position);
         }
     }
 

@@ -180,6 +180,7 @@ namespace Ord_Eancom
 
             string supplierId = orderInformations.GetSupplierName();
             string IDs = String.Empty;
+            string nIDs = String.Empty;
 
             int objSupplierNb = this.GetObjectNbFromHeading();
             if (objSupplierNb > 0)
@@ -187,14 +188,24 @@ namespace Ord_Eancom
                 for (int rank = 0; rank < objSupplierNb; rank++)
                 {
                     int objId = this.CurrentAppli.Scene.SupplierGetObjectId(supplierId, (int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false, rank);
-                    IDs += objId + KD.StringTools.Const.Comma;
+                    if (objId != KD.Const.UnknownId)
+                    {
+                        IDs += objId + KD.StringTools.Const.Comma;
+                    }
+                    else
+                    {
+                        int nObjId = this.CurrentAppli.Scene.SceneGetObjectId(rank);
+                        //int nObjId = this.CurrentAppli.Scene.HeadingGetObjectId((int)KD.SDK.SceneEnum.ObjectList.ALLHEADINGS, false, rank);
+                        nIDs += nObjId + KD.StringTools.Const.Comma;
+                    }
                 }
 
+                Articles nsupplierArticles = new Articles(CurrentAppli, nIDs);
                 //Get all supplier articles of all heading except linears
                 Articles supplierArticles = new Articles(CurrentAppli, IDs);
                 foreach (Article article in supplierArticles)
                 {
-                    SegmentClassification segmentClassification = new SegmentClassification(article);
+                    //SegmentClassification segmentClassification = new SegmentClassification(article);
                     if (article.IsValid  && article.Type != 17 && !String.IsNullOrEmpty(article.Ref))//&& !segmentClassification.IsArticleLinear()) //
                     {
                         articles.Add(article);

@@ -569,9 +569,9 @@ namespace Ord_Eancom
                     genericFinishesList.Add(_sceneAnalysis.GetGenericFinishCodeAndName(genericFinishType, genericFinish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
-                return genericFinishesList;
+                //return genericFinishesList;
             }
-            return null;
+            return genericFinishesList;
         }
         public List<string> GetFinishCodeAndName()
         {
@@ -589,9 +589,9 @@ namespace Ord_Eancom
                     finishesList.Add(_sceneAnalysis.GetFinishCodeAndName(finishType, finish) +
                         KD.StringTools.Const.SemiColon + type);
                 }
-                return finishesList;
+               // return finishesList;
             }
-            return null;
+            return finishesList;
         }
         public string GetSupplierCommentArticle()
         {

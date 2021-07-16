@@ -414,7 +414,7 @@ namespace Eancom
                 OrderInformations articleInformations = new OrderInformations(article);
                 List<string> codeAndNameList = new List<string>();
                 List<string> genericCodeAndNameList = new List<string>();
-                List<string> familyCodeAndNameList = new List<string>();
+                List<string> familyCodeAndNameList = new List<string>();               
 
                 genericCodeAndNameList = articleInformations.GetGenericFinishCodeAndName();
                 if (genericCodeAndNameList != null && genericCodeAndNameList.Count > 0)
@@ -422,11 +422,11 @@ namespace Eancom
                     codeAndNameList.AddRange(genericCodeAndNameList);
                 }
 
-                familyCodeAndNameList = articleInformations.GetFinishCodeAndName();
+                familyCodeAndNameList = articleInformations.GetFinishCodeAndName();              
                 if (familyCodeAndNameList != null && familyCodeAndNameList.Count > 0)
                 {
                     codeAndNameList.AddRange(familyCodeAndNameList.Where(item => !genericCodeAndNameList.Contains(item)));
-                }
+                }               
 
                 if (codeAndNameList != null && codeAndNameList.Count > 0)
                 {                    
